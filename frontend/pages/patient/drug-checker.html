@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Drug Interaction Checker — HealthConnect</title>
+  <link rel="manifest" href="/manifest.json">
+  <link rel="stylesheet" href="/css/main.css">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>tailwind.config={theme:{extend:{colors:{primary:{DEFAULT:'#22D3EE',dark:'#0891B2'},secondary:{DEFAULT:'#10B981'}},fontFamily:{sans:['Plus Jakarta Sans','Inter','system-ui','sans-serif'],serif:['Instrument Serif','Georgia','serif']}}}}</script>
+</head>
+<body class="min-h-screen" style="background:var(--bg);color:var(--text)">
+  <div class="flex h-screen overflow-hidden">
+    <aside id="sidebar" class="w-[220px] flex flex-col fixed h-full z-30 -translate-x-full lg:translate-x-0 transition-transform duration-300" style="background:var(--surface2);border-right:1px solid rgba(34,211,238,.1)">
+      <div class="p-5 pb-3" style="border-bottom:1px solid var(--border)">
+        <a href="/" class="flex items-center gap-2 font-bold text-lg">
+          <div class="w-8 h-8 rounded-[10px] bg-[#22D3EE] flex items-center justify-center text-white text-sm">🏥</div>
+          <span class="font-serif text-[18px]">HealthConnect</span>
+        </a>
+      </div>
+      <div class="px-4 py-5" style="border-bottom:1px solid var(--border)">
+        <div class="font-bold text-[15px]" id="user-name">Loading...</div>
+        <div class="text-[11px] mt-0.5" style="color:var(--text3)">Patient</div>
+      </div>
+      <nav class="flex-1 p-3 space-y-0.5 overflow-y-auto">
+        <a href="/pages/patient/dashboard.html"       class="sidebar-item">🏠 Dashboard</a>
+        <a href="/pages/patient/symptom-checker.html" class="sidebar-item">🤖 Symptom Checker</a>
+        <a href="/pages/patient/vitals.html"          class="sidebar-item">❤️ Vital Signs</a>
+        <a href="/pages/patient/appointments.html"    class="sidebar-item">📅 Appointments</a>
+        <a href="/pages/patient/drug-checker.html"    class="sidebar-item active">💊 Drug Checker</a>
+        <a href="/pages/patient/documents.html"       class="sidebar-item">📁 Documents</a>
+        <a href="/pages/patient/find-doctors.html"   class="sidebar-item">🔍 Find Doctors</a>
+        <a href="/pages/patient/health-records.html"  class="sidebar-item">🏥 Health Records</a>
+        <a href="/pages/patient/medical-history.html" class="sidebar-item">📋 Medical History</a>
+        <a href="/pages/patient/emergency.html"       class="sidebar-item">🆘 Emergency</a>
+        <div class="pt-4 mt-4" style="border-top:1px solid var(--border)">
+          <a href="/pages/patient/payment.html" class="sidebar-item">💳 Payments</a>
+          <a href="#" id="logout-btn" class="sidebar-item" style="color:var(--red)">🚪 Sign Out</a>
+        </div>
+      </nav>
+    </aside>
+    <div id="sidebar-overlay" class="fixed inset-0 bg-black/40 z-20 hidden lg:hidden backdrop-blur-sm" onclick="toggleSidebar()"></div>
+
+    <main class="flex-1 lg:ml-[220px] overflow-y-auto">
+      <header class="px-4 sm:px-6 py-4 flex items-center justify-between sticky top-0 z-10" style="background:rgba(7,14,28,.88);backdrop-filter:blur(20px);border-bottom:1px solid rgba(34,211,238,.08)">
+        <div class="flex items-center gap-3">
+          <button onclick="toggleSidebar()" class="lg:hidden p-2" style="color:var(--text2)">
+            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/></svg>
+          </button>
+          <div>
+            <h1 class="text-xl font-bold font-serif">💊 Drug Interaction Checker</h1>
+            <p class="text-xs" style="color:var(--text3)">AI-powered medication safety analysis</p>
+          </div>
+        </div>
+      </header>
+
+      <div class="p-4 sm:p-6 space-y-5" style="background-image:var(--g-hero)">
+
+        <!-- Input Section -->
+        <div class="animate-fade-up rounded-[18px] p-6" style="background:var(--surface2);border:1px solid rgba(34,211,238,.1)">
+          <h2 class="font-bold mb-1">Enter Your Medications</h2>
+          <p class="text-xs mb-4" style="color:var(--text3)">Add at least 2 medications to check for potential interactions.</p>
+
+          <div id="med-inputs" class="space-y-2 mb-4">
+            <div class="flex gap-2">
+              <input type="text" class="med-input flex-1 px-3 py-2.5 rounded-xl text-sm" style="background:var(--bg2);border:1px solid var(--border);color:var(--text)" placeholder="e.g., Metformin 500mg">
+              <button onclick="removeMedInput(this)" class="px-3 rounded-xl text-sm hover:bg-red-500/10" style="color:var(--red)">✕</button>
+            </div>
+            <div class="flex gap-2">
+              <input type="text" class="med-input flex-1 px-3 py-2.5 rounded-xl text-sm" style="background:var(--bg2);border:1px solid var(--border);color:var(--text)" placeholder="e.g., Lisinopril 10mg">
+              <button onclick="removeMedInput(this)" class="px-3 rounded-xl text-sm hover:bg-red-500/10" style="color:var(--red)">✕</button>
+            </div>
+          </div>
+
+          <div class="flex gap-3">
+            <button onclick="addMedInput()" class="btn-out text-xs font-semibold px-4 py-2">+ Add Medication</button>
+            <button id="check-btn" onclick="checkInteractions()" class="btn-teal text-sm font-semibold px-6 py-2.5">🔍 Check Interactions</button>
+          </div>
+        </div>
+
+        <!-- Loading -->
+        <div id="loading" class="hidden text-center py-10">
+          <div class="flex items-center justify-center gap-2 mb-3">
+            <span class="dot-bounce"></span><span class="dot-bounce"></span><span class="dot-bounce"></span>
+          </div>
+          <p class="text-sm" style="color:var(--text3)">Analyzing drug interactions with AI...</p>
+        </div>
+
+        <!-- Results -->
+        <div id="results" class="hidden space-y-5">
+          <!-- Safety Score -->
+          <div id="safety-card" class="animate-fade-up rounded-[18px] p-6"></div>
+
+          <!-- Interactions List -->
+          <div id="interactions-list" class="animate-fade-up-1 space-y-3"></div>
+
+          <!-- Recommendations -->
+          <div id="recommendations-card" class="animate-fade-up-2 rounded-[18px] p-6" style="background:var(--surface2);border:1px solid rgba(34,211,238,.1)"></div>
+
+          <!-- Disclaimer -->
+          <div class="animate-fade-up-3 rounded-[18px] p-4" style="background:rgba(245,158,11,.06);border:1px solid rgba(245,158,11,.2)">
+            <p class="text-xs" style="color:var(--yellow)">⚠️ <strong>Disclaimer:</strong> This AI analysis is for informational purposes only. Always consult your pharmacist or healthcare provider before making changes to your medication regimen.</p>
+          </div>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <script src="/js/config.js"></script>
+  <script src="/js/api.js"></script>
+  <script src="/js/utils.js"></script>
+  <script src="/js/auth.js"></script>
+  <script>
+    Auth.requireRole('patient');
+    function toggleSidebar() {
+      document.getElementById('sidebar').classList.toggle('-translate-x-full');
+      document.getElementById('sidebar-overlay').classList.toggle('hidden');
+    }
+    document.getElementById('logout-btn').addEventListener('click', (e) => { e.preventDefault(); Auth.logout(); });
+    const user = Auth.getUser();
+    if (user) document.getElementById('user-name').textContent = user.firstName + ' ' + user.lastName;
+
+    function addMedInput() {
+      const container = document.getElementById('med-inputs');
+      const div = document.createElement('div');
+      div.className = 'flex gap-2';
+      div.innerHTML = `
+        <input type="text" class="med-input flex-1 px-3 py-2.5 rounded-xl text-sm" style="background:var(--bg2);border:1px solid var(--border);color:var(--text)" placeholder="e.g., Ibuprofen 400mg">
+        <button onclick="removeMedInput(this)" class="px-3 rounded-xl text-sm hover:bg-red-500/10" style="color:var(--red)">✕</button>
+      `;
+      container.appendChild(div);
+      div.querySelector('input').focus();
+    }
+
+    function removeMedInput(btn) {
+      const inputs = document.querySelectorAll('.med-input');
+      if (inputs.length <= 2) return Utils.toast('At least 2 medications required', 'warning');
+      btn.parentElement.remove();
+    }
+
+    async function checkInteractions() {
+      const inputs = document.querySelectorAll('.med-input');
+      const medications = [...inputs].map(i => i.value.trim()).filter(Boolean);
+
+      if (medications.length < 2) {
+        return Utils.toast('Please enter at least 2 medications', 'warning');
+      }
+
+      const btn = document.getElementById('check-btn');
+      btn.disabled = true;
+      document.getElementById('loading').classList.remove('hidden');
+      document.getElementById('results').classList.add('hidden');
+
+      try {
+        const res = await API.post('/drug-interactions/check', { medications });
+        renderResults(res.data);
+      } catch (err) {
+        Utils.toast(err.message || 'Analysis failed', 'error');
+      } finally {
+        btn.disabled = false;
+        document.getElementById('loading').classList.add('hidden');
+      }
+    }
+
+    function renderResults(data) {
+      document.getElementById('results').classList.remove('hidden');
+
+      // Safety Score
+      const score = data.safetyScore || 50;
+      const severity = data.overallSeverity || 'none';
+      const severityConfig = {
+        none:             { color: '#10B981', bg: 'rgba(16,185,129,.08)', border: 'rgba(16,185,129,.2)', icon: '✅', label: 'No Interactions Found' },
+        mild:             { color: '#22D3EE', bg: 'rgba(34,211,238,.08)', border: 'rgba(34,211,238,.2)', icon: 'ℹ️', label: 'Mild Interactions' },
+        moderate:         { color: '#FBBF24', bg: 'rgba(251,191,36,.08)', border: 'rgba(251,191,36,.2)', icon: '⚠️', label: 'Moderate Interactions' },
+        severe:           { color: '#F97316', bg: 'rgba(249,115,22,.08)', border: 'rgba(249,115,22,.2)', icon: '🔴', label: 'Severe Interactions' },
+        contraindicated:  { color: '#F43F5E', bg: 'rgba(244,63,94,.08)', border: 'rgba(244,63,94,.2)', icon: '🚫', label: 'Contraindicated!' },
+      };
+      const sc = severityConfig[severity] || severityConfig.moderate;
+
+      document.getElementById('safety-card').innerHTML = `
+        <div style="background:${sc.bg};border:1px solid ${sc.border};border-radius:18px;padding:24px" class="text-center">
+          <div class="text-4xl mb-2">${sc.icon}</div>
+          <div class="text-3xl font-extrabold mb-1" style="color:${sc.color}">${score}/100</div>
+          <div class="text-sm font-bold mb-2" style="color:${sc.color}">${sc.label}</div>
+          <div class="text-xs" style="color:var(--text3)">${data.summary || ''}</div>
+        </div>
+      `;
+
+      // Interactions
+      const interEl = document.getElementById('interactions-list');
+      const interactions = data.interactions || [];
+      if (interactions.length) {
+        interEl.innerHTML = `<h3 class="font-bold">Interactions Found (${interactions.length})</h3>` +
+          interactions.map(inter => {
+            const isev = severityConfig[inter.severity] || severityConfig.moderate;
+            return `
+              <div class="rounded-[18px] p-5" style="background:${isev.bg};border:1px solid ${isev.border}">
+                <div class="flex items-start gap-3">
+                  <span class="text-xl">${isev.icon}</span>
+                  <div class="flex-1">
+                    <div class="font-bold text-sm">${inter.drug1} ↔ ${inter.drug2}</div>
+                    <span class="badge text-[10px] mt-1" style="background:${isev.bg};color:${isev.color};border:1px solid ${isev.border}">${inter.severity?.toUpperCase()}</span>
+                    <p class="text-xs mt-2" style="color:var(--text2)">${inter.description || ''}</p>
+                    ${inter.clinicalEffect ? `<p class="text-xs mt-1" style="color:var(--text3)"><strong>Effect:</strong> ${inter.clinicalEffect}</p>` : ''}
+                    ${inter.recommendation ? `<p class="text-xs mt-1" style="color:var(--cyan)"><strong>Recommendation:</strong> ${inter.recommendation}</p>` : ''}
+                  </div>
+                </div>
+              </div>`;
+          }).join('');
+      } else {
+        interEl.innerHTML = '<p class="text-sm" style="color:var(--green)">✅ No significant interactions detected between your medications.</p>';
+      }
+
+      // Recommendations
+      const recsEl = document.getElementById('recommendations-card');
+      const recs = data.recommendations || [];
+      const warnings = data.warnings || [];
+      recsEl.innerHTML = `
+        <h3 class="font-bold mb-3">Recommendations</h3>
+        ${warnings.length ? `<div class="mb-3">${warnings.map(w => `<div class="flex items-start gap-2 mb-1"><span>⚠️</span><span class="text-xs" style="color:var(--yellow)">${w}</span></div>`).join('')}</div>` : ''}
+        ${recs.map(r => `<div class="flex items-start gap-2 mb-1.5"><span style="color:var(--cyan)">→</span><span class="text-xs">${r}</span></div>`).join('')}
+      `;
+    }
+  </script>
+</body>
+</html>

@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Consultation Room — HealthConnect</title>
+  <link rel="stylesheet" href="/css/main.css">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>tailwind.config={theme:{extend:{colors:{primary:{DEFAULT:'#22D3EE',dark:'#0891B2'},secondary:{DEFAULT:'#10B981'}},fontFamily:{sans:['Plus Jakarta Sans','Inter','system-ui','sans-serif'],serif:['Instrument Serif','Georgia','serif']}}}}</script>
+  <style>
+    #local-video{transform:scaleX(-1)}
+    #remote-video{transform:scaleX(-1)}
+    .chat-bubble-out{background:var(--cyan);color:#fff;border-bottom-right-radius:4px;margin-left:auto}
+    .chat-bubble-in{background:var(--surface2);color:var(--text);border-bottom-left-radius:4px}
+    .ctrl-btn{width:3rem;height:3rem;border-radius:9999px;display:flex;align-items:center;justify-content:center;font-size:1.25rem;transition:all .2s;border:none;cursor:pointer;color:#fff}
+    .ctrl-btn:hover{opacity:.85}
+    .input-dark{width:100%;padding:.6rem .85rem;border-radius:.75rem;font-size:.875rem;background:var(--bg2);border:1px solid var(--border);color:var(--text);outline:none;transition:border-color .2s}
+    .input-dark::placeholder{color:var(--text3)}
+    .input-dark:focus{border-color:var(--cyan);box-shadow:0 0 0 3px rgba(34,211,238,.12)}
+  </style>
+</head>
+<body class="h-screen flex flex-col overflow-hidden" style="background:var(--bg);color:var(--text)">
+
+  <!-- Top Bar -->
+  <div class="flex items-center justify-between px-4 py-3" style="background:rgba(7,14,28,.8);backdrop-filter:blur(20px);border-bottom:1px solid var(--border)">
+    <div class="flex items-center gap-3">
+      <div class="w-8 h-8 rounded-lg flex items-center justify-center text-white text-sm font-bold" style="background:linear-gradient(135deg,var(--cyan),var(--green))">M</div>
+      <span class="font-semibold text-sm">HealthConnect Consultation Room</span>
+    </div>
+    <div class="flex items-center gap-3">
+      <div id="connection-status" class="flex items-center gap-2">
+        <div class="w-2 h-2 rounded-full" style="background:var(--text3)" id="status-dot"></div>
+        <span class="text-xs" style="color:var(--text3)" id="status-text">Waiting...</span>
+      </div>
+      <div class="text-xs px-3 py-1 rounded-full font-medium" style="background:rgba(34,211,238,.1);color:var(--cyan)" id="timer">00:00</div>
+    </div>
+  </div>
+
+  <!-- Main Area -->
+  <div class="flex flex-1 overflow-hidden">
+
+    <!-- Video Area -->
+    <div class="flex-1 relative flex items-center justify-center" style="background:var(--bg)" id="video-container">
+      <video id="remote-video" autoplay playsinline class="w-full h-full object-cover"></video>
+
+      <div id="no-video-placeholder" class="absolute inset-0 flex flex-col items-center justify-center">
+        <div class="w-24 h-24 rounded-full flex items-center justify-center text-white text-4xl font-bold mb-4" style="background:linear-gradient(135deg,var(--cyan),var(--green))" id="remote-avatar">P</div>
+        <div class="font-semibold" id="remote-name">Connecting...</div>
+        <div class="text-sm mt-1" style="color:var(--text3)" id="call-status-text">Waiting for patient to join</div>
+      </div>
+
+      <div class="absolute bottom-4 right-4 w-32 sm:w-40 aspect-video rounded-xl overflow-hidden shadow-2xl" style="background:var(--surface);border:2px solid var(--border)">
+        <video id="local-video" autoplay playsinline muted class="w-full h-full object-cover"></video>
+        <div id="local-no-video" class="absolute inset-0 flex items-center justify-center">
+          <span class="text-xs text-center px-2" style="color:var(--text3)">Camera Off</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Chat Panel -->
+    <div id="chat-panel" class="hidden lg:flex flex-col w-80" style="background:var(--surface);border-left:1px solid var(--border)">
+      <div class="p-4 flex justify-between items-center" style="border-bottom:1px solid var(--border)">
+        <h3 class="font-bold text-sm">Chat</h3>
+        <button onclick="document.getElementById('chat-panel').classList.toggle('hidden')" class="text-sm" style="color:var(--text3)">✕</button>
+      </div>
+      <div id="chat-messages" class="flex-1 overflow-y-auto p-4 space-y-3"></div>
+      <div class="p-3" style="border-top:1px solid var(--border)">
+        <div class="flex gap-2">
+          <input type="text" id="chat-input" placeholder="Type a message..." maxlength="500"
+            class="input-dark flex-1"
+            onkeydown="if(event.key==='Enter')sendMessage()">
+          <button onclick="sendMessage()" class="btn-teal px-3 py-2 text-sm">→</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Controls Bar -->
+  <div class="flex items-center justify-center gap-3 sm:gap-4 py-4 px-4" style="background:rgba(7,14,28,.8);backdrop-filter:blur(20px);border-top:1px solid var(--border)">
+    <button id="mic-btn" onclick="toggleMic()" title="Toggle Microphone"
+      class="ctrl-btn" style="background:var(--surface2)">🎤</button>
+    <button id="cam-btn" onclick="toggleCamera()" title="Toggle Camera"
+      class="ctrl-btn" style="background:var(--surface2)">📹</button>
+    <button id="screen-btn" onclick="toggleScreenShare()" title="Share Screen"
+      class="ctrl-btn" style="background:var(--surface2)">🖥️</button>
+    <button onclick="document.getElementById('chat-panel').classList.toggle('hidden')" title="Chat"
+      class="ctrl-btn" style="background:var(--surface2)">💬</button>
+    <button id="rx-btn" onclick="document.getElementById('rx-panel').classList.toggle('hidden')" title="Write Prescription"
+      class="ctrl-btn" style="background:var(--green)">💊</button>
+    <button id="end-btn" onclick="endConsultation()" title="End Call"
+      class="ctrl-btn w-14" style="background:var(--red)">📵</button>
+  </div>
+
+  <!-- Prescription Panel (slide-over) -->
+  <div id="rx-panel" class="fixed right-0 top-0 h-full w-full sm:w-96 shadow-2xl z-50 hidden flex-col" style="background:var(--surface);border-left:1px solid var(--border)">
+    <div class="p-5 flex justify-between items-center" style="border-bottom:1px solid var(--border)">
+      <h3 class="font-bold text-lg">Write Prescription</h3>
+      <button onclick="document.getElementById('rx-panel').classList.add('hidden')" class="text-xl" style="color:var(--text3)">✕</button>
+    </div>
+    <div class="flex-1 overflow-y-auto p-5 space-y-4">
+      <div>
+        <label class="block text-xs font-medium mb-1" style="color:var(--text3)">Diagnosis</label>
+        <input type="text" id="rx-diagnosis" placeholder="Primary diagnosis" class="input-dark">
+      </div>
+      <div id="rx-items" class="space-y-3">
+        <div class="rx-item rounded-xl p-3 space-y-2" style="background:var(--bg2);border:1px solid var(--border)">
+          <input type="text" placeholder="Medication name" class="rx-med input-dark">
+          <div class="grid grid-cols-2 gap-2">
+            <input type="text" placeholder="Dosage (e.g. 500mg)" class="rx-dosage input-dark">
+            <input type="text" placeholder="Frequency" class="rx-freq input-dark">
+          </div>
+          <input type="text" placeholder="Duration (e.g. 7 days)" class="rx-duration input-dark">
+        </div>
+      </div>
+      <button onclick="addRxItem()" class="w-full rounded-xl py-3 text-sm transition" style="border:2px dashed var(--border);color:var(--text3)" onmouseover="this.style.borderColor='var(--cyan)';this.style.color='var(--cyan)'" onmouseout="this.style.borderColor='var(--border)';this.style.color='var(--text3)'">
+        + Add Medication
+      </button>
+      <div>
+        <label class="block text-xs font-medium mb-1" style="color:var(--text3)">Additional Notes</label>
+        <textarea id="rx-notes" rows="3" placeholder="Instructions, follow-up notes..."
+          class="input-dark resize-none"></textarea>
+      </div>
+      <div id="rx-alert" class="hidden p-3 rounded-xl text-sm font-medium"></div>
+    </div>
+    <div class="p-5" style="border-top:1px solid var(--border)">
+      <button id="submit-rx-btn" onclick="submitPrescription()" class="w-full font-bold py-3.5 rounded-xl text-white transition shadow" style="background:var(--green)" onmouseover="this.style.opacity='.9'" onmouseout="this.style.opacity='1'">
+        Issue Prescription
+      </button>
+    </div>
+  </div>
+
+  <script src="/js/config.js"></script>
+  <script src="/js/api.js"></script>
+  <script src="/js/utils.js"></script>
+  <script src="/js/auth.js"></script>
+  <script src="/js/consultation.js"></script>
+</body>
+</html>

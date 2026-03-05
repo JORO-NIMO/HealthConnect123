@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>My Profile — HealthConnect (Doctor)</title>
+  <link rel="stylesheet" href="/css/main.css">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>tailwind.config={theme:{extend:{colors:{primary:{DEFAULT:'#22D3EE',dark:'#0891B2'},secondary:{DEFAULT:'#10B981'}},fontFamily:{sans:['Plus Jakarta Sans','Inter','system-ui','sans-serif'],serif:['Instrument Serif','Georgia','serif']}}}}</script>
+  <style>
+    .input-dark{width:100%;padding:.75rem 1rem;border-radius:.75rem;font-size:.875rem;background:var(--bg2);border:1px solid var(--border);color:var(--text);outline:none;transition:border-color .2s}
+    .input-dark::placeholder{color:var(--text3)}
+    .input-dark:focus{border-color:var(--cyan);box-shadow:0 0 0 3px rgba(34,211,238,.12)}
+    textarea.input-dark{resize:vertical}
+    .stat-card{border-radius:1rem;padding:1.25rem;background:var(--surface2);border:1px solid var(--border)}
+    .section-card{border-radius:1rem;padding:1.5rem;background:var(--surface2);border:1px solid var(--border);margin-bottom:1.25rem}
+  </style>
+</head>
+<body class="min-h-screen" style="background:var(--bg);color:var(--text)">
+
+  <header class="px-4 sm:px-6 py-4 flex items-center gap-4 sticky top-0 z-10" style="background:rgba(7,14,28,.88);backdrop-filter:blur(20px);border-bottom:1px solid rgba(34,211,238,.08)">
+    <a href="/pages/doctor/dashboard.html" class="p-1.5 rounded-lg transition-colors" style="color:var(--text2)" onmouseover="this.style.color='var(--cyan)'" onmouseout="this.style.color='var(--text2)'">←</a>
+    <h1 class="font-bold font-serif text-lg">My Profile</h1>
+    <div id="verification-badge" class="ml-auto"></div>
+  </header>
+
+  <div class="max-w-3xl mx-auto p-4 sm:p-6 animate-fade-up">
+
+    <!-- Stats row -->
+    <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-6" id="profile-stats"></div>
+
+    <!-- Profile Form -->
+    <div class="section-card">
+      <h2 class="font-bold text-base mb-4">📋 Professional Information</h2>
+      <div class="space-y-4">
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          <div>
+            <label class="block text-sm font-medium mb-1.5">First Name</label>
+            <input type="text" id="prof-fname" class="input-dark" placeholder="First name">
+          </div>
+          <div>
+            <label class="block text-sm font-medium mb-1.5">Last Name</label>
+            <input type="text" id="prof-lname" class="input-dark" placeholder="Last name">
+          </div>
+        </div>
+        <div>
+          <label class="block text-sm font-medium mb-1.5">Phone Number</label>
+          <input type="text" id="prof-phone" class="input-dark" placeholder="+256 7XX XXX XXX">
+        </div>
+        <div>
+          <label class="block text-sm font-medium mb-1.5">Specialization</label>
+          <input type="text" id="prof-spec" class="input-dark" placeholder="e.g. General Medicine, Cardiology...">
+        </div>
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          <div>
+            <label class="block text-sm font-medium mb-1.5">Years of Experience</label>
+            <input type="number" id="prof-exp" class="input-dark" min="0" placeholder="0">
+          </div>
+          <div>
+            <label class="block text-sm font-medium mb-1.5">Consultation Fee (USD)</label>
+            <input type="number" id="prof-fee" class="input-dark" min="0" step="0.01" placeholder="0.00">
+          </div>
+        </div>
+        <div>
+          <label class="block text-sm font-medium mb-1.5">Hospital / Clinic Affiliation</label>
+          <input type="text" id="prof-hospital" class="input-dark" placeholder="e.g. Mulago National Referral Hospital">
+        </div>
+        <div>
+          <label class="block text-sm font-medium mb-1.5">Languages</label>
+          <input type="text" id="prof-languages" class="input-dark" placeholder="e.g. English, Luganda, Swahili">
+        </div>
+        <div>
+          <label class="block text-sm font-medium mb-1.5">License Number</label>
+          <input type="text" id="prof-license" class="input-dark" placeholder="Medical license number">
+        </div>
+        <div>
+          <label class="block text-sm font-medium mb-1.5">Bio / About You</label>
+          <textarea id="prof-bio" class="input-dark" rows="4" placeholder="Write a brief description of your practice, expertise, and what patients can expect..."></textarea>
+        </div>
+        <div id="prof-alert"></div>
+        <button id="save-profile-btn" onclick="saveProfile()" class="btn-teal text-sm font-semibold px-6 py-3 w-full">Save Profile</button>
+      </div>
+    </div>
+
+    <!-- Waitlist Section -->
+    <div class="section-card">
+      <h2 class="font-bold text-base mb-4">📋 Patient Waitlist</h2>
+      <div id="waitlist-content">
+        <p class="text-sm" style="color:var(--text3)">Loading waitlist...</p>
+      </div>
+    </div>
+  </div>
+
+  <script src="/js/config.js"></script>
+  <script src="/js/auth.js"></script>
+  <script src="/js/api.js"></script>
+  <script src="/js/utils.js"></script>
+  <script>
+  (async () => {
+    Auth.requireRole('doctor');
+
+    // Load profile
+    try {
+      const res = await API.get('/doctors/me/profile');
+      const d = res.data?.doctor;
+      if (d) {
+        document.getElementById('prof-fname').value = d.first_name || '';
+        document.getElementById('prof-lname').value = d.last_name || '';
+        document.getElementById('prof-phone').value = d.phone || '';
+        document.getElementById('prof-spec').value = d.specialization || '';
+        document.getElementById('prof-exp').value = d.years_experience || '';
+        document.getElementById('prof-fee').value = d.consultation_fee || '';
+        document.getElementById('prof-hospital').value = d.hospital_affiliation || '';
+        document.getElementById('prof-languages').value = d.languages || '';
+        document.getElementById('prof-license').value = d.license_number || '';
+        document.getElementById('prof-bio').value = d.bio || '';
+
+        // Verification badge
+        const vBadge = document.getElementById('verification-badge');
+        const statusMap = {
+          verified: { badge: 'badge b-green', text: '✅ Verified' },
+          pending:  { badge: 'badge b-yellow', text: '⏳ Pending Verification' },
+          rejected: { badge: 'badge b-red', text: '❌ Rejected' },
+        };
+        const s = statusMap[d.verification_status] || statusMap.pending;
+        vBadge.innerHTML = `<span class="${s.badge}">${s.text}</span>`;
+
+        // Stats
+        document.getElementById('profile-stats').innerHTML = `
+          <div class="stat-card text-center">
+            <div class="text-2xl font-bold" style="color:var(--cyan)">⭐ ${Number(d.rating||0).toFixed(1)}</div>
+            <div class="text-xs mt-1" style="color:var(--text3)">Rating</div>
+          </div>
+          <div class="stat-card text-center">
+            <div class="text-2xl font-bold" style="color:var(--cyan)">${d.total_reviews || 0}</div>
+            <div class="text-xs mt-1" style="color:var(--text3)">Reviews</div>
+          </div>
+          <div class="stat-card text-center">
+            <div class="text-2xl font-bold" style="color:var(--cyan)">${d.years_experience || 0}</div>
+            <div class="text-xs mt-1" style="color:var(--text3)">Years Exp</div>
+          </div>
+          <div class="stat-card text-center">
+            <div class="text-2xl font-bold" style="color:var(--cyan)">${Utils.formatCurrency(d.consultation_fee)}</div>
+            <div class="text-xs mt-1" style="color:var(--text3)">Consult Fee</div>
+          </div>
+        `;
+      }
+    } catch {}
+
+    // Load waitlist
+    try {
+      const res = await API.get('/waitlist/doctor');
+      const entries = res.data?.waitlist || [];
+      const wlDiv = document.getElementById('waitlist-content');
+      if (!entries.length) {
+        wlDiv.innerHTML = '<p class="text-sm text-center py-6" style="color:var(--text3)">No patients currently on waitlist</p>';
+      } else {
+        wlDiv.innerHTML = entries.map(e => `
+          <div class="flex items-center gap-3 p-3 rounded-xl mb-2" style="border:1px solid var(--border)">
+            <div class="w-10 h-10 rounded-xl ${Utils.avatarColor(e.patient_first_name)} flex items-center justify-center text-white text-sm font-bold">${Utils.initials(e.patient_first_name+' '+e.patient_last_name)}</div>
+            <div class="flex-1">
+              <div class="font-semibold text-sm">${Utils.escapeHtml(e.patient_first_name+' '+e.patient_last_name)}</div>
+              <div class="text-xs" style="color:var(--text3)">${Utils.formatDate(e.preferred_date)}${e.preferred_time ? ' at '+e.preferred_time : ''} · ${e.type}</div>
+              ${e.notes ? `<div class="text-xs mt-0.5" style="color:var(--text3)">${Utils.truncate(e.notes,80)}</div>` : ''}
+            </div>
+            <span class="badge b-yellow text-[10px]">Waiting</span>
+          </div>
+        `).join('');
+      }
+    } catch {}
+
+    // Save profile
+    window.saveProfile = async function() {
+      const data = {
+        firstName:            document.getElementById('prof-fname').value.trim(),
+        lastName:             document.getElementById('prof-lname').value.trim(),
+        phone:                document.getElementById('prof-phone').value.trim(),
+        specialization:       document.getElementById('prof-spec').value.trim(),
+        years_experience:     parseInt(document.getElementById('prof-exp').value) || 0,
+        consultation_fee:     parseFloat(document.getElementById('prof-fee').value) || 0,
+        hospital_affiliation: document.getElementById('prof-hospital').value.trim(),
+        languages:            document.getElementById('prof-languages').value.trim(),
+        license_number:       document.getElementById('prof-license').value.trim(),
+        bio:                  document.getElementById('prof-bio').value.trim(),
+      };
+
+      try {
+        await API.put('/doctors/me/profile', data);
+        Utils.showAlert('prof-alert', 'Profile updated successfully!', 'success');
+      } catch (err) {
+        Utils.showAlert('prof-alert', err.message || 'Failed to update profile.', 'error');
+      }
+    };
+  })();
+  </script>
+</body>
+</html>

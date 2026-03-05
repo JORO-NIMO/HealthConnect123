@@ -1,0 +1,326 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Emergency — HealthConnect</title>
+  <link rel="manifest" href="/manifest.json">
+  <link rel="stylesheet" href="/css/main.css">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>tailwind.config={theme:{extend:{colors:{primary:{DEFAULT:'#22D3EE',dark:'#0891B2'},secondary:{DEFAULT:'#10B981'}},fontFamily:{sans:['Plus Jakarta Sans','Inter','system-ui','sans-serif'],serif:['Instrument Serif','Georgia','serif']}}}}</script>
+</head>
+<body class="min-h-screen" style="background:var(--bg);color:var(--text)">
+  <div class="flex h-screen overflow-hidden">
+    <!-- Sidebar -->
+    <aside id="sidebar" class="w-[220px] flex flex-col fixed h-full z-30 -translate-x-full lg:translate-x-0 transition-transform duration-300" style="background:var(--surface2);border-right:1px solid rgba(34,211,238,.1)">
+      <div class="p-5 pb-3" style="border-bottom:1px solid var(--border)">
+        <a href="/" class="flex items-center gap-2 font-bold text-lg">
+          <div class="w-8 h-8 rounded-[10px] bg-[#22D3EE] flex items-center justify-center text-white text-sm">🏥</div>
+          <span class="font-serif text-[18px]">HealthConnect</span>
+        </a>
+      </div>
+      <div class="px-4 py-5" style="border-bottom:1px solid var(--border)">
+        <div class="font-bold text-[15px]" id="user-name">Loading...</div>
+        <div class="text-[11px] mt-0.5" style="color:var(--text3)">Patient</div>
+      </div>
+      <nav class="flex-1 p-3 space-y-0.5 overflow-y-auto">
+        <a href="/pages/patient/dashboard.html"       class="sidebar-item">🏠 Dashboard</a>
+        <a href="/pages/patient/symptom-checker.html" class="sidebar-item">🤖 Symptom Checker</a>
+        <a href="/pages/patient/vitals.html"          class="sidebar-item">❤️ Vital Signs</a>
+        <a href="/pages/patient/appointments.html"    class="sidebar-item">📅 Appointments</a>
+        <a href="/pages/patient/drug-checker.html"    class="sidebar-item">💊 Drug Checker</a>
+        <a href="/pages/patient/documents.html"       class="sidebar-item">📁 Documents</a>
+        <a href="/pages/patient/find-doctors.html"   class="sidebar-item">🔍 Find Doctors</a>
+        <a href="/pages/patient/health-records.html"  class="sidebar-item">🏥 Health Records</a>
+        <a href="/pages/patient/medical-history.html" class="sidebar-item">📋 Medical History</a>
+        <a href="/pages/patient/emergency.html"       class="sidebar-item active">🆘 Emergency</a>
+        <div class="pt-4 mt-4" style="border-top:1px solid var(--border)">
+          <a href="/pages/patient/payment.html" class="sidebar-item">💳 Payments</a>
+          <a href="#" id="logout-btn" class="sidebar-item" style="color:var(--red)">🚪 Sign Out</a>
+        </div>
+      </nav>
+    </aside>
+
+    <div id="sidebar-overlay" class="fixed inset-0 bg-black/40 z-20 hidden lg:hidden backdrop-blur-sm" onclick="toggleSidebar()"></div>
+
+    <main class="flex-1 lg:ml-[220px] overflow-y-auto">
+      <header class="px-4 sm:px-6 py-4 flex items-center justify-between sticky top-0 z-10" style="background:rgba(7,14,28,.88);backdrop-filter:blur(20px);border-bottom:1px solid rgba(34,211,238,.08)">
+        <div class="flex items-center gap-3">
+          <button onclick="toggleSidebar()" class="lg:hidden p-2" style="color:var(--text2)">
+            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/></svg>
+          </button>
+          <div>
+            <h1 class="text-xl font-bold font-serif">🆘 Emergency Center</h1>
+            <p class="text-xs" style="color:var(--text3)">SOS alerts & emergency contacts</p>
+          </div>
+        </div>
+      </header>
+
+      <div class="p-4 sm:p-6 space-y-5" style="background-image:var(--g-hero)">
+
+        <!-- SOS Button -->
+        <div class="animate-fade-up rounded-[18px] p-8 text-center" style="background:linear-gradient(135deg, rgba(244,63,94,.12), rgba(244,63,94,.04));border:2px solid rgba(244,63,94,.3)">
+          <div class="text-6xl mb-4">🚨</div>
+          <h2 class="text-2xl font-bold mb-2" style="color:var(--red)">Emergency SOS</h2>
+          <p class="text-sm mb-6" style="color:var(--text3)">Press the button below to alert your emergency contacts and nearby healthcare providers.</p>
+          <button id="sos-btn" onclick="triggerSOS()" class="px-10 py-4 text-lg font-bold text-white rounded-2xl transition-all hover:scale-105 active:scale-95 animate-pulse-ring" style="background:linear-gradient(135deg, #F43F5E, #DC2626);box-shadow:0 0 30px rgba(244,63,94,.4)">
+            🚨 TRIGGER SOS
+          </button>
+          <p class="text-xs mt-4" style="color:var(--text3)">Your location and latest vitals will be shared with emergency contacts.</p>
+          <div id="sos-status" class="hidden mt-4 p-4 rounded-xl" style="background:rgba(16,185,129,.08);border:1px solid rgba(16,185,129,.2)">
+            <div class="text-sm font-semibold" style="color:var(--green)">✅ SOS Alert Sent Successfully</div>
+            <div class="text-xs mt-1" style="color:var(--text3)">Emergency contacts have been notified. Stay calm — help is on the way.</div>
+          </div>
+        </div>
+
+        <!-- Emergency Contacts -->
+        <div class="animate-fade-up-1 rounded-[18px] p-6" style="background:var(--surface2);border:1px solid rgba(34,211,238,.1)">
+          <div class="flex items-center justify-between mb-4">
+            <h3 class="font-bold">Emergency Contacts</h3>
+            <button onclick="showContactModal()" class="btn-teal text-xs font-semibold px-4 py-2">+ Add Contact</button>
+          </div>
+          <div id="contacts-list" class="space-y-3">
+            <div class="text-center py-6" style="color:var(--text3)">
+              <div class="text-3xl mb-2">📞</div>
+              <p class="text-sm">No emergency contacts added yet.</p>
+              <p class="text-xs mt-1">Add contacts who should be notified during emergencies.</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- SOS History -->
+        <div class="animate-fade-up-2 rounded-[18px] p-6" style="background:var(--surface2);border:1px solid rgba(34,211,238,.1)">
+          <h3 class="font-bold mb-4">SOS History</h3>
+          <div id="sos-history" class="space-y-3">
+            <div class="text-center py-6" style="color:var(--text3)">
+              <p class="text-sm">No emergency alerts triggered.</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Important Numbers -->
+        <div class="animate-fade-up-3 rounded-[18px] p-6" style="background:var(--surface2);border:1px solid rgba(34,211,238,.1)">
+          <h3 class="font-bold mb-4">🏥 Emergency Numbers</h3>
+          <div class="grid sm:grid-cols-2 lg:grid-cols-3 gap-3">
+            <a href="tel:911" class="flex items-center gap-3 p-4 rounded-xl" style="background:rgba(244,63,94,.06);border:1px solid rgba(244,63,94,.12)">
+              <span class="text-2xl">🚑</span>
+              <div>
+                <div class="font-bold text-sm">Emergency (US)</div>
+                <div class="text-xs" style="color:var(--text3)">911</div>
+              </div>
+            </a>
+            <a href="tel:999" class="flex items-center gap-3 p-4 rounded-xl" style="background:rgba(244,63,94,.06);border:1px solid rgba(244,63,94,.12)">
+              <span class="text-2xl">🏥</span>
+              <div>
+                <div class="font-bold text-sm">Emergency (Kenya)</div>
+                <div class="text-xs" style="color:var(--text3)">999 / 112</div>
+              </div>
+            </a>
+            <a href="tel:10177" class="flex items-center gap-3 p-4 rounded-xl" style="background:rgba(244,63,94,.06);border:1px solid rgba(244,63,94,.12)">
+              <span class="text-2xl">🩺</span>
+              <div>
+                <div class="font-bold text-sm">Ambulance (SA)</div>
+                <div class="text-xs" style="color:var(--text3)">10177</div>
+              </div>
+            </a>
+            <a href="tel:767" class="flex items-center gap-3 p-4 rounded-xl" style="background:rgba(244,63,94,.06);border:1px solid rgba(244,63,94,.12)">
+              <span class="text-2xl">🚑</span>
+              <div>
+                <div class="font-bold text-sm">NEMA (Nigeria)</div>
+                <div class="text-xs" style="color:var(--text3)">767</div>
+              </div>
+            </a>
+            <a href="tel:114" class="flex items-center gap-3 p-4 rounded-xl" style="background:rgba(244,63,94,.06);border:1px solid rgba(244,63,94,.12)">
+              <span class="text-2xl">🏥</span>
+              <div>
+                <div class="font-bold text-sm">Emergency (Ghana)</div>
+                <div class="text-xs" style="color:var(--text3)">112 / 114</div>
+              </div>
+            </a>
+            <a href="tel:116" class="flex items-center gap-3 p-4 rounded-xl" style="background:rgba(244,63,94,.06);border:1px solid rgba(244,63,94,.12)">
+              <span class="text-2xl">📞</span>
+              <div>
+                <div class="font-bold text-sm">Poison Control</div>
+                <div class="text-xs" style="color:var(--text3)">Varies by country</div>
+              </div>
+            </a>
+          </div>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <!-- Add Contact Modal -->
+  <div id="contact-modal" class="hidden modal-bg">
+    <div class="modal-panel p-6 max-w-md">
+      <div class="flex items-center justify-between mb-5">
+        <h2 class="text-lg font-bold font-serif">Add Emergency Contact</h2>
+        <button onclick="hideContactModal()" class="text-xl" style="color:var(--text3)">&times;</button>
+      </div>
+      <form id="contact-form" class="space-y-4">
+        <div>
+          <label class="text-xs font-semibold mb-1 block" style="color:var(--text3)">Full Name *</label>
+          <input type="text" name="name" required class="w-full px-3 py-2.5 rounded-xl text-sm" style="background:var(--bg2);border:1px solid var(--border);color:var(--text)" placeholder="John Doe">
+        </div>
+        <div>
+          <label class="text-xs font-semibold mb-1 block" style="color:var(--text3)">Relationship *</label>
+          <select name="relationship" required class="w-full px-3 py-2.5 rounded-xl text-sm" style="background:var(--bg2);border:1px solid var(--border);color:var(--text)">
+            <option value="">Select...</option>
+            <option value="spouse">Spouse</option>
+            <option value="parent">Parent</option>
+            <option value="child">Child</option>
+            <option value="sibling">Sibling</option>
+            <option value="friend">Friend</option>
+            <option value="doctor">Doctor</option>
+            <option value="other">Other</option>
+          </select>
+        </div>
+        <div>
+          <label class="text-xs font-semibold mb-1 block" style="color:var(--text3)">Phone Number *</label>
+          <input type="tel" name="phone" required class="w-full px-3 py-2.5 rounded-xl text-sm" style="background:var(--bg2);border:1px solid var(--border);color:var(--text)" placeholder="+254 700 123 456">
+        </div>
+        <div>
+          <label class="text-xs font-semibold mb-1 block" style="color:var(--text3)">Email</label>
+          <input type="email" name="email" class="w-full px-3 py-2.5 rounded-xl text-sm" style="background:var(--bg2);border:1px solid var(--border);color:var(--text)" placeholder="john@example.com">
+        </div>
+        <div class="flex items-center gap-4">
+          <label class="flex items-center gap-2 text-sm cursor-pointer">
+            <input type="checkbox" name="isPrimary" class="rounded"> Primary contact
+          </label>
+          <label class="flex items-center gap-2 text-sm cursor-pointer">
+            <input type="checkbox" name="notifyOnEmergency" checked class="rounded"> Notify on SOS
+          </label>
+        </div>
+        <button type="submit" class="w-full btn-teal py-3 text-sm font-bold">Save Contact</button>
+      </form>
+    </div>
+  </div>
+
+  <script src="/js/config.js"></script>
+  <script src="/js/api.js"></script>
+  <script src="/js/utils.js"></script>
+  <script src="/js/auth.js"></script>
+  <script>
+    Auth.requireRole('patient');
+    function toggleSidebar() {
+      document.getElementById('sidebar').classList.toggle('-translate-x-full');
+      document.getElementById('sidebar-overlay').classList.toggle('hidden');
+    }
+    document.getElementById('logout-btn').addEventListener('click', (e) => { e.preventDefault(); Auth.logout(); });
+    const user = Auth.getUser();
+    if (user) document.getElementById('user-name').textContent = user.firstName + ' ' + user.lastName;
+
+    // ─── Load Data ─────────────────────────────────────────────────────
+    (async () => {
+      await Promise.all([loadContacts(), loadSOSHistory()]);
+    })();
+
+    async function loadContacts() {
+      try {
+        const res = await API.get('/emergency/contacts');
+        const contacts = res.data.contacts;
+        const el = document.getElementById('contacts-list');
+        if (!contacts?.length) return;
+
+        el.innerHTML = contacts.map(c => `
+          <div class="flex items-center gap-3 p-4 rounded-xl" style="background:var(--bg2);border:1px solid var(--border)">
+            <div class="w-10 h-10 rounded-full flex items-center justify-center text-lg" style="background:rgba(34,211,238,.1)">👤</div>
+            <div class="flex-1">
+              <div class="font-semibold text-sm">${c.name} ${c.is_primary ? '<span class="badge b-cyan text-[10px] ml-1">Primary</span>' : ''}</div>
+              <div class="text-xs" style="color:var(--text3)">${c.relationship} · ${c.phone}</div>
+            </div>
+            <div class="flex items-center gap-2">
+              <a href="tel:${c.phone}" class="p-2 rounded-lg hover:bg-green-500/10" title="Call">📞</a>
+              <button onclick="deleteContact('${c.id}')" class="p-2 rounded-lg hover:bg-red-500/10" title="Remove" style="color:var(--red)">🗑️</button>
+            </div>
+          </div>
+        `).join('');
+      } catch (err) { console.warn('Failed to load contacts:', err); }
+    }
+
+    async function loadSOSHistory() {
+      try {
+        const res = await API.get('/emergency/sos/history');
+        const history = res.data.history;
+        const el = document.getElementById('sos-history');
+        if (!history?.length) return;
+
+        const statusBadge = { triggered: 'b-red', acknowledged: 'b-yellow', responded: 'b-cyan', resolved: 'b-green', false_alarm: 'b-purple' };
+        el.innerHTML = history.map(s => `
+          <div class="flex items-center gap-3 p-4 rounded-xl" style="background:var(--bg2);border:1px solid var(--border)">
+            <span class="text-xl">🚨</span>
+            <div class="flex-1">
+              <div class="text-xs" style="color:var(--text3)">${new Date(s.created_at).toLocaleString('en-GB')}</div>
+              ${s.address ? `<div class="text-xs mt-0.5" style="color:var(--text3)">📍 ${s.address}</div>` : ''}
+            </div>
+            <span class="badge ${statusBadge[s.status] || 'b-cyan'} text-[10px]">${s.status}</span>
+          </div>
+        `).join('');
+      } catch (err) { console.warn('Failed to load SOS history:', err); }
+    }
+
+    // ─── Trigger SOS ───────────────────────────────────────────────────
+    async function triggerSOS() {
+      if (!confirm('⚠️ Are you sure you want to trigger an EMERGENCY SOS?\n\nThis will alert your emergency contacts and nearby healthcare providers.')) return;
+
+      const btn = document.getElementById('sos-btn');
+      btn.disabled = true;
+      btn.textContent = '📡 Sending SOS...';
+
+      let location = {};
+      try {
+        const pos = await new Promise((resolve, reject) => {
+          navigator.geolocation.getCurrentPosition(resolve, reject, { timeout: 10000 });
+        });
+        location = { latitude: pos.coords.latitude, longitude: pos.coords.longitude };
+      } catch (e) { /* Location unavailable — continue without it */ }
+
+      try {
+        await API.post('/emergency/sos', { ...location, symptoms: [] });
+        document.getElementById('sos-status').classList.remove('hidden');
+        Utils.toast('🚨 Emergency SOS sent!', 'success', 5000);
+        await loadSOSHistory();
+      } catch (err) {
+        Utils.toast('Failed to send SOS: ' + (err.message || 'Unknown error'), 'error');
+      } finally {
+        btn.disabled = false;
+        btn.textContent = '🚨 TRIGGER SOS';
+      }
+    }
+
+    // ─── Contact Modal ─────────────────────────────────────────────────
+    function showContactModal() { document.getElementById('contact-modal').classList.remove('hidden'); }
+    function hideContactModal() { document.getElementById('contact-modal').classList.add('hidden'); }
+
+    document.getElementById('contact-form').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const form = new FormData(e.target);
+      try {
+        await API.post('/emergency/contacts', {
+          name: form.get('name'),
+          relationship: form.get('relationship'),
+          phone: form.get('phone'),
+          email: form.get('email') || undefined,
+          isPrimary: form.has('isPrimary'),
+          notifyOnEmergency: form.has('notifyOnEmergency'),
+        });
+        Utils.toast('✅ Contact added!', 'success');
+        hideContactModal();
+        e.target.reset();
+        await loadContacts();
+      } catch (err) {
+        Utils.toast(err.message || 'Failed to add contact', 'error');
+      }
+    });
+
+    async function deleteContact(id) {
+      if (!confirm('Remove this emergency contact?')) return;
+      try {
+        await API.delete(`/emergency/contacts/${id}`);
+        Utils.toast('Contact removed', 'success');
+        await loadContacts();
+      } catch (err) { Utils.toast('Failed to remove contact', 'error'); }
+    }
+  </script>
+</body>
+</html>

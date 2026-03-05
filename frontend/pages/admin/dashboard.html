@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Admin Dashboard — HealthConnect</title>
+  <link rel="stylesheet" href="/css/main.css">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>tailwind.config={theme:{extend:{colors:{primary:{DEFAULT:'#22D3EE',dark:'#0891B2'},secondary:{DEFAULT:'#10B981'}},fontFamily:{sans:['Plus Jakarta Sans','Inter','system-ui','sans-serif'],serif:['Instrument Serif','Georgia','serif']}}}}</script>
+  <style>
+    .input-dark{width:100%;padding:.6rem .85rem;border-radius:.75rem;font-size:.875rem;background:var(--bg2);border:1px solid var(--border);color:var(--text);outline:none;transition:border-color .2s}
+    .input-dark::placeholder{color:var(--text3)}
+    .input-dark:focus{border-color:var(--cyan);box-shadow:0 0 0 3px rgba(34,211,238,.12)}
+    select.input-dark{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%2394A3B8' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 1rem center}
+    .admin-nav.active{background:rgba(34,211,238,.1);color:var(--cyan);font-weight:600}
+    .dark-table thead{background:var(--bg2)}.dark-table th{color:var(--text3);font-weight:500;padding:.75rem 1.25rem;text-align:left;font-size:.8rem}
+    .dark-table tbody tr{border-bottom:1px solid var(--border)}.dark-table td{padding:.75rem 1.25rem;font-size:.85rem}
+  </style>
+</head>
+<body class="min-h-screen" style="background:var(--bg);color:var(--text)">
+
+  <div id="sidebar-overlay" class="fixed inset-0 bg-black/50 z-20 lg:hidden hidden" onclick="toggleSidebar()"></div>
+
+  <!-- Sidebar -->
+  <aside id="sidebar" class="fixed left-0 top-0 h-full w-64 z-30 -translate-x-full lg:translate-x-0 transition-transform duration-300 flex flex-col" style="background:var(--surface);border-right:1px solid var(--border)">
+    <div class="p-6" style="border-bottom:1px solid var(--border)">
+      <div class="w-10 h-10 rounded-xl flex items-center justify-center text-white font-bold text-lg mb-3" style="background:linear-gradient(135deg,var(--cyan),var(--green))">M</div>
+      <div class="font-bold font-serif text-lg">HealthConnect</div>
+      <div class="text-xs" style="color:var(--text3)">Admin Control Panel</div>
+    </div>
+    <nav class="p-4 space-y-1 flex-1">
+      <a href="#" onclick="showSection('overview')" class="admin-nav active sidebar-item flex items-center gap-3 text-sm">
+        <span>📊</span> Overview
+      </a>
+      <a href="#" onclick="showSection('users')" class="admin-nav sidebar-item flex items-center gap-3 text-sm">
+        <span>👤</span> Users
+      </a>
+      <a href="#" onclick="showSection('doctors')" class="admin-nav sidebar-item flex items-center gap-3 text-sm">
+        <span>🩺</span> Doctor Verification
+      </a>
+      <a href="#" onclick="showSection('revenue')" class="admin-nav sidebar-item flex items-center gap-3 text-sm">
+        <span>💰</span> Revenue
+      </a>
+      <a href="#" onclick="showSection('audit')" class="admin-nav sidebar-item flex items-center gap-3 text-sm">
+        <span>🔍</span> Audit Logs
+      </a>
+    </nav>
+    <div class="p-4" style="border-top:1px solid var(--border)">
+      <button onclick="Auth.logout()" class="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm transition" style="color:var(--red)" onmouseover="this.style.background='rgba(239,68,68,.08)'" onmouseout="this.style.background='transparent'">
+        <span>🚪</span> Sign Out
+      </button>
+    </div>
+  </aside>
+
+  <!-- Main Content -->
+  <main class="lg:ml-64 min-h-screen">
+    <div class="px-4 sm:px-6 py-4 flex items-center gap-4 sticky top-0 z-10" style="background:rgba(7,14,28,.75);backdrop-filter:blur(20px);border-bottom:1px solid var(--border)">
+      <button class="lg:hidden text-xl" style="color:var(--text2)" onclick="toggleSidebar()">☰</button>
+      <h1 class="font-bold font-serif text-lg">Admin Dashboard</h1>
+      <span class="ml-auto text-xs font-semibold px-3 py-1 rounded-full" style="background:rgba(239,68,68,.1);color:#F87171">ADMIN</span>
+    </div>
+
+    <div class="p-4 sm:p-6">
+
+      <!-- Overview Section -->
+      <div id="section-overview" class="space-y-6 animate-fade-up">
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+          <div class="rounded-[18px] p-5" style="background:var(--surface2);border:1px solid var(--border)">
+            <div class="text-3xl font-bold" style="color:var(--cyan)" id="stat-users">—</div>
+            <div class="text-sm mt-1" style="color:var(--text3)">Total Users</div>
+          </div>
+          <div class="rounded-[18px] p-5" style="background:var(--surface2);border:1px solid var(--border)">
+            <div class="text-3xl font-bold" style="color:var(--green)" id="stat-doctors">—</div>
+            <div class="text-sm mt-1" style="color:var(--text3)">Active Doctors</div>
+          </div>
+          <div class="rounded-[18px] p-5" style="background:var(--surface2);border:1px solid var(--border)">
+            <div class="text-3xl font-bold" style="color:var(--gold)" id="stat-appointments">—</div>
+            <div class="text-sm mt-1" style="color:var(--text3)">Appointments</div>
+          </div>
+          <div class="rounded-[18px] p-5" style="background:var(--surface2);border:1px solid var(--border)">
+            <div class="text-3xl font-bold" style="color:var(--purple)" id="stat-revenue">—</div>
+            <div class="text-sm mt-1" style="color:var(--text3)">Total Revenue</div>
+          </div>
+        </div>
+
+        <!-- Pending Verifications Alert -->
+        <div id="pending-alert" class="hidden rounded-[18px] p-4 flex items-center gap-3" style="background:rgba(245,158,11,.06);border:1px solid rgba(245,158,11,.2)">
+          <span class="text-2xl">⚠️</span>
+          <div>
+            <div class="font-semibold" style="color:var(--gold)" id="pending-alert-text"></div>
+            <button onclick="showSection('doctors')" class="text-sm underline" style="color:var(--gold);opacity:.8">Review now →</button>
+          </div>
+        </div>
+
+        <!-- Recent Activity -->
+        <div class="rounded-[18px] p-5" style="background:var(--surface2);border:1px solid var(--border)">
+          <h2 class="font-bold mb-4">Recent Audit Log</h2>
+          <div id="recent-audit" class="space-y-2 text-sm"></div>
+        </div>
+      </div>
+
+      <!-- Users Section -->
+      <div id="section-users" class="hidden space-y-4 animate-fade-up">
+        <div class="flex flex-wrap items-center justify-between gap-3">
+          <h2 class="font-bold text-lg">All Users</h2>
+          <div class="flex gap-2">
+            <input type="text" id="user-search" placeholder="Search name or email..." class="input-dark" style="width:auto" oninput="filterUsers()">
+            <select id="role-filter" onchange="filterUsers()" class="input-dark" style="width:auto">
+              <option value="">All Roles</option>
+              <option value="patient">Patients</option>
+              <option value="doctor">Doctors</option>
+              <option value="admin">Admins</option>
+            </select>
+          </div>
+        </div>
+        <div class="rounded-[18px] overflow-hidden" style="background:var(--surface2);border:1px solid var(--border)">
+          <div class="overflow-x-auto">
+            <table class="w-full text-sm dark-table">
+              <thead>
+                <tr>
+                  <th>User</th>
+                  <th>Role</th>
+                  <th>Status</th>
+                  <th>Joined</th>
+                  <th></th>
+                </tr>
+              </thead>
+              <tbody id="users-tbody"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- Doctor Verification Section -->
+      <div id="section-doctors" class="hidden space-y-4 animate-fade-up">
+        <h2 class="font-bold text-lg">Pending Doctor Verification</h2>
+        <div id="pending-doctors-list" class="space-y-4"></div>
+        <div id="no-pending-msg" class="hidden text-center py-16" style="color:var(--text3)">
+          <div class="text-5xl mb-3">✅</div>
+          <p class="font-medium">All doctors are verified!</p>
+        </div>
+      </div>
+
+      <!-- Revenue Section -->
+      <div id="section-revenue" class="hidden space-y-4 animate-fade-up">
+        <h2 class="font-bold text-lg">Revenue Overview</h2>
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+          <div class="rounded-[18px] p-5" style="background:var(--surface2);border:1px solid var(--border)">
+            <div class="text-2xl font-bold" style="color:var(--cyan)" id="rev-today">—</div>
+            <div class="text-sm" style="color:var(--text3)">Today</div>
+          </div>
+          <div class="rounded-[18px] p-5" style="background:var(--surface2);border:1px solid var(--border)">
+            <div class="text-2xl font-bold" style="color:var(--green)" id="rev-month">—</div>
+            <div class="text-sm" style="color:var(--text3)">This Month</div>
+          </div>
+          <div class="rounded-[18px] p-5" style="background:var(--surface2);border:1px solid var(--border)">
+            <div class="text-2xl font-bold" style="color:var(--purple)" id="rev-total">—</div>
+            <div class="text-sm" style="color:var(--text3)">All Time</div>
+          </div>
+        </div>
+        <div class="rounded-[18px] p-5" style="background:var(--surface2);border:1px solid var(--border)">
+          <h3 class="font-semibold mb-4">Recent Payments</h3>
+          <div id="revenue-table" class="overflow-x-auto">
+            <table class="w-full text-sm dark-table">
+              <thead>
+                <tr>
+                  <th>Patient</th>
+                  <th>Amount</th>
+                  <th>Method</th>
+                  <th>Status</th>
+                  <th>Date</th>
+                </tr>
+              </thead>
+              <tbody id="revenue-tbody"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- Audit Logs Section -->
+      <div id="section-audit" class="hidden space-y-4 animate-fade-up">
+        <h2 class="font-bold text-lg">Audit Logs</h2>
+        <div class="rounded-[18px] overflow-hidden" style="background:var(--surface2);border:1px solid var(--border)">
+          <div class="overflow-x-auto">
+            <table class="w-full text-xs sm:text-sm dark-table">
+              <thead>
+                <tr>
+                  <th>Time</th>
+                  <th>User</th>
+                  <th>Action</th>
+                  <th>Endpoint</th>
+                  <th>IP</th>
+                </tr>
+              </thead>
+              <tbody id="audit-tbody"></tbody>
+            </table>
+          </div>
+          <div class="p-4 flex justify-center gap-2" style="border-top:1px solid var(--border)">
+            <button id="audit-prev" onclick="loadAuditPage(-1)" class="btn-out px-3 py-1.5 text-xs disabled:opacity-40">← Prev</button>
+            <span id="audit-page-info" class="px-3 py-1.5 text-xs" style="color:var(--text3)"></span>
+            <button id="audit-next" onclick="loadAuditPage(1)" class="btn-out px-3 py-1.5 text-xs disabled:opacity-40">Next →</button>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </main>
+
+  <!-- User Delete Confirm Modal -->
+  <div id="delete-modal" class="modal-bg hidden">
+    <div class="modal-panel max-w-sm">
+      <div class="text-4xl mb-3 text-center">⚠️</div>
+      <h3 class="font-bold text-center mb-2 text-lg">Delete User?</h3>
+      <p class="text-sm text-center mb-5" style="color:var(--text3)">This action cannot be undone.</p>
+      <div class="flex gap-3">
+        <button onclick="document.getElementById('delete-modal').classList.add('hidden')"
+          class="btn-out flex-1 py-3 text-sm font-medium">Cancel</button>
+        <button id="confirm-delete-btn" class="flex-1 py-3 text-sm font-medium rounded-xl text-white transition" style="background:var(--red)" onmouseover="this.style.opacity='.85'" onmouseout="this.style.opacity='1'">Delete</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="/js/config.js"></script>
+  <script src="/js/api.js"></script>
+  <script src="/js/utils.js"></script>
+  <script src="/js/auth.js"></script>
+  <script src="/js/admin.js"></script>
+</body>
+</html>

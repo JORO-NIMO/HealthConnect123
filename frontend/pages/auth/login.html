@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Sign In — HealthConnect</title>
+  <link rel="manifest" href="/manifest.json">
+  <link rel="stylesheet" href="/css/main.css">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>tailwind.config={theme:{extend:{colors:{primary:{DEFAULT:'#22D3EE',dark:'#0891B2'},secondary:{DEFAULT:'#10B981'}},fontFamily:{sans:['Plus Jakarta Sans','Inter','system-ui','sans-serif'],serif:['Instrument Serif','Georgia','serif']}}}}</script>
+  <style>
+    .input-dark{width:100%;padding:.75rem 1rem;border-radius:.75rem;font-size:.875rem;background:var(--bg2);border:1px solid var(--border);color:var(--text);outline:none;transition:border-color .2s}
+    .input-dark::placeholder{color:var(--text3)}
+    .input-dark:focus{border-color:var(--cyan);box-shadow:0 0 0 3px rgba(34,211,238,.12)}
+  </style>
+</head>
+<body class="min-h-screen flex" style="background:var(--bg);color:var(--text)">
+
+  <!-- Left panel (desktop) -->
+  <div class="hidden lg:flex lg:w-1/2 flex-col justify-between p-12 text-white relative overflow-hidden" style="background:linear-gradient(135deg,#0C1A32,#0E2A4A)">
+    <div class="absolute inset-0 opacity-[0.04]" style="background-image:radial-gradient(circle at 1px 1px,rgba(34,211,238,.4) 1px,transparent 0);background-size:32px 32px"></div>
+    <a href="/" class="relative flex items-center gap-2 font-bold text-xl">
+      <div class="w-8 h-8 rounded-[10px] bg-[#22D3EE] flex items-center justify-center text-sm">🏥</div>
+      <span class="font-serif">HealthConnect</span>
+    </a>
+    <div class="relative">
+      <h1 class="text-4xl font-bold font-serif leading-tight mb-4">Welcome back to<br>smarter healthcare</h1>
+      <p class="text-white/60 text-lg">Your AI health assistant and doctor network — always available.</p>
+      <div class="mt-10 space-y-3">
+        <div class="flex items-center gap-3 rounded-xl p-4" style="background:rgba(34,211,238,.08);border:1px solid rgba(34,211,238,.15)">
+          <span class="text-2xl">🤖</span>
+          <div><div class="font-semibold">AI Symptom Analysis</div><div class="text-white/50 text-sm">Instant insights for 500+ conditions</div></div>
+        </div>
+        <div class="flex items-center gap-3 rounded-xl p-4" style="background:rgba(16,185,129,.08);border:1px solid rgba(16,185,129,.15)">
+          <span class="text-2xl">👨‍⚕️</span>
+          <div><div class="font-semibold">300+ Verified Doctors</div><div class="text-white/50 text-sm">Available for video consultations</div></div>
+        </div>
+      </div>
+    </div>
+    <p class="relative text-white/30 text-sm">© 2026 HealthConnect</p>
+  </div>
+
+  <!-- Right panel: Form -->
+  <div class="w-full lg:w-1/2 flex items-center justify-center p-6">
+    <div class="w-full max-w-md">
+      <div class="lg:hidden text-center mb-8">
+        <a href="/" class="inline-flex items-center gap-2 font-bold text-xl" style="color:var(--cyan)">
+          🏥 <span class="font-serif">HealthConnect</span>
+        </a>
+      </div>
+      <h2 class="text-3xl font-bold font-serif mb-2">Sign In</h2>
+      <p class="mb-8" style="color:var(--text3)">Don't have an account? <a href="/pages/auth/register.html" class="font-medium hover:underline" style="color:var(--cyan)">Create one free</a></p>
+
+      <div id="alert" class="hidden mb-4 p-4 rounded-xl text-sm font-medium"></div>
+
+      <!-- Google Sign In -->
+      <button id="google-btn" class="btn-out w-full flex items-center justify-center gap-3 py-3 mb-4">
+        <svg class="w-5 h-5" viewBox="0 0 24 24"><path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/><path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/><path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/><path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/></svg>
+        Continue with Google
+      </button>
+
+      <div class="flex items-center gap-3 my-5">
+        <div class="flex-1 h-px" style="background:var(--border)"></div>
+        <span class="text-sm" style="color:var(--text3)">or sign in with email</span>
+        <div class="flex-1 h-px" style="background:var(--border)"></div>
+      </div>
+
+      <form id="login-form" class="space-y-4">
+        <div>
+          <label class="block text-sm font-medium mb-1.5">Email Address</label>
+          <input type="email" id="email" name="email" required placeholder="you@example.com" class="input-dark">
+        </div>
+        <div>
+          <div class="flex justify-between mb-1.5">
+            <label class="text-sm font-medium">Password</label>
+            <a href="#" class="text-sm hover:underline" style="color:var(--cyan)">Forgot password?</a>
+          </div>
+          <div class="relative">
+            <input type="password" id="password" name="password" required placeholder="••••••••" class="input-dark pr-12">
+            <button type="button" id="toggle-pw" class="absolute right-3 top-1/2 -translate-y-1/2 text-lg" style="color:var(--text3)">👁</button>
+          </div>
+        </div>
+        <div class="flex items-center gap-2">
+          <input type="checkbox" id="remember" class="rounded" style="accent-color:var(--cyan)">
+          <label for="remember" class="text-sm" style="color:var(--text2)">Remember me for 7 days</label>
+        </div>
+        <button type="submit" id="submit-btn" class="btn-teal w-full font-semibold py-3.5 disabled:opacity-50">
+          Sign In →
+        </button>
+      </form>
+
+      <div class="mt-6 text-center">
+        <button id="phone-login-btn" class="text-sm transition-colors" style="color:var(--text3)">
+          📱 Sign in with Phone OTP instead
+        </button>
+      </div>
+
+      <form id="otp-form" class="hidden mt-4 space-y-4">
+        <div>
+          <label class="block text-sm font-medium mb-1.5">Phone Number</label>
+          <input type="tel" id="phone" placeholder="+254 7XX XXX XXX" class="input-dark">
+        </div>
+        <button type="button" id="send-otp-btn" class="w-full font-semibold py-3 rounded-xl transition-all" style="background:var(--green);color:#fff">
+          Send OTP Code
+        </button>
+        <div id="otp-input-group" class="hidden">
+          <label class="block text-sm font-medium mb-1.5">Enter 6-digit OTP</label>
+          <input type="text" id="otp-code" maxlength="6" placeholder="123456" class="input-dark text-center text-2xl tracking-widest font-mono">
+          <button type="button" id="verify-otp-btn" class="btn-teal w-full mt-3 font-semibold py-3">Verify & Sign In →</button>
+        </div>
+      </form>
+
+      <p class="text-center text-xs mt-8" style="color:var(--text3)">
+        By signing in, you agree to our <a href="#" class="underline">Terms</a> and <a href="#" class="underline">Privacy Policy</a>
+      </p>
+    </div>
+  </div>
+
+  <script src="/js/config.js"></script>
+  <script src="/js/api.js"></script>
+  <script src="/js/utils.js"></script>
+  <script src="/js/auth.js"></script>
+  <script>
+    // Toggle password visibility
+    document.getElementById('toggle-pw').addEventListener('click', () => {
+      const pw = document.getElementById('password');
+      pw.type = pw.type === 'password' ? 'text' : 'password';
+    });
+
+    // Toggle phone OTP form
+    document.getElementById('phone-login-btn').addEventListener('click', () => {
+      const otpForm = document.getElementById('otp-form');
+      const loginForm = document.getElementById('login-form');
+      otpForm.classList.toggle('hidden');
+      loginForm.classList.toggle('hidden');
+    });
+
+    // Login form submit
+    document.getElementById('login-form').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const btn = document.getElementById('submit-btn');
+      btn.disabled = true;
+      btn.textContent = 'Signing in...';
+      const email    = document.getElementById('email').value;
+      const password = document.getElementById('password').value;
+      try {
+        const res = await API.post('/auth/login', { email, password });
+        Auth.saveSession(res.data.tokens, res.data.user);
+        Auth.redirectToDashboard(res.data.user.role);
+      } catch (err) {
+        showAlert(err.message || 'Login failed', 'error');
+        btn.disabled = false;
+        btn.textContent = 'Sign In →';
+      }
+    });
+
+    // Send OTP
+    document.getElementById('send-otp-btn').addEventListener('click', async () => {
+      const phone = document.getElementById('phone').value;
+      if (!phone) return showAlert('Enter your phone number', 'error');
+      try {
+        await API.post('/auth/send-otp', { phone });
+        document.getElementById('otp-input-group').classList.remove('hidden');
+        showAlert('OTP sent to your phone!', 'success');
+      } catch (err) { showAlert(err.message, 'error'); }
+    });
+
+    // Verify OTP
+    document.getElementById('verify-otp-btn').addEventListener('click', async () => {
+      const phone = document.getElementById('phone').value;
+      const otp   = document.getElementById('otp-code').value;
+      try {
+        const res = await API.post('/auth/verify-otp', { phone, otp });
+        Auth.saveSession(res.data.tokens, res.data.user);
+        Auth.redirectToDashboard(res.data.user.role);
+      } catch (err) { showAlert(err.message, 'error'); }
+    });
+
+    function showAlert(msg, type) {
+      const el = document.getElementById('alert');
+      el.className = `mb-4 p-4 rounded-xl text-sm font-medium ${type === 'error' ? 'text-[var(--red)]' : 'text-[var(--green)]'}`;
+      el.style.background = type === 'error' ? 'rgba(239,68,68,.08)' : 'rgba(16,185,129,.08)';
+      el.style.border = type === 'error' ? '1px solid rgba(239,68,68,.2)' : '1px solid rgba(16,185,129,.2)';
+      el.textContent = msg;
+      el.classList.remove('hidden');
+      setTimeout(() => el.classList.add('hidden'), 4000);
+    }
+  </script>
+</body>
+</html>

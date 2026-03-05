@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Appointments — HealthConnect</title>
+  <link rel="stylesheet" href="/css/main.css">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>tailwind.config={theme:{extend:{colors:{primary:{DEFAULT:'#22D3EE',dark:'#0891B2'},secondary:{DEFAULT:'#10B981'}},fontFamily:{sans:['Plus Jakarta Sans','Inter','system-ui','sans-serif'],serif:['Instrument Serif','Georgia','serif']}}}}</script>
+  <style>
+    .tab-btn{position:relative;padding-bottom:.75rem;font-size:.875rem;color:var(--text3);transition:color .2s}
+    .tab-btn::after{content:'';position:absolute;left:0;right:0;bottom:0;height:2px;border-radius:2px;background:transparent;transition:background .2s}
+    .tab-btn.active{color:var(--cyan);font-weight:600}
+    .tab-btn.active::after{background:var(--cyan)}
+    .tab-btn:hover{color:var(--text)}
+
+    .type-card{cursor:pointer;border:1.5px solid var(--border);border-radius:.85rem;padding:.85rem;text-align:center;transition:all .2s;background:var(--bg2)}
+    .type-card:hover{border-color:rgba(34,211,238,.3)}
+    .type-card.selected,.type-card:has(input:checked){border-color:var(--cyan);background:rgba(34,211,238,.06)}
+
+    .input-dark{width:100%;padding:.75rem 1rem;border-radius:.75rem;font-size:.875rem;background:var(--bg2);border:1px solid var(--border);color:var(--text);outline:none;transition:border-color .2s}
+    .input-dark::placeholder{color:var(--text3)}
+    .input-dark:focus{border-color:var(--cyan);box-shadow:0 0 0 3px rgba(34,211,238,.12)}
+    select.input-dark{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%2394A3B8' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 1rem center}
+  </style>
+</head>
+<body class="min-h-screen" style="background:var(--bg);color:var(--text)">
+
+  <header class="px-4 sm:px-6 py-4 flex items-center gap-4 sticky top-0 z-10" style="background:rgba(7,14,28,.88);backdrop-filter:blur(20px);border-bottom:1px solid rgba(34,211,238,.08)">
+    <a href="/pages/patient/dashboard.html" class="p-1.5 rounded-lg transition-colors" style="color:var(--text2)" onmouseover="this.style.color='var(--cyan)'" onmouseout="this.style.color='var(--text2)'">←</a>
+    <h1 class="font-bold font-serif">Appointments</h1>
+    <button id="book-new-btn" class="ml-auto btn-teal text-sm font-semibold px-4 py-2.5">+ Book New</button>
+  </header>
+
+  <div class="max-w-4xl mx-auto p-4 sm:p-6 animate-fade-up">
+
+    <!-- Tabs -->
+    <div class="flex gap-5 mb-6 pb-0.5" style="border-bottom:1px solid var(--border)">
+      <button class="tab-btn active" data-tab="upcoming">Upcoming</button>
+      <button class="tab-btn" data-tab="past">Past</button>
+      <button class="tab-btn" data-tab="cancelled">Cancelled</button>
+    </div>
+
+    <div id="appointments-list" class="space-y-4">
+      <div class="text-center py-16" style="color:var(--text3)">
+        <div class="text-5xl mb-4">📅</div>
+        <p class="font-medium">No appointments yet</p>
+        <p class="text-sm mt-1">Book a consultation with a verified doctor</p>
+        <button id="book-first-btn" class="mt-4 btn-teal text-sm font-semibold px-6 py-3 inline-block">Find a Doctor →</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Book Appointment Modal -->
+  <div id="book-modal" class="modal-bg hidden">
+    <div class="modal-panel w-full max-w-2xl max-h-[90vh] overflow-y-auto">
+      <div class="p-6 flex items-center justify-between sticky top-0 z-10" style="background:var(--surface2);border-bottom:1px solid var(--border)">
+        <h2 class="text-lg font-bold font-serif">Book Appointment</h2>
+        <button onclick="document.getElementById('book-modal').classList.add('hidden')" class="text-2xl leading-none" style="color:var(--text3)">×</button>
+      </div>
+      <div class="p-6 space-y-5">
+
+        <!-- Doctor search -->
+        <div>
+          <label class="block text-sm font-medium mb-2">Search Doctor or Specialization</label>
+          <input type="text" id="doctor-search" placeholder="e.g. General Medicine, Dr. Amara..." class="input-dark">
+        </div>
+
+        <!-- Doctors list -->
+        <div id="doctors-list" class="space-y-3 max-h-52 overflow-y-auto" style="scrollbar-width:thin;scrollbar-color:rgba(34,211,238,.2) transparent"></div>
+
+        <!-- Selected doctor -->
+        <div id="selected-doctor-card" class="hidden rounded-xl p-4" style="background:rgba(34,211,238,.06);border:1px solid rgba(34,211,238,.2)">
+          <div class="flex items-center gap-3">
+            <div class="w-12 h-12 rounded-xl flex items-center justify-center text-white text-xl font-bold da0" id="selected-doc-avatar">D</div>
+            <div class="flex-1">
+              <div class="font-semibold" id="selected-doc-name"></div>
+              <div class="text-sm" style="color:var(--text3)" id="selected-doc-spec"></div>
+              <div class="text-sm font-medium" style="color:var(--cyan)" id="selected-doc-fee"></div>
+            </div>
+            <button onclick="clearSelectedDoctor()" style="color:var(--text3)">×</button>
+          </div>
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div>
+            <label class="block text-sm font-medium mb-2">Date</label>
+            <input type="date" id="appointment-date" min="" class="input-dark">
+          </div>
+          <div>
+            <label class="block text-sm font-medium mb-2">Time</label>
+            <select id="appointment-time" class="input-dark">
+              <option value="">Select time...</option>
+            </select>
+          </div>
+        </div>
+
+        <div>
+          <label class="block text-sm font-medium mb-2">Consultation Type</label>
+          <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+            <label class="type-card">
+              <input type="radio" name="consult-type" value="video" checked class="hidden">
+              <div class="text-2xl mb-1">📹</div>
+              <div class="text-xs font-semibold">Video</div>
+            </label>
+            <label class="type-card">
+              <input type="radio" name="consult-type" value="chat" class="hidden">
+              <div class="text-2xl mb-1">💬</div>
+              <div class="text-xs font-semibold">Chat</div>
+            </label>
+            <label class="type-card">
+              <input type="radio" name="consult-type" value="in_person" class="hidden">
+              <div class="text-2xl mb-1">🏥</div>
+              <div class="text-xs font-semibold">In Person</div>
+            </label>
+          </div>
+        </div>
+
+        <div>
+          <label class="block text-sm font-medium mb-2">Notes for doctor <span style="color:var(--text3)">(optional)</span></label>
+          <textarea id="appointment-notes" rows="2" placeholder="Describe your main concern..." class="input-dark resize-none"></textarea>
+        </div>
+
+        <div id="booking-alert" class="hidden p-3 rounded-xl text-sm font-medium"></div>
+
+        <button id="confirm-booking-btn" class="btn-teal w-full font-bold py-4 disabled:opacity-50">
+          Confirm Appointment →
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <script src="/js/config.js"></script>
+  <script src="/js/api.js"></script>
+  <script src="/js/utils.js"></script>
+  <script src="/js/auth.js"></script>
+  <script src="/js/appointments.js"></script>
+</body>
+</html>

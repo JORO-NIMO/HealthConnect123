@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Doctor Dashboard — HealthConnect</title>
+  <link rel="stylesheet" href="/css/main.css">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>tailwind.config={theme:{extend:{colors:{primary:{DEFAULT:'#22D3EE',dark:'#0891B2'},secondary:{DEFAULT:'#10B981'}},fontFamily:{sans:['Plus Jakarta Sans','Inter','system-ui','sans-serif'],serif:['Instrument Serif','Georgia','serif']}}}}</script>
+</head>
+<body class="min-h-screen" style="background:var(--bg);color:var(--text)">
+
+  <!-- Mobile Sidebar Overlay -->
+  <div id="sidebar-overlay" class="fixed inset-0 bg-black/40 backdrop-blur-sm z-20 lg:hidden hidden" onclick="toggleSidebar()"></div>
+
+  <!-- Sidebar -->
+  <aside id="sidebar" class="fixed left-0 top-0 h-full w-[220px] z-30 -translate-x-full lg:translate-x-0 transition-transform duration-300 flex flex-col" style="background:var(--surface2);border-right:1px solid rgba(34,211,238,.1)">
+    <div class="p-5 pb-3" style="border-bottom:1px solid var(--border)">
+      <a href="/" class="flex items-center gap-2 font-bold text-lg">
+        <div class="w-8 h-8 rounded-[10px] bg-[#22D3EE] flex items-center justify-center text-white text-sm">🏥</div>
+        <span class="font-serif text-[18px]">HealthConnect</span>
+      </a>
+      <div class="text-[11px] mt-1" style="color:var(--text3)">Doctor Portal</div>
+    </div>
+    <div class="px-4 py-4" style="border-bottom:1px solid var(--border)">
+      <div class="flex items-center gap-3">
+        <div id="doc-avatar" class="w-10 h-10 da1 rounded-full flex items-center justify-center text-white font-bold text-sm"></div>
+        <div>
+          <div id="doc-name" class="font-semibold text-sm"></div>
+          <div id="doc-spec" class="text-xs" style="color:var(--text3)"></div>
+        </div>
+      </div>
+    </div>
+    <nav class="flex-1 p-3 space-y-0.5 overflow-y-auto">
+      <a href="/pages/doctor/dashboard.html" class="sidebar-item active">🏠 Dashboard</a>
+      <a href="/pages/doctor/schedule.html" class="sidebar-item">📅 Schedule</a>
+      <a href="javascript:void(0)" onclick="showTab('appointments')" class="sidebar-item">👥 Patients</a>
+      <a href="javascript:void(0)" onclick="showTab('prescriptions')" class="sidebar-item">💊 Prescriptions</a>
+      <a href="/pages/doctor/consultation.html" class="sidebar-item">📹 Consultation Room</a>
+      <div class="pt-4 mt-4" style="border-top:1px solid var(--border)">
+        <a href="/pages/doctor/profile.html" class="sidebar-item">👤 My Profile</a>
+        <button onclick="Auth.logout()" class="sidebar-item w-full text-left" style="color:var(--red)">🚪 Sign Out</button>
+      </div>
+    </nav>
+  </aside>
+
+  <!-- Main Content -->
+  <main class="lg:ml-[220px] min-h-screen">
+    <!-- Top Bar -->
+    <div class="px-4 sm:px-6 py-4 flex items-center gap-4 sticky top-0 z-10" style="background:rgba(7,14,28,.88);backdrop-filter:blur(20px);border-bottom:1px solid rgba(34,211,238,.08)">
+      <button class="lg:hidden text-xl" style="color:var(--text2)" onclick="toggleSidebar()">☰</button>
+      <div>
+        <h1 class="font-bold font-serif">Good morning, <span id="header-name">Doctor</span> 👋</h1>
+        <p class="text-xs" style="color:var(--text3)" id="today-date"></p>
+      </div>
+      <div class="ml-auto flex items-center gap-3">
+        <span id="verification-badge" class="hidden badge text-xs"></span>
+        <div id="availability-toggle" class="flex items-center gap-2">
+          <span class="text-xs" style="color:var(--text3)">Available</span>
+          <div class="relative">
+            <input type="checkbox" id="avail-switch" class="sr-only peer" onchange="toggleAvailability(this.checked)">
+            <label for="avail-switch" class="block w-11 h-6 rounded-full cursor-pointer transition-colors after:content-[''] after:absolute after:top-0.5 after:left-0.5 after:w-5 after:h-5 after:rounded-full after:bg-white after:shadow after:transition-transform peer-checked:after:translate-x-5" style="background:var(--border)" onchange="this.style.background=this.previousElementSibling.checked?'var(--green)':'var(--border)'"></label>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="p-4 sm:p-6 space-y-5">
+
+      <!-- ═══ SECTION: DASHBOARD (default) ═══ -->
+      <div id="view-dashboard">
+        <!-- Stats -->
+        <div class="animate-fade-up grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3.5 mb-5">
+          <div class="rounded-2xl p-5" style="background:var(--surface2);border:1px solid rgba(34,211,238,.1)">
+            <div class="text-2xl font-extrabold" style="color:var(--cyan)" id="stat-today">0</div>
+            <div class="text-[11px] mt-1" style="color:var(--text3)">Today's Appointments</div>
+          </div>
+          <div class="rounded-2xl p-5" style="background:var(--surface2);border:1px solid rgba(34,211,238,.1)">
+            <div class="text-2xl font-extrabold" style="color:var(--green)" id="stat-pending">0</div>
+            <div class="text-[11px] mt-1" style="color:var(--text3)">Pending Requests</div>
+          </div>
+          <div class="rounded-2xl p-5" style="background:var(--surface2);border:1px solid rgba(34,211,238,.1)">
+            <div class="text-2xl font-extrabold" style="color:var(--gold)" id="stat-rating">—</div>
+            <div class="text-[11px] mt-1" style="color:var(--text3)">Average Rating</div>
+          </div>
+          <div class="rounded-2xl p-5" style="background:var(--surface2);border:1px solid rgba(34,211,238,.1)">
+            <div class="text-2xl font-extrabold" style="color:var(--purple)" id="stat-total">0</div>
+            <div class="text-[11px] mt-1" style="color:var(--text3)">Total Patients</div>
+          </div>
+        </div>
+
+        <div class="animate-fade-up-1 grid lg:grid-cols-2 gap-5">
+          <!-- Today's Appointments -->
+          <div class="rounded-[18px] p-5" style="background:var(--surface2);border:1px solid rgba(34,211,238,.1)">
+            <div class="flex items-center justify-between mb-4">
+              <h2 class="font-bold">Today's Schedule</h2>
+              <a href="/pages/doctor/schedule.html" class="text-xs hover:underline" style="color:var(--cyan)">Manage</a>
+            </div>
+            <div id="today-appointments" class="space-y-3">
+              <div class="animate-pulse h-16 rounded-xl" style="background:var(--bg2)"></div>
+              <div class="animate-pulse h-16 rounded-xl" style="background:var(--bg2)"></div>
+            </div>
+          </div>
+
+          <!-- Pending Appointments -->
+          <div class="rounded-[18px] p-5" style="background:var(--surface2);border:1px solid rgba(34,211,238,.1)">
+            <h2 class="font-bold mb-4">Pending Requests</h2>
+            <div id="pending-appointments" class="space-y-3">
+              <div class="animate-pulse h-16 rounded-xl" style="background:var(--bg2)"></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Recent Prescriptions preview -->
+        <div class="animate-fade-up-2 rounded-[18px] p-5 mt-5" style="background:var(--surface2);border:1px solid rgba(34,211,238,.1)">
+          <div class="flex items-center justify-between mb-4">
+            <h2 class="font-bold">Recent Prescriptions</h2>
+            <a href="#" onclick="showTab('prescriptions');return false" class="text-xs hover:underline" style="color:var(--cyan)">View all →</a>
+          </div>
+          <div id="recent-prescriptions" class="space-y-3"></div>
+        </div>
+      </div>
+
+      <!-- ═══ SECTION: PATIENTS (all appointments) ═══ -->
+      <div id="view-appointments" class="hidden">
+        <div class="flex items-center justify-between mb-5">
+          <h2 class="text-xl font-bold font-serif">👥 My Patients</h2>
+          <div class="flex gap-2">
+            <select id="patient-filter" class="text-sm rounded-lg px-3 py-2" style="background:var(--bg2);border:1px solid var(--border);color:var(--text)" onchange="filterPatients()">
+              <option value="all">All</option>
+              <option value="pending">Pending</option>
+              <option value="confirmed">Confirmed</option>
+              <option value="completed">Completed</option>
+              <option value="cancelled">Cancelled</option>
+            </select>
+          </div>
+        </div>
+        <div id="all-patients-list" class="space-y-3">
+          <div class="text-center py-16" style="color:var(--text3)">
+            <div class="text-5xl mb-4">🔄</div>
+            <p class="font-medium">Loading patients...</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- ═══ SECTION: PRESCRIPTIONS (all) ═══ -->
+      <div id="view-prescriptions" class="hidden">
+        <div class="flex items-center justify-between mb-5">
+          <h2 class="text-xl font-bold font-serif">💊 All Prescriptions</h2>
+        </div>
+        <div id="all-prescriptions-list" class="space-y-3">
+          <div class="text-center py-16" style="color:var(--text3)">
+            <div class="text-5xl mb-4">🔄</div>
+            <p class="font-medium">Loading prescriptions...</p>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </main>
+
+  <script src="/js/config.js"></script>
+  <script src="/js/api.js"></script>
+  <script src="/js/utils.js"></script>
+  <script src="/js/auth.js"></script>
+  <script src="/js/doctor-dashboard.js"></script>
+</body>
+</html>

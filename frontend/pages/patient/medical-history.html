@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Medical History — HealthConnect</title>
+  <link rel="stylesheet" href="/css/main.css">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>tailwind.config={theme:{extend:{colors:{primary:{DEFAULT:'#22D3EE',dark:'#0891B2'},secondary:{DEFAULT:'#10B981'}},fontFamily:{sans:['Plus Jakarta Sans','Inter','system-ui','sans-serif'],serif:['Instrument Serif','Georgia','serif']}}}}</script>
+  <style>
+    .tab-btn{position:relative;padding-bottom:.75rem;font-size:.875rem;color:var(--text3);transition:color .2s}
+    .tab-btn::after{content:'';position:absolute;left:0;right:0;bottom:0;height:2px;border-radius:2px;background:transparent;transition:background .2s}
+    .tab-btn.active{color:var(--cyan);font-weight:600}
+    .tab-btn.active::after{background:var(--cyan)}
+    .tab-btn:hover{color:var(--text)}
+    .input-dark{width:100%;padding:.65rem 1rem;border-radius:.75rem;font-size:.875rem;background:var(--bg2);border:1px solid var(--border);color:var(--text);outline:none;transition:border-color .2s}
+    .input-dark::placeholder{color:var(--text3)}
+    .input-dark:focus{border-color:var(--cyan);box-shadow:0 0 0 3px rgba(34,211,238,.12)}
+    select.input-dark{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%2394A3B8' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 1rem center}
+  </style>
+</head>
+<body class="min-h-screen" style="background:var(--bg);color:var(--text)">
+
+  <header class="px-4 sm:px-6 py-4 flex items-center gap-4 sticky top-0 z-10" style="background:rgba(7,14,28,.88);backdrop-filter:blur(20px);border-bottom:1px solid rgba(34,211,238,.08)">
+    <a href="/pages/patient/dashboard.html" style="color:var(--text2)" class="hover:text-[var(--cyan)] transition-colors">←</a>
+    <h1 class="font-bold font-serif">Medical History</h1>
+  </header>
+
+  <div class="max-w-4xl mx-auto p-4 sm:p-6 space-y-5 animate-fade-up">
+
+    <!-- Tabs -->
+    <div class="flex gap-5 pb-0.5" style="border-bottom:1px solid var(--border)">
+      <button class="tab-btn active" data-tab="symptom-reports">AI Reports</button>
+      <button class="tab-btn" data-tab="prescriptions">Prescriptions</button>
+      <button class="tab-btn" data-tab="profile">Health Profile</button>
+    </div>
+
+    <!-- AI Reports Tab -->
+    <div id="tab-symptom-reports">
+      <div id="reports-list" class="space-y-4">
+        <div class="rounded-2xl p-4 animate-pulse h-20" style="background:var(--surface2)"></div>
+        <div class="rounded-2xl p-4 animate-pulse h-20" style="background:var(--surface2)"></div>
+      </div>
+    </div>
+
+    <!-- Prescriptions Tab -->
+    <div id="tab-prescriptions" class="hidden">
+      <div id="prescriptions-list" class="space-y-4"></div>
+    </div>
+
+    <!-- Health Profile Tab -->
+    <div id="tab-profile" class="hidden">
+      <div class="rounded-[18px] p-6 space-y-5" style="background:var(--surface2);border:1px solid rgba(34,211,238,.1)">
+        <h2 class="font-bold">Health Profile</h2>
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div>
+            <label class="block text-xs font-medium mb-1" style="color:var(--text3)">Blood Type</label>
+            <select id="blood-type" class="input-dark">
+              <option value="">Unknown</option>
+              <option>A+</option><option>A-</option><option>B+</option><option>B-</option>
+              <option>AB+</option><option>AB-</option><option>O+</option><option>O-</option>
+            </select>
+          </div>
+          <div>
+            <label class="block text-xs font-medium mb-1" style="color:var(--text3)">Weight (kg)</label>
+            <input type="number" id="weight" placeholder="70" class="input-dark">
+          </div>
+          <div>
+            <label class="block text-xs font-medium mb-1" style="color:var(--text3)">Height (cm)</label>
+            <input type="number" id="height" placeholder="170" class="input-dark">
+          </div>
+          <div>
+            <label class="block text-xs font-medium mb-1" style="color:var(--text3)">Date of Birth</label>
+            <input type="date" id="date-of-birth" class="input-dark">
+          </div>
+        </div>
+        <div>
+          <label class="block text-xs font-medium mb-1" style="color:var(--text3)">Chronic Conditions</label>
+          <input type="text" id="chronic-conditions" placeholder="e.g. Diabetes, Hypertension" class="input-dark">
+        </div>
+        <div>
+          <label class="block text-xs font-medium mb-1" style="color:var(--text3)">Allergies</label>
+          <input type="text" id="allergies" placeholder="e.g. Penicillin, Peanuts" class="input-dark">
+        </div>
+        <div>
+          <label class="block text-xs font-medium mb-1" style="color:var(--text3)">Current Medications</label>
+          <textarea id="current-medications" rows="2" placeholder="List current medications..." class="input-dark resize-none"></textarea>
+        </div>
+        <div>
+          <label class="block text-xs font-medium mb-1" style="color:var(--text3)">Surgical History</label>
+          <textarea id="surgical-history" rows="2" placeholder="Any past surgeries..." class="input-dark resize-none"></textarea>
+        </div>
+        <!-- Avatar upload -->
+        <div class="rounded-[14px] p-4" style="background:var(--bg2);border:1px solid var(--border)">
+          <div class="text-xs font-semibold mb-3" style="color:var(--text3)">PROFILE PICTURE</div>
+          <div class="flex items-center gap-4">
+            <div class="relative w-16 h-16 rounded-full overflow-hidden flex-shrink-0" style="border:2px solid var(--border)">
+              <img id="avatar-preview" src="" alt="" class="hidden w-full h-full object-cover">
+              <div id="avatar-initials-profile" class="w-full h-full da0 flex items-center justify-center text-white font-bold text-lg">?</div>
+            </div>
+            <div class="flex-1">
+              <label for="avatar-file" class="btn-out text-xs font-semibold px-4 py-2 cursor-pointer inline-block">📷 Choose Photo</label>
+              <input type="file" id="avatar-file" accept="image/jpeg,image/png,image/webp" class="hidden">
+              <p class="text-xs mt-1.5" style="color:var(--text3)">JPG, PNG or WebP · max 3 MB</p>
+              <button id="upload-avatar-btn" class="hidden btn-teal text-xs font-semibold px-4 py-2 mt-2">Upload</button>
+            </div>
+          </div>
+          <div id="avatar-alert" class="hidden p-2 rounded-lg text-xs font-medium mt-3"></div>
+        </div>
+
+        <button id="save-profile-btn" class="btn-teal text-sm font-semibold px-6 py-3">Save Profile</button>
+        <div id="profile-alert" class="hidden p-3 rounded-xl text-sm font-medium mt-2"></div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- Report Detail Modal -->
+  <div id="report-modal" class="modal-bg hidden">
+    <div class="modal-panel w-full max-w-lg max-h-[90vh] overflow-y-auto">
+      <div class="p-5 flex justify-between items-center sticky top-0" style="background:var(--surface2);border-bottom:1px solid var(--border)">
+        <h2 class="font-bold">Report Details</h2>
+        <button onclick="document.getElementById('report-modal').classList.add('hidden')" class="text-2xl" style="color:var(--text3)">×</button>
+      </div>
+      <div id="report-modal-body" class="p-5"></div>
+    </div>
+  </div>
+
+  <!-- Prescription Detail Modal -->
+  <div id="rx-modal" class="modal-bg hidden">
+    <div class="modal-panel w-full max-w-lg max-h-[90vh] overflow-y-auto">
+      <div class="p-5 flex justify-between items-center sticky top-0" style="background:var(--surface2);border-bottom:1px solid var(--border)">
+        <h2 class="font-bold">Prescription</h2>
+        <button onclick="document.getElementById('rx-modal').classList.add('hidden')" class="text-2xl" style="color:var(--text3)">×</button>
+      </div>
+      <div id="rx-modal-body" class="p-5"></div>
+    </div>
+  </div>
+
+  <script src="/js/config.js"></script>
+  <script src="/js/api.js"></script>
+  <script src="/js/utils.js"></script>
+  <script src="/js/auth.js"></script>
+  <script src="/js/medical-history.js"></script>
+</body>
+</html>

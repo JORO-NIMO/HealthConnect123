@@ -1,0 +1,476 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="HealthConnect — AI-powered symptom checker and telemedicine platform for Africa. Get instant health insights and consult verified doctors online.">
+  <meta name="theme-color" content="#070E1C">
+  <title>HealthConnect — AI Symptom Checker & Telemedicine</title>
+  <link rel="manifest" href="/manifest.json">
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🏥</text></svg>">
+  <link rel="stylesheet" href="/css/main.css">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            primary  : { DEFAULT: '#22D3EE', dark: '#0891B2', light: '#67E8F9' },
+            secondary: { DEFAULT: '#10B981', dark: '#059669' },
+            danger   : '#F43F5E',
+            warning  : '#F59E0B',
+            navy     : { DEFAULT: '#070E1C', 50: '#0A1528', 100: '#0E1B30', 200: '#122038', 300: '#162540' },
+          },
+          fontFamily: {
+            sans: ['Plus Jakarta Sans', 'Inter', 'system-ui', 'sans-serif'],
+            serif: ['Instrument Serif', 'Georgia', 'serif'],
+          }
+        }
+      }
+    }
+  </script>
+</head>
+<body class="font-sans bg-[#070E1C] text-[#E4F2FF]">
+
+  <!-- ── Navigation ──────────────────────────────────────────────────── -->
+  <nav id="navbar" class="fixed top-0 w-full z-50 transition-all duration-300 py-4" style="background:rgba(7,14,28,.88);backdrop-filter:blur(20px);border-bottom:1px solid rgba(34,211,238,.08)">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 flex items-center justify-between">
+      <a href="/" class="flex items-center gap-2.5 font-bold text-xl group">
+        <div class="w-9 h-9 rounded-[10px] bg-[#22D3EE] flex items-center justify-center transition-all group-hover:shadow-[0_0_20px_rgba(34,211,238,.4)]">
+          <svg class="w-[18px] h-[18px] text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M4.26 10.147a60.436 60.436 0 00-.491 6.347A48.627 48.627 0 0112 20.904a48.627 48.627 0 018.232-4.41 60.46 60.46 0 00-.491-6.347m-15.482 0a50.57 50.57 0 00-2.658-.813A59.905 59.905 0 0112 3.493a59.902 59.902 0 0110.399 5.84c-.896.248-1.783.52-2.658.814m-15.482 0A50.697 50.697 0 0112 13.489a50.702 50.702 0 017.74-3.342M6.75 15a.75.75 0 100-1.5.75.75 0 000 1.5zm0 0v-3.675A55.378 55.378 0 0112 8.443m-7.007 11.55A5.981 5.981 0 006.75 15.75v-1.5"/></svg>
+        </div>
+        <span class="font-serif text-[21px] text-[#E4F2FF]">
+          HealthConnect
+        </span>
+      </a>
+      <div class="hidden md:flex items-center gap-8 text-sm font-medium">
+        <a href="#features"     class="nav-link">Features</a>
+        <a href="#how-it-works" class="nav-link">How It Works</a>
+        <a href="#doctors"      class="nav-link">Find Doctors</a>
+        <a href="#testimonials" class="nav-link">Testimonials</a>
+      </div>
+      <div class="flex items-center gap-3">
+        <a href="/pages/auth/login.html" class="btn-out hidden md:inline-flex px-5 py-2.5 text-sm font-medium">Sign In</a>
+        <a href="/pages/auth/register.html" class="btn-teal px-5 py-2.5 text-sm font-semibold inline-flex items-center gap-2">Get Started →</a>
+        <!-- Mobile menu -->
+        <button id="mobile-menu-btn" class="md:hidden text-[#E4F2FF]/80 p-2">
+          <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/></svg>
+        </button>
+      </div>
+    </div>
+    <!-- Mobile menu -->
+    <div id="mobile-menu" class="hidden md:hidden glass mx-4 mt-2 rounded-xl p-4">
+      <div class="flex flex-col gap-3 text-sm">
+        <a href="#features"     class="hover:bg-[rgba(34,211,238,.08)] px-3 py-2 rounded-lg text-[#E4F2FF]/80 hover:text-[#22D3EE]">Features</a>
+        <a href="#how-it-works" class="hover:bg-[rgba(34,211,238,.08)] px-3 py-2 rounded-lg text-[#E4F2FF]/80 hover:text-[#22D3EE]">How It Works</a>
+        <a href="#doctors"      class="hover:bg-[rgba(34,211,238,.08)] px-3 py-2 rounded-lg text-[#E4F2FF]/80 hover:text-[#22D3EE]">Find Doctors</a>
+        <a href="/pages/auth/login.html"    class="hover:bg-[rgba(34,211,238,.08)] px-3 py-2 rounded-lg text-[#E4F2FF]/80">Sign In</a>
+        <a href="/pages/auth/register.html" class="btn-teal px-3 py-2.5 text-center text-sm font-semibold">Get Started →</a>
+      </div>
+    </div>
+  </nav>
+
+  <!-- ── Hero ─────────────────────────────────────────────────────────── -->
+  <section class="min-h-screen flex items-center relative overflow-hidden" style="background:var(--bg);background-image:var(--g-hero)">
+    <!-- Background decoration -->
+    <div class="absolute inset-0 opacity-[0.07]">
+      <div class="absolute top-20 left-10 w-[500px] h-[500px] bg-[#22D3EE] rounded-full blur-[120px]"></div>
+      <div class="absolute bottom-20 right-10 w-[400px] h-[400px] bg-[#F59E0B] rounded-full blur-[100px]"></div>
+      <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[300px] h-[300px] bg-[#A78BFA] rounded-full blur-[80px]"></div>
+    </div>
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 py-28 pt-32 relative z-10">
+      <div class="grid lg:grid-cols-2 gap-12 lg:gap-16 items-center">
+        <!-- Left: Copy -->
+        <div>
+          <div class="animate-fade-up inline-flex mb-6">
+            <span class="chip">⚡ AI-Powered Healthcare · Africa</span>
+          </div>
+          <h1 class="font-serif animate-fade-up-1 text-4xl sm:text-5xl lg:text-[62px] font-normal leading-[1.1] mb-6">
+            Your Health,<br>
+            Expertly<br>
+            <span class="text-[#22D3EE]">Guided by AI</span>
+          </h1>
+          <p class="animate-fade-up-2 text-lg text-[#E4F2FF]/60 leading-relaxed mb-8 max-w-xl">
+            Describe symptoms, get instant AI insights, and consult verified African doctors — all in one secure platform.
+          </p>
+          <div class="animate-fade-up-3 flex flex-col sm:flex-row gap-4 mb-10">
+            <a href="/pages/auth/register.html" class="btn-teal px-8 py-4 text-[15px] font-bold inline-flex items-center justify-center gap-2 shadow-xl">
+              🩺 Check My Symptoms
+            </a>
+            <a href="#how-it-works" class="btn-out px-8 py-4 text-[15px] font-semibold text-center">
+              Find a Doctor
+            </a>
+          </div>
+          <!-- Trust badges -->
+          <div class="animate-fade-up-4 flex flex-wrap gap-5 text-sm text-[#E4F2FF]/50">
+            <div class="flex items-center gap-2"><span class="text-[#10B981]">✓</span> HIPAA-Compliant</div>
+            <div class="flex items-center gap-2"><span class="text-[#10B981]">✓</span> Verified Doctors</div>
+            <div class="flex items-center gap-2"><span class="text-[#10B981]">✓</span> 24/7 Available</div>
+            <div class="flex items-center gap-2"><span class="text-[#10B981]">✓</span> Africa-Optimized</div>
+          </div>
+        </div>
+        <!-- Right: Hero visual -->
+        <div class="hidden lg:block animate-slide-right relative">
+          <div class="rounded-3xl overflow-hidden h-[520px] relative" style="background:linear-gradient(135deg,#050D1A,#0A2040,#091830)">
+            <img src="https://images.unsplash.com/photo-1651008376811-b90baee60c1f?w=900&h=600&fit=crop&q=85&crop=faces,top"
+              alt="Doctor" class="w-full h-full object-cover object-[center_top]" onerror="this.style.display='none'" loading="lazy"/>
+            <div class="absolute inset-0" style="background:linear-gradient(160deg,rgba(34,211,238,.06),transparent 55%,rgba(8,14,28,.4))"></div>
+          </div>
+
+          <!-- Floating AI Analysis card -->
+          <div class="absolute bottom-7 -left-6 animate-float z-10 max-w-[270px]" style="background:rgba(9,18,35,.92);backdrop-filter:blur(16px);border-radius:16px;padding:18px;box-shadow:0 20px 60px rgba(0,0,0,.7),0 0 0 1px rgba(34,211,238,.18)">
+            <div class="flex items-center gap-2.5 mb-3">
+              <div class="w-[34px] h-[34px] rounded-[9px] flex items-center justify-center" style="background:rgba(34,211,238,.1)">
+                <svg class="w-[17px] h-[17px] text-[#22D3EE]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
+              </div>
+              <div>
+                <div class="font-bold text-[13px]">AI Analysis Complete</div>
+                <div class="text-[11px] text-[#E4F2FF]/35">3 symptoms analyzed</div>
+              </div>
+              <span class="badge b-yellow ml-auto text-[11px]">Medium</span>
+            </div>
+            <div class="space-y-2">
+              <div>
+                <div class="flex justify-between text-[12px] mb-1"><span class="text-[#E4F2FF]/60">Seasonal Flu</span><span class="text-[#0891B2] font-bold">78%</span></div>
+                <div class="pbar"><div class="pfill" style="width:78%"></div></div>
+              </div>
+              <div>
+                <div class="flex justify-between text-[12px] mb-1"><span class="text-[#E4F2FF]/60">Common Cold</span><span class="text-[#0891B2] font-bold">62%</span></div>
+                <div class="pbar"><div class="pfill" style="width:62%"></div></div>
+              </div>
+              <div>
+                <div class="flex justify-between text-[12px] mb-1"><span class="text-[#E4F2FF]/60">Sinusitis</span><span class="text-[#0891B2] font-bold">40%</span></div>
+                <div class="pbar"><div class="pfill" style="width:40%"></div></div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Rating pill -->
+          <div class="absolute top-5 -right-3" style="background:rgba(9,18,35,.92);backdrop-filter:blur(14px);border-radius:14px;padding:11px 18px;box-shadow:0 8px 28px rgba(0,0,0,.6),0 0 0 1px rgba(34,211,238,.15)">
+            <div class="flex items-center gap-2.5">
+              <span class="text-[#F59E0B]">⭐</span>
+              <div>
+                <div class="font-bold text-lg">4.9</div>
+                <div class="text-[11px] text-[#E4F2FF]/35">1,200+ doctors</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ── Stats Bar ────────────────────────────────────────────────────── -->
+  <section style="border-top:1px solid rgba(34,211,238,.1);border-bottom:1px solid rgba(34,211,238,.1);background:var(--surface)">
+    <div class="max-w-5xl mx-auto px-6 py-7 grid grid-cols-2 sm:grid-cols-4 gap-6 text-center">
+      <div>
+        <div class="font-serif text-3xl sm:text-4xl gradient-text">50K+</div>
+        <div class="text-[13px] text-[#E4F2FF]/35 mt-1">Patients Served</div>
+      </div>
+      <div>
+        <div class="font-serif text-3xl sm:text-4xl gradient-text">1,200+</div>
+        <div class="text-[13px] text-[#E4F2FF]/35 mt-1">Verified Doctors</div>
+      </div>
+      <div>
+        <div class="font-serif text-3xl sm:text-4xl gradient-text">15</div>
+        <div class="text-[13px] text-[#E4F2FF]/35 mt-1">African Countries</div>
+      </div>
+      <div>
+        <div class="font-serif text-3xl sm:text-4xl gradient-text">4.9★</div>
+        <div class="text-[13px] text-[#E4F2FF]/35 mt-1">Average Rating</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ── Features ─────────────────────────────────────────────────────── -->
+  <section id="features" class="py-20" style="background:var(--surface2);border-top:1px solid var(--border)">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6">
+      <div class="text-center mb-14">
+        <h2 class="font-serif text-3xl sm:text-4xl lg:text-[44px] mb-3.5">Everything in one platform</h2>
+        <p class="text-[#E4F2FF]/60 text-base max-w-lg mx-auto">Built specifically for African healthcare — low-bandwidth, mobile-first, multilingual.</p>
+      </div>
+      <div class="grid sm:grid-cols-2 lg:grid-cols-3 gap-5">
+        <!-- Feature cards with gradient strips -->
+        <div class="card-hover rounded-[20px] overflow-hidden" style="background:var(--surface);border:1px solid var(--border)">
+          <div class="h-[100px] relative overflow-hidden" style="background:linear-gradient(135deg,rgba(34,211,238,.22),rgba(8,145,178,.1),transparent)">
+            <img src="https://images.unsplash.com/photo-1559757148-5c350d0d3c56?w=600&h=120&fit=crop&q=60" alt="" class="w-full h-full object-cover opacity-30 block" onerror="this.style.display='none'" loading="lazy"/>
+          </div>
+          <div class="p-5 pb-6">
+            <div class="w-[42px] h-[42px] rounded-[10px] flex items-center justify-center text-[#22D3EE] mb-3.5" style="background:rgba(34,211,238,.1)">🤖</div>
+            <h3 class="font-bold text-[16px] mb-2">AI Symptom Analysis</h3>
+            <p class="text-[13.5px] text-[#E4F2FF]/60 leading-relaxed">Instant insights with risk assessment and actionable next steps. ICD-10 mapped conditions.</p>
+          </div>
+        </div>
+
+        <div class="card-hover rounded-[20px] overflow-hidden" style="background:var(--surface);border:1px solid var(--border)">
+          <div class="h-[100px] relative overflow-hidden" style="background:linear-gradient(135deg,rgba(245,158,11,.2),rgba(251,191,36,.08),transparent)">
+            <img src="https://images.unsplash.com/photo-1587854692152-cbe660dbde88?w=600&h=120&fit=crop&q=60" alt="" class="w-full h-full object-cover opacity-30 block" onerror="this.style.display='none'" loading="lazy"/>
+          </div>
+          <div class="p-5 pb-6">
+            <div class="w-[42px] h-[42px] rounded-[10px] flex items-center justify-center text-[#F59E0B] mb-3.5" style="background:rgba(245,158,11,.1)">📹</div>
+            <h3 class="font-bold text-[16px] mb-2">Video Consultations</h3>
+            <p class="text-[13.5px] text-[#E4F2FF]/60 leading-relaxed">Connect face-to-face with verified African doctors in your language. Works on 2G/3G.</p>
+          </div>
+        </div>
+
+        <div class="card-hover rounded-[20px] overflow-hidden" style="background:var(--surface);border:1px solid var(--border)">
+          <div class="h-[100px] relative overflow-hidden" style="background:linear-gradient(135deg,rgba(16,185,129,.2),rgba(16,185,129,.06),transparent)">
+            <img src="https://images.unsplash.com/photo-1530026405186-ed1f139313f8?w=600&h=120&fit=crop&q=60" alt="" class="w-full h-full object-cover opacity-30 block" onerror="this.style.display='none'" loading="lazy"/>
+          </div>
+          <div class="p-5 pb-6">
+            <div class="w-[42px] h-[42px] rounded-[10px] flex items-center justify-center text-[#10B981] mb-3.5" style="background:rgba(16,185,129,.1)">📋</div>
+            <h3 class="font-bold text-[16px] mb-2">Digital Medical Records</h3>
+            <p class="text-[13.5px] text-[#E4F2FF]/60 leading-relaxed">Encrypted, accessible health history from any device, anywhere.</p>
+          </div>
+        </div>
+
+        <div class="card-hover rounded-[20px] overflow-hidden" style="background:var(--surface);border:1px solid var(--border)">
+          <div class="h-[100px] relative overflow-hidden" style="background:linear-gradient(135deg,rgba(167,139,250,.2),rgba(167,139,250,.06),transparent)">
+            <img src="https://images.unsplash.com/photo-1471864190281-a93a3070b6de?w=600&h=120&fit=crop&q=60" alt="" class="w-full h-full object-cover opacity-30 block" onerror="this.style.display='none'" loading="lazy"/>
+          </div>
+          <div class="p-5 pb-6">
+            <div class="w-[42px] h-[42px] rounded-[10px] flex items-center justify-center text-[#A78BFA] mb-3.5" style="background:rgba(167,139,250,.1)">🔒</div>
+            <h3 class="font-bold text-[16px] mb-2">HIPAA-Grade Security</h3>
+            <p class="text-[13.5px] text-[#E4F2FF]/60 leading-relaxed">AES-256 encryption, full audit logs, and strict access controls.</p>
+          </div>
+        </div>
+
+        <div class="card-hover rounded-[20px] overflow-hidden" style="background:var(--surface);border:1px solid var(--border)">
+          <div class="h-[100px] relative overflow-hidden" style="background:linear-gradient(135deg,rgba(34,211,238,.18),rgba(14,116,144,.08),transparent)">
+            <img src="https://images.unsplash.com/photo-1512941937669-90a1b58e7e9c?w=600&h=120&fit=crop&q=60" alt="" class="w-full h-full object-cover opacity-30 block" onerror="this.style.display='none'" loading="lazy"/>
+          </div>
+          <div class="p-5 pb-6">
+            <div class="w-[42px] h-[42px] rounded-[10px] flex items-center justify-center text-[#22D3EE] mb-3.5" style="background:rgba(34,211,238,.1)">📱</div>
+            <h3 class="font-bold text-[16px] mb-2">Works Offline (PWA)</h3>
+            <p class="text-[13.5px] text-[#E4F2FF]/60 leading-relaxed">Built for Africa — works in low-bandwidth, offline environments as a PWA.</p>
+          </div>
+        </div>
+
+        <div class="card-hover rounded-[20px] overflow-hidden" style="background:var(--surface);border:1px solid var(--border)">
+          <div class="h-[100px] relative overflow-hidden" style="background:linear-gradient(135deg,rgba(244,63,94,.18),rgba(244,63,94,.05),transparent)">
+            <img src="https://images.unsplash.com/photo-1584308666744-24d5c474f2ae?w=600&h=120&fit=crop&q=60" alt="" class="w-full h-full object-cover opacity-30 block" onerror="this.style.display='none'" loading="lazy"/>
+          </div>
+          <div class="p-5 pb-6">
+            <div class="w-[42px] h-[42px] rounded-[10px] flex items-center justify-center text-[#F43F5E] mb-3.5" style="background:rgba(244,63,94,.1)">💊</div>
+            <h3 class="font-bold text-[16px] mb-2">e-Prescriptions</h3>
+            <p class="text-[13.5px] text-[#E4F2FF]/60 leading-relaxed">Doctors issue prescriptions directly to you and local pharmacies.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ── How It Works ──────────────────────────────────────────────────── -->
+  <section id="how-it-works" class="py-20" style="background:var(--bg);background-image:var(--g-hero)">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6">
+      <div class="grid lg:grid-cols-2 gap-16 items-center">
+        <!-- Steps -->
+        <div>
+          <h2 class="font-serif text-3xl sm:text-4xl lg:text-[44px] mb-3">How HealthConnect Works</h2>
+          <p class="text-[#E4F2FF]/60 text-base mb-12 leading-relaxed">From symptom to solution in under 5 minutes.</p>
+
+          <div class="space-y-7">
+            <div class="flex gap-[18px] items-start">
+              <div class="w-11 h-11 rounded-xl flex items-center justify-center text-[#22D3EE] flex-shrink-0" style="background:rgba(34,211,238,.1)">
+                <svg class="w-[18px] h-[18px]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>
+              </div>
+              <div class="pt-0.5">
+                <div class="text-[10px] text-[#E4F2FF]/35 font-bold tracking-[2px] mb-1">01</div>
+                <div class="font-semibold text-[15px] mb-1">Enter Symptoms</div>
+                <div class="text-[13.5px] text-[#E4F2FF]/60 leading-relaxed">Select or describe your symptoms in plain language.</div>
+              </div>
+            </div>
+            <div class="flex gap-[18px] items-start">
+              <div class="w-11 h-11 rounded-xl flex items-center justify-center text-[#22D3EE] flex-shrink-0" style="background:rgba(34,211,238,.1)">
+                <svg class="w-[18px] h-[18px]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
+              </div>
+              <div class="pt-0.5">
+                <div class="text-[10px] text-[#E4F2FF]/35 font-bold tracking-[2px] mb-1">02</div>
+                <div class="font-semibold text-[15px] mb-1">AI Analyzes</div>
+                <div class="text-[13.5px] text-[#E4F2FF]/60 leading-relaxed">AI cross-references ICD-10 databases with African disease patterns in seconds.</div>
+              </div>
+            </div>
+            <div class="flex gap-[18px] items-start">
+              <div class="w-11 h-11 rounded-xl flex items-center justify-center text-[#22D3EE] flex-shrink-0" style="background:rgba(34,211,238,.1)">
+                <svg class="w-[18px] h-[18px]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+              </div>
+              <div class="pt-0.5">
+                <div class="text-[10px] text-[#E4F2FF]/35 font-bold tracking-[2px] mb-1">03</div>
+                <div class="font-semibold text-[15px] mb-1">Get Your Report</div>
+                <div class="text-[13.5px] text-[#E4F2FF]/60 leading-relaxed">Risk level, conditions, and recommended next steps.</div>
+              </div>
+            </div>
+            <div class="flex gap-[18px] items-start">
+              <div class="w-11 h-11 rounded-xl flex items-center justify-center text-[#22D3EE] flex-shrink-0" style="background:rgba(34,211,238,.1)">
+                <svg class="w-[18px] h-[18px]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z"/></svg>
+              </div>
+              <div class="pt-0.5">
+                <div class="text-[10px] text-[#E4F2FF]/35 font-bold tracking-[2px] mb-1">04</div>
+                <div class="font-semibold text-[15px] mb-1">Book a Doctor</div>
+                <div class="text-[13.5px] text-[#E4F2FF]/60 leading-relaxed">Connect with a verified specialist instantly via video, chat, or phone.</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Image -->
+        <div class="hidden lg:block rounded-3xl overflow-hidden h-[440px] relative" style="background:linear-gradient(135deg,#06111F,#091F35,#0A1525)">
+          <img src="https://images.unsplash.com/photo-1576091160550-2173dba999ef?w=800&h=500&fit=crop&q=80"
+            alt="Doctor using technology" class="w-full h-full object-cover block" onerror="this.style.display='none'" loading="lazy"/>
+          <div class="absolute inset-0" style="background:linear-gradient(0deg,rgba(13,78,78,.7) 0%,transparent 50%)"></div>
+          <!-- Overlay card -->
+          <div class="absolute bottom-6 left-6 right-6 flex items-center gap-3 p-3.5 px-[18px] rounded-[14px]" style="background:rgba(9,18,35,.88);backdrop-filter:blur(14px);border:1px solid rgba(34,211,238,.18)">
+            <div class="w-[38px] h-[38px] rounded-[10px] flex items-center justify-center flex-shrink-0" style="background:rgba(16,185,129,.14);border:1px solid rgba(16,185,129,.25)">
+              <span class="text-[#10B981] text-lg">✓</span>
+            </div>
+            <div>
+              <div class="font-bold text-sm">Available 24 / 7</div>
+              <div class="text-[12px] text-[#E4F2FF]/35">Doctors across 15 African countries</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ── Testimonials ─────────────────────────────────────────────────── -->
+  <section id="testimonials" class="py-20" style="background:var(--bg);background-image:var(--g-hero)">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6">
+      <div class="text-center mb-12">
+        <h2 class="font-serif text-3xl sm:text-4xl lg:text-[44px] mb-3">What our patients say</h2>
+        <p class="text-[#E4F2FF]/60 text-base">Real stories from people across Africa.</p>
+      </div>
+      <div class="grid sm:grid-cols-2 lg:grid-cols-3 gap-5">
+        <div class="card-hover rounded-[20px] p-7" style="background:var(--surface);border:1px solid var(--border)">
+          <div class="flex gap-1 mb-4">
+            <span class="text-[#F59E0B]">⭐</span><span class="text-[#F59E0B]">⭐</span><span class="text-[#F59E0B]">⭐</span><span class="text-[#F59E0B]">⭐</span><span class="text-[#F59E0B]">⭐</span>
+          </div>
+          <p class="text-[15px] text-[#E4F2FF]/60 leading-[1.75] mb-5">"HealthConnect identified my symptoms and connected me with a doctor in minutes. Absolutely incredible service."</p>
+          <div class="flex items-center gap-3 border-t pt-4" style="border-color:var(--border)">
+            <div class="w-11 h-11 rounded-full da0 flex items-center justify-center text-white text-sm font-bold flex-shrink-0">AA</div>
+            <div>
+              <div class="font-semibold text-sm">Ama Asante</div>
+              <div class="text-[12px] text-[#E4F2FF]/35">📍 Kumasi, Ghana</div>
+            </div>
+          </div>
+        </div>
+        <div class="card-hover rounded-[20px] p-7" style="background:var(--surface);border:1px solid var(--border)">
+          <div class="flex gap-1 mb-4">
+            <span class="text-[#F59E0B]">⭐</span><span class="text-[#F59E0B]">⭐</span><span class="text-[#F59E0B]">⭐</span><span class="text-[#F59E0B]">⭐</span><span class="text-[#F59E0B]">⭐</span>
+          </div>
+          <p class="text-[15px] text-[#E4F2FF]/60 leading-[1.75] mb-5">"As someone in a rural area, getting quality medical advice online has been life-changing for my whole family."</p>
+          <div class="flex items-center gap-3 border-t pt-4" style="border-color:var(--border)">
+            <div class="w-11 h-11 rounded-full da4 flex items-center justify-center text-white text-sm font-bold flex-shrink-0">EO</div>
+            <div>
+              <div class="font-semibold text-sm">Emeka Okafor</div>
+              <div class="text-[12px] text-[#E4F2FF]/35">📍 Lagos, Nigeria</div>
+            </div>
+          </div>
+        </div>
+        <div class="card-hover rounded-[20px] p-7" style="background:var(--surface);border:1px solid var(--border)">
+          <div class="flex gap-1 mb-4">
+            <span class="text-[#F59E0B]">⭐</span><span class="text-[#F59E0B]">⭐</span><span class="text-[#F59E0B]">⭐</span><span class="text-[#F59E0B]">⭐</span><span class="text-[#F59E0B]">⭐</span>
+          </div>
+          <p class="text-[15px] text-[#E4F2FF]/60 leading-[1.75] mb-5">"The AI symptom checker is impressively accurate. I trust the doctors on this platform completely."</p>
+          <div class="flex items-center gap-3 border-t pt-4" style="border-color:var(--border)">
+            <div class="w-11 h-11 rounded-full da2 flex items-center justify-center text-white text-sm font-bold flex-shrink-0">ZM</div>
+            <div>
+              <div class="font-semibold text-sm">Zawadi Mwangi</div>
+              <div class="text-[12px] text-[#E4F2FF]/35">📍 Mombasa, Kenya</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ── CTA ───────────────────────────────────────────────────────────── -->
+  <section class="py-20 px-4 sm:px-6">
+    <div class="max-w-[860px] mx-auto rounded-[28px] p-[60px_48px] text-center relative overflow-hidden" style="background:var(--cyan);border:1px solid rgba(34,211,238,.2);box-shadow:0 0 80px rgba(34,211,238,.08),inset 0 1px 0 rgba(255,255,255,.04)">
+      <!-- Pattern -->
+      <div class="absolute inset-0 opacity-[.12]" style="background-image:radial-gradient(circle at 20% 50%,rgba(34,211,238,.6) 1px,transparent 1px),radial-gradient(circle at 80% 20%,rgba(245,158,11,.4) 1px,transparent 1px);background-size:40px 40px"></div>
+      <div class="relative z-10">
+        <h2 class="font-serif text-3xl sm:text-4xl lg:text-[46px] mb-4" style="background:linear-gradient(135deg,#E4F2FF,#22D3EE);-webkit-background-clip:text;-webkit-text-fill-color:transparent">Ready to take control<br>of your health?</h2>
+        <p class="text-white/70 text-base max-w-[440px] mx-auto mb-9">Join 50,000+ Africans using HealthConnect for faster, smarter healthcare.</p>
+        <div class="flex flex-col sm:flex-row gap-4 justify-center">
+          <a href="/pages/auth/register.html" class="inline-block bg-white text-[#22D3EE] font-bold px-10 py-4 rounded-2xl text-base hover:bg-blue-50 transition-all shadow-xl hover:-translate-y-0.5">
+            Start Free — Check Symptoms Now →
+          </a>
+          <a href="/pages/auth/register.html?role=doctor" class="inline-block border-2 border-white/40 text-white font-semibold px-10 py-4 rounded-2xl text-base hover:bg-white/10 transition-all">
+            Join as a Doctor
+          </a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ── Footer ────────────────────────────────────────────────────────── -->
+  <footer class="py-12" style="background:var(--surface);border-top:1px solid var(--border)">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6">
+      <div class="grid sm:grid-cols-2 lg:grid-cols-4 gap-8 mb-10">
+        <div>
+          <div class="flex items-center gap-2 mb-4">
+            <div class="w-8 h-8 rounded-lg bg-[#22D3EE] flex items-center justify-center text-white">🏥</div>
+            <span class="font-bold text-lg">HealthConnect</span>
+          </div>
+          <p class="text-sm text-[#E4F2FF]/35 leading-relaxed">AI-powered telemedicine platform built for Africa's healthcare future.</p>
+        </div>
+        <div>
+          <div class="font-semibold text-sm mb-4">Platform</div>
+          <div class="space-y-2.5 text-sm text-[#E4F2FF]/50">
+            <div><a href="/pages/auth/register.html" class="hover:text-[#22D3EE] transition-colors">Symptom Checker</a></div>
+            <div><a href="/pages/auth/register.html" class="hover:text-[#22D3EE] transition-colors">Find Doctors</a></div>
+            <div><a href="/pages/auth/register.html" class="hover:text-[#22D3EE] transition-colors">Book Appointment</a></div>
+          </div>
+        </div>
+        <div>
+          <div class="font-semibold text-sm mb-4">For Doctors</div>
+          <div class="space-y-2.5 text-sm text-[#E4F2FF]/50">
+            <div><a href="/pages/auth/register.html?role=doctor" class="hover:text-[#22D3EE] transition-colors">Join as Doctor</a></div>
+            <div><a href="#" class="hover:text-[#22D3EE] transition-colors">Doctor Portal</a></div>
+          </div>
+        </div>
+        <div>
+          <div class="font-semibold text-sm mb-4">Legal</div>
+          <div class="space-y-2.5 text-sm text-[#E4F2FF]/50">
+            <div><a href="#" class="hover:text-[#22D3EE] transition-colors">Privacy Policy</a></div>
+            <div><a href="#" class="hover:text-[#22D3EE] transition-colors">Terms of Service</a></div>
+            <div><a href="#" class="hover:text-[#22D3EE] transition-colors">Medical Disclaimer</a></div>
+          </div>
+        </div>
+      </div>
+      <div class="border-t pt-8 flex flex-col sm:flex-row items-center justify-between gap-4 text-sm text-[#E4F2FF]/35" style="border-color:var(--border)">
+        <span>© 2026 HealthConnect. All rights reserved.</span>
+        <span>⚕️ Not a substitute for professional medical advice</span>
+      </div>
+    </div>
+  </footer>
+
+  <script>
+    // Navbar scroll effect
+    const navbar = document.getElementById('navbar');
+    window.addEventListener('scroll', () => {
+      if (window.scrollY > 50) {
+        navbar.style.background = 'rgba(7,14,28,.95)';
+        navbar.style.boxShadow = '0 4px 30px rgba(0,0,0,.4)';
+        navbar.style.padding = '0.5rem 0';
+      } else {
+        navbar.style.background = 'rgba(7,14,28,.88)';
+        navbar.style.boxShadow = 'none';
+        navbar.style.padding = '1rem 0';
+      }
+    });
+
+    // Mobile menu
+    document.getElementById('mobile-menu-btn').addEventListener('click', () => {
+      document.getElementById('mobile-menu').classList.toggle('hidden');
+    });
+  </script>
+  <script>
+    // Register service worker
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.register('/sw.js').catch(console.warn);
+    }
+  </script>
+</body>
+</html>

@@ -1,0 +1,265 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <meta name="description" content="Track and monitor your vital signs with HealthConnect">
+  <meta name="theme-color" content="#070E1C">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <title>Vital Signs — HealthConnect</title>
+  <link rel="manifest" href="/manifest.json">
+  <link rel="stylesheet" href="/css/main.css">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>tailwind.config={theme:{extend:{colors:{primary:{DEFAULT:'#22D3EE',dark:'#0891B2'},secondary:{DEFAULT:'#10B981'}},fontFamily:{sans:['Plus Jakarta Sans','Inter','system-ui','sans-serif'],serif:['Instrument Serif','Georgia','serif']}}}}</script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4" defer></script>
+</head>
+<body class="min-h-screen" style="background:var(--bg);color:var(--text)">
+  <div class="flex h-screen overflow-hidden">
+
+    <!-- Sidebar -->
+    <aside id="sidebar" class="w-[220px] flex flex-col fixed h-full z-30 -translate-x-full lg:translate-x-0 transition-transform duration-300" style="background:var(--surface2);border-right:1px solid rgba(34,211,238,.1)">
+      <div class="p-5 pb-3" style="border-bottom:1px solid var(--border)">
+        <a href="/" class="flex items-center gap-2 font-bold text-lg">
+          <div class="w-8 h-8 rounded-[10px] bg-[#22D3EE] flex items-center justify-center text-white text-sm">🏥</div>
+          <span class="font-serif text-[18px]">HealthConnect</span>
+        </a>
+      </div>
+      <div class="px-4 py-5" style="border-bottom:1px solid var(--border)">
+        <div class="font-bold text-[15px]" id="user-name">Loading...</div>
+        <div class="text-[11px] mt-0.5" style="color:var(--text3)">Patient</div>
+      </div>
+      <nav class="flex-1 p-3 space-y-0.5 overflow-y-auto">
+        <a href="/pages/patient/dashboard.html"       class="sidebar-item" data-page="dashboard">🏠 Dashboard</a>
+        <a href="/pages/patient/symptom-checker.html" class="sidebar-item" data-page="symptoms">🤖 Symptom Checker</a>
+        <a href="/pages/patient/vitals.html"          class="sidebar-item active" data-page="vitals">❤️ Vital Signs</a>
+        <a href="/pages/patient/appointments.html"    class="sidebar-item" data-page="appointments">📅 Appointments</a>
+        <a href="/pages/patient/drug-checker.html"    class="sidebar-item" data-page="drugs">💊 Drug Checker</a>
+        <a href="/pages/patient/documents.html"       class="sidebar-item" data-page="documents">📁 Documents</a>
+        <a href="/pages/patient/find-doctors.html"   class="sidebar-item" data-page="doctors">🔍 Find Doctors</a>
+        <a href="/pages/patient/health-records.html"  class="sidebar-item" data-page="records">🏥 Health Records</a>
+        <a href="/pages/patient/medical-history.html" class="sidebar-item" data-page="history">📋 Medical History</a>
+        <a href="/pages/patient/emergency.html"       class="sidebar-item" data-page="emergency">🆘 Emergency</a>
+        <div class="pt-4 mt-4" style="border-top:1px solid var(--border)">
+          <a href="/pages/patient/payment.html" class="sidebar-item">💳 Payments</a>
+          <a href="#" id="logout-btn" class="sidebar-item" style="color:var(--red)">🚪 Sign Out</a>
+        </div>
+      </nav>
+    </aside>
+
+    <div id="sidebar-overlay" class="fixed inset-0 bg-black/40 z-20 hidden lg:hidden backdrop-blur-sm" onclick="toggleSidebar()"></div>
+
+    <main class="flex-1 lg:ml-[220px] overflow-y-auto">
+      <header class="px-4 sm:px-6 py-4 flex items-center justify-between sticky top-0 z-10" style="background:rgba(7,14,28,.88);backdrop-filter:blur(20px);border-bottom:1px solid rgba(34,211,238,.08)">
+        <div class="flex items-center gap-3">
+          <button onclick="toggleSidebar()" class="lg:hidden p-2" style="color:var(--text2)">
+            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/></svg>
+          </button>
+          <div>
+            <h1 class="text-xl font-bold font-serif">❤️ Vital Signs Tracker</h1>
+            <p class="text-xs" style="color:var(--text3)">Monitor your health metrics over time</p>
+          </div>
+        </div>
+        <div class="flex items-center gap-2">
+          <a href="/api/v1/export/vitals-report" target="_blank" class="hidden sm:inline-flex items-center gap-2 btn-out text-xs px-3 py-2">📄 Export PDF</a>
+          <button onclick="showRecordModal()" class="btn-teal text-sm font-semibold px-4 py-2.5">+ Record Vitals</button>
+        </div>
+      </header>
+
+      <div class="p-4 sm:p-6 space-y-5" style="background-image:var(--g-hero)">
+
+        <!-- Vital Sign Cards (Latest) -->
+        <div class="animate-fade-up grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-2 sm:gap-3">
+          <div class="rounded-xl sm:rounded-2xl p-3 sm:p-4 text-center" style="background:var(--surface2);border:1px solid rgba(34,211,238,.1)">
+            <div class="text-xl sm:text-2xl mb-1">🫀</div>
+            <div class="text-lg sm:text-xl font-extrabold" id="v-bp">—/—</div>
+            <div class="text-[9px] sm:text-[10px]" style="color:var(--text3)">Blood Pressure</div>
+            <div class="text-[9px] sm:text-[10px]" style="color:var(--text3)">mmHg</div>
+          </div>
+          <div class="rounded-xl sm:rounded-2xl p-3 sm:p-4 text-center" style="background:var(--surface2);border:1px solid rgba(34,211,238,.1)">
+            <div class="text-xl sm:text-2xl mb-1">💓</div>
+            <div class="text-lg sm:text-xl font-extrabold" id="v-hr">—</div>
+            <div class="text-[9px] sm:text-[10px]" style="color:var(--text3)">Heart Rate</div>
+            <div class="text-[9px] sm:text-[10px]" style="color:var(--text3)">bpm</div>
+          </div>
+          <div class="rounded-xl sm:rounded-2xl p-3 sm:p-4 text-center" style="background:var(--surface2);border:1px solid rgba(34,211,238,.1)">
+            <div class="text-xl sm:text-2xl mb-1">🌡️</div>
+            <div class="text-lg sm:text-xl font-extrabold" id="v-temp">—</div>
+            <div class="text-[9px] sm:text-[10px]" style="color:var(--text3)">Temperature</div>
+            <div class="text-[9px] sm:text-[10px]" style="color:var(--text3)">°C</div>
+          </div>
+          <div class="rounded-xl sm:rounded-2xl p-3 sm:p-4 text-center" style="background:var(--surface2);border:1px solid rgba(34,211,238,.1)">
+            <div class="text-xl sm:text-2xl mb-1">🫁</div>
+            <div class="text-lg sm:text-xl font-extrabold" id="v-spo2">—</div>
+            <div class="text-[9px] sm:text-[10px]" style="color:var(--text3)">SpO₂</div>
+            <div class="text-[9px] sm:text-[10px]" style="color:var(--text3)">%</div>
+          </div>
+          <div class="rounded-xl sm:rounded-2xl p-3 sm:p-4 text-center" style="background:var(--surface2);border:1px solid rgba(34,211,238,.1)">
+            <div class="text-xl sm:text-2xl mb-1">🩸</div>
+            <div class="text-lg sm:text-xl font-extrabold" id="v-sugar">—</div>
+            <div class="text-[9px] sm:text-[10px]" style="color:var(--text3)">Blood Sugar</div>
+            <div class="text-[9px] sm:text-[10px]" style="color:var(--text3)">mg/dL</div>
+          </div>
+          <div class="rounded-xl sm:rounded-2xl p-3 sm:p-4 text-center" style="background:var(--surface2);border:1px solid rgba(34,211,238,.1)">
+            <div class="text-xl sm:text-2xl mb-1">⚖️</div>
+            <div class="text-lg sm:text-xl font-extrabold" id="v-weight">—</div>
+            <div class="text-[9px] sm:text-[10px]" style="color:var(--text3)">Weight</div>
+            <div class="text-[9px] sm:text-[10px]" style="color:var(--text3)">kg</div>
+          </div>
+        </div>
+
+        <!-- Alerts -->
+        <div id="alerts-section" class="hidden animate-fade-up-1">
+          <div class="rounded-[18px] p-5" style="background:rgba(244,63,94,.06);border:1px solid rgba(244,63,94,.2)">
+            <h3 class="font-bold text-sm mb-3" style="color:var(--red)">⚠️ Recent Abnormal Readings</h3>
+            <div id="alerts-list" class="space-y-2"></div>
+          </div>
+        </div>
+
+        <!-- Charts -->
+        <div class="animate-fade-up-1 grid sm:grid-cols-2 gap-3 sm:gap-5" id="charts-container">
+          <div class="rounded-xl sm:rounded-[18px] p-4 sm:p-5" style="background:var(--surface2);border:1px solid rgba(34,211,238,.1)">
+            <div class="flex items-center justify-between mb-3 sm:mb-4 gap-2">
+              <h3 class="font-bold text-sm line-clamp-1">Blood Pressure Trends</h3>
+              <select id="bp-days" onchange="loadTrends()" class="text-xs px-2 sm:px-3 py-1.5 rounded-lg flex-shrink-0" style="background:var(--bg2);border:1px solid var(--border);color:var(--text)">
+                <option value="7">7d</option>
+                <option value="30" selected>30d</option>
+                <option value="90">90d</option>
+              </select>
+            </div>
+            <canvas id="chart-bp" height="150" class="sm:h-[200px]"></canvas>
+          </div>
+          <div class="rounded-xl sm:rounded-[18px] p-4 sm:p-5" style="background:var(--surface2);border:1px solid rgba(34,211,238,.1)">
+            <div class="flex items-center justify-between mb-3 sm:mb-4">
+              <h3 class="font-bold text-sm">Heart Rate</h3>
+            </div>
+            <canvas id="chart-hr" height="150" class="sm:h-[200px]"></canvas>
+          </div>
+          <div class="rounded-xl sm:rounded-[18px] p-4 sm:p-5" style="background:var(--surface2);border:1px solid rgba(34,211,238,.1)">
+            <div class="flex items-center justify-between mb-3 sm:mb-4">
+              <h3 class="font-bold text-sm">Blood Sugar</h3>
+            </div>
+            <canvas id="chart-sugar" height="150" class="sm:h-[200px]"></canvas>
+          </div>
+          <div class="rounded-xl sm:rounded-[18px] p-4 sm:p-5" style="background:var(--surface2);border:1px solid rgba(34,211,238,.1)">
+            <div class="flex items-center justify-between mb-3 sm:mb-4">
+              <h3 class="font-bold text-sm">Weight</h3>
+            </div>
+            <canvas id="chart-weight" height="150" class="sm:h-[200px]"></canvas>
+          </div>
+        </div>
+
+        <!-- History Table -->
+        <div class="animate-fade-up-2 rounded-xl sm:rounded-[18px] p-4 sm:p-5" style="background:var(--surface2);border:1px solid rgba(34,211,238,.1)">
+          <h3 class="font-bold mb-3 sm:mb-4 text-sm sm:text-base">Reading History</h3>
+          <div class="overflow-x-auto -mx-4 sm:mx-0 px-4 sm:px-0">
+            <table class="w-full text-xs sm:text-sm whitespace-nowrap">
+              <thead>
+                <tr class="text-left" style="color:var(--text3)">
+                  <th class="pb-2 sm:pb-3 text-xs">Date</th>
+                  <th class="pb-2 sm:pb-3 text-xs">BP</th>
+                  <th class="pb-2 sm:pb-3 text-xs">HR</th>
+                  <th class="pb-2 sm:pb-3 text-xs">Temp</th>
+                  <th class="pb-2 sm:pb-3 text-xs">O₂</th>
+                  <th class="pb-2 sm:pb-3 text-xs">Sugar</th>
+                  <th class="pb-2 sm:pb-3 text-xs">Wt</th>
+                  <th class="pb-2 sm:pb-3 text-xs">Notes</th>
+                  <th class="pb-2 sm:pb-3 text-xs"></th>
+                </tr>
+              </thead>
+              <tbody id="vitals-table"></tbody>
+            </table>
+          </div>
+          <div id="no-vitals" class="text-center py-8 hidden" style="color:var(--text3)">
+            <div class="text-4xl mb-3">❤️</div>
+            <p class="text-sm">No vital signs recorded yet.</p>
+            <button onclick="showRecordModal()" class="mt-3 text-sm hover:underline" style="color:var(--cyan)">Record your first reading →</button>
+          </div>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <!-- Record Vitals Modal -->
+  <div id="record-modal" class="hidden modal-bg">
+    <div class="modal-panel p-4 sm:p-6 max-w-lg">
+      <div class="flex items-center justify-between mb-4 sm:mb-5">
+        <h2 class="text-base sm:text-lg font-bold font-serif">Record Vital Signs</h2>
+        <button onclick="hideRecordModal()" class="text-xl p-1 -mr-2" style="color:var(--text3)" aria-label="Close">&times;</button>
+      </div>
+      <div id="record-alert" class="hidden mb-4"></div>
+      <form id="vitals-form" class="space-y-3 sm:space-y-4">
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          <div>
+            <label class="text-xs font-semibold mb-1 block" style="color:var(--text3)">Systolic BP (mmHg)</label>
+            <input type="number" name="systolicBp" placeholder="120" min="50" max="250" class="w-full px-3 py-2.5 rounded-lg text-sm" style="background:var(--bg2);border:1px solid var(--border);color:var(--text)" inputmode="numeric">
+          </div>
+          <div>
+            <label class="text-xs font-semibold mb-1 block" style="color:var(--text3)">Diastolic BP (mmHg)</label>
+            <input type="number" name="diastolicBp" placeholder="80" min="30" max="150" class="w-full px-3 py-2.5 rounded-lg text-sm" style="background:var(--bg2);border:1px solid var(--border);color:var(--text)" inputmode="numeric">
+          </div>
+          <div>
+            <label class="text-xs font-semibold mb-1 block" style="color:var(--text3)">Heart Rate (bpm)</label>
+            <input type="number" name="heartRate" placeholder="72" min="30" max="220" class="w-full px-3 py-2.5 rounded-lg text-sm" style="background:var(--bg2);border:1px solid var(--border);color:var(--text)" inputmode="numeric">
+          </div>
+          <div>
+            <label class="text-xs font-semibold mb-1 block" style="color:var(--text3)">Temperature (°C)</label>
+            <input type="number" name="temperature" placeholder="36.6" step="0.1" min="34" max="43" class="w-full px-3 py-2.5 rounded-lg text-sm" style="background:var(--bg2);border:1px solid var(--border);color:var(--text)" inputmode="decimal">
+          </div>
+          <div>
+            <label class="text-xs font-semibold mb-1 block" style="color:var(--text3)">Oxygen Saturation (%)</label>
+            <input type="number" name="oxygenSat" placeholder="98" min="50" max="100" class="w-full px-3 py-2.5 rounded-lg text-sm" style="background:var(--bg2);border:1px solid var(--border);color:var(--text)" inputmode="numeric">
+          </div>
+          <div>
+            <label class="text-xs font-semibold mb-1 block" style="color:var(--text3)">Respiratory Rate (/min)</label>
+            <input type="number" name="respiratoryRate" placeholder="16" min="5" max="60" class="w-full px-3 py-2.5 rounded-lg text-sm" style="background:var(--bg2);border:1px solid var(--border);color:var(--text)" inputmode="numeric">
+          </div>
+          <div>
+            <label class="text-xs font-semibold mb-1 block" style="color:var(--text3)">Blood Sugar (mg/dL)</label>
+            <input type="number" name="bloodSugar" placeholder="100" min="20" max="600" class="w-full px-3 py-2.5 rounded-lg text-sm" style="background:var(--bg2);border:1px solid var(--border);color:var(--text)" inputmode="numeric">
+          </div>
+          <div>
+            <label class="text-xs font-semibold mb-1 block" style="color:var(--text3)">Sugar Context</label>
+            <select name="sugarContext" class="w-full px-3 py-2.5 rounded-lg text-sm" style="background:var(--bg2);border:1px solid var(--border);color:var(--text)">
+              <option value="random">Random</option>
+              <option value="fasting">Fasting</option>
+              <option value="before_meal">Before Meal</option>
+              <option value="after_meal">After Meal</option>
+              <option value="bedtime">Bedtime</option>
+            </select>
+          </div>
+          <div>
+            <label class="text-xs font-semibold mb-1 block" style="color:var(--text3)">Weight (kg)</label>
+            <input type="number" name="weightKg" placeholder="70" step="0.1" min="1" max="300" class="w-full px-3 py-2.5 rounded-lg text-sm" style="background:var(--bg2);border:1px solid var(--border);color:var(--text)" inputmode="decimal">
+          </div>
+          <div>
+            <label class="text-xs font-semibold mb-1 block" style="color:var(--text3)">Height (cm)</label>
+            <input type="number" name="heightCm" placeholder="170" step="0.1" min="30" max="250" class="w-full px-3 py-2.5 rounded-lg text-sm" style="background:var(--bg2);border:1px solid var(--border);color:var(--text)" inputmode="decimal">
+          </div>
+        </div>
+        <div>
+          <label class="text-xs font-semibold mb-1 block" style="color:var(--text3)">Notes</label>
+          <textarea name="notes" rows="2" placeholder="Any observations..." class="w-full px-3 py-2.5 rounded-lg text-sm" style="background:var(--bg2);border:1px solid var(--border);color:var(--text)"></textarea>
+        </div>
+        <button type="submit" class="w-full btn-teal py-3 text-sm font-bold min-h-[44px]" id="record-btn">Save Reading</button>
+      </form>
+    </div>
+  </div>
+
+  <script src="/js/config.js"></script>
+  <script src="/js/api.js"></script>
+  <script src="/js/utils.js"></script>
+  <script src="/js/auth.js"></script>
+  <script src="/js/vitals.js"></script>
+  <script>
+    Auth.requireRole('patient');
+    function toggleSidebar() {
+      document.getElementById('sidebar').classList.toggle('-translate-x-full');
+      document.getElementById('sidebar-overlay').classList.toggle('hidden');
+    }
+    document.getElementById('logout-btn').addEventListener('click', (e) => { e.preventDefault(); Auth.logout(); });
+    const user = Auth.getUser();
+    if (user) document.getElementById('user-name').textContent = user.firstName + ' ' + user.lastName;
+  </script>
+</body>
+</html>

@@ -1,0 +1,207 @@
+name: HealthConnect CI/CD
+
+on:
+  push:
+    branches: [main, develop]
+  pull_request:
+    branches: [main]
+
+env:
+  NODE_VERSION: '18'
+  REGISTRY: ghcr.io
+  IMAGE_NAME: ${{ github.repository }}/healthconnect-app
+
+jobs:
+
+  # ── Lint & Test ────────────────────────────────────────────────────
+  test:
+    name: Test & Lint
+    runs-on: ubuntu-latest
+
+    services:
+      mysql:
+        image: mysql:8.0
+        env:
+          MYSQL_ROOT_PASSWORD: test_root
+          MYSQL_DATABASE: healthconnect_test
+          MYSQL_USER: healthconnect
+          MYSQL_PASSWORD: test_password
+        ports:
+          - 3306:3306
+        options: >-
+          --health-cmd="mysqladmin ping"
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=10
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js ${{ env.NODE_VERSION }}
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+          cache-dependency-path: backend/package-lock.json
+
+      - name: Install dependencies
+        working-directory: backend
+        run: npm ci
+
+      - name: Create test .env
+        working-directory: backend
+        run: |
+          cat > .env << 'EOF'
+          NODE_ENV=test
+          PORT=5001
+          DB_HOST=127.0.0.1
+          DB_PORT=3306
+          DB_NAME=healthconnect_test
+          DB_USER=healthconnect
+          DB_PASS=test_password
+          JWT_SECRET=test_jwt_secret_at_least_32_characters_long
+          JWT_REFRESH_SECRET=test_refresh_secret_at_least_32_chars
+          OPENAI_API_KEY=sk-test-key
+          ENCRYPTION_KEY=test_encryption_key_32_characters_
+          EOF
+
+      - name: Initialize test database
+        working-directory: backend
+        run: |
+          mysql -h 127.0.0.1 -u healthconnect -ptest_password healthconnect_test < database/schema.sql
+
+      - name: Run tests
+        working-directory: backend
+        run: npm test --if-present
+
+      - name: Lint check
+        working-directory: backend
+        run: npm run lint --if-present
+
+  # ── Security Audit ─────────────────────────────────────────────────
+  security:
+    name: Security Audit
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+      - name: Run npm audit
+        working-directory: backend
+        run: npm audit --audit-level=high --production
+        continue-on-error: true
+
+  # ── Build Docker Image ─────────────────────────────────────────────
+  build:
+    name: Build Docker Image
+    runs-on: ubuntu-latest
+    needs: [test]
+    if: github.event_name == 'push'
+
+    permissions:
+      contents: read
+      packages: write
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Log in to Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Extract metadata
+        id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
+          tags: |
+            type=ref,event=branch
+            type=sha,prefix=sha-
+            type=raw,value=latest,enable={{is_default_branch}}
+
+      - name: Build and push
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          target: production
+          push: true
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+  # ── Deploy to Staging ──────────────────────────────────────────────
+  deploy-staging:
+    name: Deploy to Staging
+    runs-on: ubuntu-latest
+    needs: [build]
+    if: github.ref == 'refs/heads/develop'
+    environment:
+      name: staging
+      url: ${{ vars.STAGING_URL }}
+
+    steps:
+      - name: Deploy to staging server
+        uses: appleboy/ssh-action@v1
+        with:
+          host: ${{ secrets.STAGING_HOST }}
+          username: ${{ secrets.STAGING_USER }}
+          key: ${{ secrets.STAGING_SSH_KEY }}
+          script: |
+            cd /opt/healthconnect
+            docker-compose pull app
+            docker-compose up -d --no-deps app
+            docker system prune -f
+
+  # ── Deploy to Production ───────────────────────────────────────────
+  deploy-production:
+    name: Deploy to Production
+    runs-on: ubuntu-latest
+    needs: [build]
+    if: github.ref == 'refs/heads/main'
+    environment:
+      name: production
+      url: ${{ vars.PRODUCTION_URL }}
+
+    steps:
+      - name: Deploy to production server
+        uses: appleboy/ssh-action@v1
+        with:
+          host: ${{ secrets.PROD_HOST }}
+          username: ${{ secrets.PROD_USER }}
+          key: ${{ secrets.PROD_SSH_KEY }}
+          script: |
+            cd /opt/healthconnect
+            docker-compose pull app
+            docker-compose up -d --no-deps --scale app=2 app
+            sleep 15
+            docker-compose up -d --no-deps app
+            docker system prune -f
+
+      - name: Notify deployment
+        if: always()
+        uses: slackapi/slack-github-action@v1
+        with:
+          payload: |
+            {
+              "text": "HealthConnect ${{ job.status == 'success' && '✅ deployed to production' || '❌ deployment failed' }}",
+              "blocks": [{
+                "type": "section",
+                "text": {
+                  "type": "mrkdwn",
+                  "text": "*HealthConnect* — Production deploy `${{ job.status }}`\nCommit: `${{ github.sha }}`\nBy: ${{ github.actor }}"
+                }
+              }]
+            }
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+        continue-on-error: true

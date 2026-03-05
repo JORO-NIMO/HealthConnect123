@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Payment — HealthConnect</title>
+  <link rel="stylesheet" href="/css/main.css">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>tailwind.config={theme:{extend:{colors:{primary:{DEFAULT:'#22D3EE',dark:'#0891B2'},secondary:{DEFAULT:'#10B981'}},fontFamily:{sans:['Plus Jakarta Sans','Inter','system-ui','sans-serif'],serif:['Instrument Serif','Georgia','serif']}}}}</script>
+  <style>
+    .input-dark{width:100%;padding:.75rem 1rem;border-radius:.75rem;font-size:.875rem;background:var(--bg2);border:1px solid var(--border);color:var(--text);outline:none;transition:border-color .2s}
+    .input-dark::placeholder{color:var(--text3)}
+    .input-dark:focus{border-color:var(--cyan);box-shadow:0 0 0 3px rgba(34,211,238,.12)}
+    .method-card{border-radius:1rem;padding:1.25rem;cursor:pointer;transition:all .2s;background:var(--surface2);border:2px solid var(--border)}
+    .method-card.selected{border-color:var(--cyan);box-shadow:0 0 0 3px rgba(34,211,238,.12)}
+    .method-card:hover{border-color:var(--cyan)}
+    .section-card{border-radius:1rem;padding:1.5rem;background:var(--surface2);border:1px solid var(--border)}
+    .history-row{padding:1rem;border-radius:.75rem;border:1px solid var(--border);transition:background .15s}
+    .history-row:hover{background:var(--bg2)}
+    #stripe-card-element{padding:.75rem 1rem;border-radius:.75rem;background:var(--bg2);border:1px solid var(--border)}
+  </style>
+</head>
+<body class="min-h-screen" style="background:var(--bg);color:var(--text)">
+  <div class="flex h-screen overflow-hidden">
+    <!-- Sidebar -->
+    <aside id="sidebar" class="w-[220px] flex flex-col fixed h-full z-30 -translate-x-full lg:translate-x-0 transition-transform duration-300" style="background:var(--surface2);border-right:1px solid rgba(34,211,238,.1)">
+      <div class="p-5 pb-3" style="border-bottom:1px solid var(--border)">
+        <a href="/" class="flex items-center gap-2 font-bold text-lg">
+          <div class="w-8 h-8 rounded-[10px] bg-[#22D3EE] flex items-center justify-center text-white text-sm">🏥</div>
+          <span class="font-serif text-[18px]">HealthConnect</span>
+        </a>
+      </div>
+      <div class="px-4 py-5" style="border-bottom:1px solid var(--border)">
+        <div class="font-bold text-[15px]" id="user-name">Loading...</div>
+        <div class="text-[11px] mt-0.5" style="color:var(--text3)">Patient</div>
+      </div>
+      <nav class="flex-1 p-3 space-y-0.5 overflow-y-auto">
+        <a href="/pages/patient/dashboard.html"       class="sidebar-item">🏠 Dashboard</a>
+        <a href="/pages/patient/symptom-checker.html" class="sidebar-item">🤖 Symptom Checker</a>
+        <a href="/pages/patient/vitals.html"          class="sidebar-item">❤️ Vital Signs</a>
+        <a href="/pages/patient/appointments.html"    class="sidebar-item">📅 Appointments</a>
+        <a href="/pages/patient/drug-checker.html"    class="sidebar-item">💊 Drug Checker</a>
+        <a href="/pages/patient/documents.html"       class="sidebar-item">📁 Documents</a>
+        <a href="/pages/patient/find-doctors.html"    class="sidebar-item">🔍 Find Doctors</a>
+        <a href="/pages/patient/health-records.html"  class="sidebar-item">🏥 Health Records</a>
+        <a href="/pages/patient/medical-history.html" class="sidebar-item">📋 Medical History</a>
+        <a href="/pages/patient/emergency.html"       class="sidebar-item">🆘 Emergency</a>
+        <div class="pt-4 mt-4" style="border-top:1px solid var(--border)">
+          <a href="/pages/patient/payment.html" class="sidebar-item active">💳 Payments</a>
+          <a href="#" id="logout-btn" class="sidebar-item" style="color:var(--red)">🚪 Sign Out</a>
+        </div>
+      </nav>
+    </aside>
+    <div id="sidebar-overlay" class="fixed inset-0 bg-black/40 z-20 hidden lg:hidden backdrop-blur-sm" onclick="toggleSidebar()"></div>
+
+    <main class="flex-1 lg:ml-[220px] overflow-y-auto">
+      <header class="px-4 sm:px-6 py-4 flex items-center justify-between sticky top-0 z-10" style="background:rgba(7,14,28,.88);backdrop-filter:blur(20px);border-bottom:1px solid rgba(34,211,238,.08)">
+        <div class="flex items-center gap-3">
+          <button onclick="toggleSidebar()" class="lg:hidden p-2" style="color:var(--text2)">
+            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/></svg>
+          </button>
+          <div>
+            <h1 class="text-xl font-bold font-serif">💳 Payment</h1>
+            <p class="text-xs" style="color:var(--text3)">Pay for consultations securely</p>
+          </div>
+        </div>
+      </header>
+
+  <div class="p-4 sm:p-6 space-y-5 animate-fade-up">
+
+    <!-- Tab Switcher -->
+    <div class="flex gap-2 p-1 rounded-xl" style="background:var(--bg2)">
+      <button class="flex-1 py-2.5 px-4 rounded-lg text-sm font-semibold transition-all tab-btn active" data-tab="checkout" onclick="switchTab('checkout')">💳 Checkout</button>
+      <button class="flex-1 py-2.5 px-4 rounded-lg text-sm font-semibold transition-all tab-btn" data-tab="history" onclick="switchTab('history')">📜 History</button>
+    </div>
+
+    <!-- ──────── Checkout Tab ──────── -->
+    <div id="tab-checkout">
+
+      <!-- Select Appointment -->
+      <div class="section-card mb-4">
+        <h2 class="font-bold text-base mb-3">📅 Select Appointment</h2>
+        <select id="appointment-select" class="input-dark" onchange="onAppointmentSelected()">
+          <option value="">— Choose an unpaid appointment —</option>
+        </select>
+        <div id="appointment-details" class="hidden mt-4 p-4 rounded-xl" style="background:var(--bg2)">
+          <div class="flex items-center gap-3 mb-3">
+            <div id="appt-avatar" class="w-10 h-10 rounded-full da1 flex items-center justify-center text-white font-bold text-sm"></div>
+            <div>
+              <div class="font-semibold text-sm" id="appt-doctor"></div>
+              <div class="text-xs" style="color:var(--text3)" id="appt-info"></div>
+            </div>
+          </div>
+          <div class="flex items-center justify-between">
+            <span class="text-sm" style="color:var(--text3)">Consultation Fee</span>
+            <span class="font-bold text-lg" style="color:var(--cyan)" id="appt-amount"></span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Payment Method -->
+      <div class="section-card mb-4">
+        <h2 class="font-bold text-base mb-3">💰 Payment Method</h2>
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          <div class="method-card selected" onclick="selectMethod('card')" id="method-card">
+            <div class="flex items-center gap-3">
+              <span class="text-2xl">💳</span>
+              <div>
+                <div class="font-semibold text-sm">Card Payment</div>
+                <div class="text-xs" style="color:var(--text3)">Visa, Mastercard, etc.</div>
+              </div>
+            </div>
+          </div>
+          <div class="method-card" onclick="selectMethod('momo')" id="method-momo">
+            <div class="flex items-center gap-3">
+              <span class="text-2xl">📱</span>
+              <div>
+                <div class="font-semibold text-sm">Mobile Money</div>
+                <div class="text-xs" style="color:var(--text3)">MTN MoMo</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Card Form -->
+      <div class="section-card mb-4" id="card-form-section">
+        <h2 class="font-bold text-base mb-3">🔒 Card Details</h2>
+        <div id="stripe-card-element" class="mb-3"></div>
+        <div id="card-errors" class="text-xs mt-2" style="color:var(--red)"></div>
+      </div>
+
+      <!-- MoMo Form -->
+      <div class="section-card mb-4 hidden" id="momo-form-section">
+        <h2 class="font-bold text-base mb-3">📱 Mobile Money Details</h2>
+        <div>
+          <label class="block text-sm font-medium mb-1.5">Phone Number</label>
+          <input type="tel" id="momo-phone" class="input-dark" placeholder="+256 7XX XXX XXX">
+          <p class="text-xs mt-1" style="color:var(--text3)">You will receive a prompt on your phone to authorize payment.</p>
+        </div>
+      </div>
+
+      <!-- Pay Button -->
+      <div id="pay-alert"></div>
+      <button id="pay-btn" onclick="submitPayment()" class="btn-teal text-sm font-semibold px-6 py-3.5 w-full" disabled>
+        Pay Now
+      </button>
+    </div>
+
+    <!-- ──────── History Tab ──────── -->
+    <div id="tab-history" class="hidden">
+      <div class="section-card">
+        <h2 class="font-bold text-base mb-4">📜 Payment History</h2>
+        <div id="payment-history">
+          <div class="text-center py-10" style="color:var(--text3)">
+            <div class="text-4xl mb-3">💳</div>
+            <p class="text-sm">Loading payment history...</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+    </main>
+  </div>
+
+  <script src="/js/config.js"></script>
+  <script src="/js/auth.js"></script>
+  <script src="/js/api.js"></script>
+  <script src="/js/utils.js"></script>
+  <script>
+    function toggleSidebar() {
+      document.getElementById('sidebar').classList.toggle('-translate-x-full');
+      document.getElementById('sidebar-overlay').classList.toggle('hidden');
+    }
+    document.getElementById('logout-btn').addEventListener('click', (e) => { e.preventDefault(); Auth.logout(); });
+    const user = Auth.getUser();
+    if (user) document.getElementById('user-name').textContent = user.firstName + ' ' + user.lastName;
+  </script>
+  <script src="/js/payment.js"></script>
+</body>
+</html>

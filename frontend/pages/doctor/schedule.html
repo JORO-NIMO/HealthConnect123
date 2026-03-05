@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Manage Schedule — HealthConnect</title>
+  <link rel="stylesheet" href="/css/main.css">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>tailwind.config={theme:{extend:{colors:{primary:{DEFAULT:'#22D3EE',dark:'#0891B2'},secondary:{DEFAULT:'#10B981'}},fontFamily:{sans:['Plus Jakarta Sans','Inter','system-ui','sans-serif'],serif:['Instrument Serif','Georgia','serif']}}}}</script>
+  <style>
+    .slot-btn{padding:.4rem .75rem;border-radius:9999px;font-size:.75rem;font-weight:600;border:1.5px solid var(--border);background:var(--bg2);color:var(--text2);cursor:pointer;transition:all .18s}
+    .slot-btn:hover{border-color:rgba(34,211,238,.3)}
+    .slot-btn.active{background:var(--cyan);color:#fff;border-color:var(--cyan)}
+    .input-dark{width:100%;padding:.65rem 1rem;border-radius:.75rem;font-size:.875rem;background:var(--bg2);border:1px solid var(--border);color:var(--text);outline:none;transition:border-color .2s}
+    .input-dark:focus{border-color:var(--cyan);box-shadow:0 0 0 3px rgba(34,211,238,.12)}
+    select.input-dark{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%2394A3B8' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 1rem center}
+  </style>
+</head>
+<body class="min-h-screen" style="background:var(--bg);color:var(--text)">
+
+  <header class="px-4 sm:px-6 py-4 flex items-center gap-4 sticky top-0 z-10" style="background:rgba(7,14,28,.88);backdrop-filter:blur(20px);border-bottom:1px solid rgba(34,211,238,.08)">
+    <a href="/pages/doctor/dashboard.html" style="color:var(--text2)" class="hover:text-[var(--cyan)] transition-colors">←</a>
+    <h1 class="font-bold font-serif">Manage Schedule</h1>
+    <button id="save-avail-btn" class="ml-auto btn-teal text-sm font-semibold px-4 py-2.5">Save Changes</button>
+  </header>
+
+  <div class="max-w-3xl mx-auto p-4 sm:p-6 space-y-5 animate-fade-up">
+
+    <!-- Consultation Fee -->
+    <div class="rounded-[18px] p-5" style="background:var(--surface2);border:1px solid rgba(34,211,238,.1)">
+      <h2 class="font-semibold mb-4">Consultation Fee</h2>
+      <div class="flex gap-4 items-center">
+        <select id="currency" class="input-dark" style="width:auto">
+          <option value="USD">USD ($)</option>
+          <option value="KES">KES (Ksh)</option>
+          <option value="GHS">GHS (GH₵)</option>
+          <option value="NGN">NGN (₦)</option>
+          <option value="UGX">UGX (USh)</option>
+          <option value="TZS">TZS (TSh)</option>
+        </select>
+        <input type="number" id="consultation-fee" placeholder="25.00" min="0" step="0.01" class="input-dark flex-1">
+      </div>
+    </div>
+
+    <!-- Weekly Availability -->
+    <div class="rounded-[18px] p-5" style="background:var(--surface2);border:1px solid rgba(34,211,238,.1)">
+      <h2 class="font-semibold mb-4">Weekly Availability</h2>
+      <div class="space-y-4" id="availability-grid"></div>
+    </div>
+
+    <div id="save-alert" class="hidden p-3 rounded-xl text-sm font-medium"></div>
+
+  </div>
+
+  <script src="/js/config.js"></script>
+  <script src="/js/api.js"></script>
+  <script src="/js/utils.js"></script>
+  <script src="/js/auth.js"></script>
+  <script src="/js/schedule.js"></script>
+</body>
+</html>

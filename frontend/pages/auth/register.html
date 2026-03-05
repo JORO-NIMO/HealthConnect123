@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Create Account — HealthConnect</title>
+  <link rel="manifest" href="/manifest.json">
+  <link rel="stylesheet" href="/css/main.css">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>tailwind.config={theme:{extend:{colors:{primary:{DEFAULT:'#22D3EE',dark:'#0891B2'},secondary:{DEFAULT:'#10B981'}},fontFamily:{sans:['Plus Jakarta Sans','Inter','system-ui','sans-serif'],serif:['Instrument Serif','Georgia','serif']}}}}</script>
+  <style>
+    .input-dark{width:100%;padding:.75rem 1rem;border-radius:.75rem;font-size:.875rem;background:var(--bg2);border:1px solid var(--border);color:var(--text);outline:none;transition:border-color .2s}
+    .input-dark::placeholder{color:var(--text3)}
+    .input-dark:focus{border-color:var(--cyan);box-shadow:0 0 0 3px rgba(34,211,238,.12)}
+    select.input-dark{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%2394A3B8' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 1rem center}
+    .role-card{cursor:pointer;border:1.5px solid var(--border);border-radius:.85rem;padding:1rem;display:flex;align-items:center;gap:.75rem;transition:all .2s;background:var(--bg2)}
+    .role-card:has(input:checked){border-color:var(--cyan);background:rgba(34,211,238,.06)}
+  </style>
+</head>
+<body class="min-h-screen flex" style="background:var(--bg);color:var(--text)">
+
+  <!-- Left panel -->
+  <div class="hidden lg:flex lg:w-2/5 flex-col justify-between p-12 text-white relative overflow-hidden" style="background:linear-gradient(135deg,#0C1A32,#0E2A4A)">
+    <div class="absolute inset-0 opacity-[0.04]" style="background-image:radial-gradient(circle at 1px 1px,rgba(34,211,238,.4) 1px,transparent 0);background-size:32px 32px"></div>
+    <a href="/" class="relative flex items-center gap-2 font-bold text-xl">
+      <div class="w-8 h-8 rounded-[10px] bg-[#22D3EE] flex items-center justify-center text-sm">🏥</div>
+      <span class="font-serif">HealthConnect</span>
+    </a>
+    <div class="relative">
+      <h1 class="text-3xl font-bold font-serif leading-tight mb-4">Join Africa's leading<br>telemedicine platform</h1>
+      <ul class="space-y-3 text-white/70">
+        <li class="flex gap-2"><span style="color:var(--cyan)" class="font-bold">✓</span>Free AI symptom analysis</li>
+        <li class="flex gap-2"><span style="color:var(--cyan)" class="font-bold">✓</span>Book verified doctors instantly</li>
+        <li class="flex gap-2"><span style="color:var(--cyan)" class="font-bold">✓</span>Secure electronic prescriptions</li>
+        <li class="flex gap-2"><span style="color:var(--cyan)" class="font-bold">✓</span>Your health records, always safe</li>
+      </ul>
+    </div>
+    <p class="relative text-white/30 text-sm">© 2026 HealthConnect</p>
+  </div>
+
+  <!-- Right panel -->
+  <div class="w-full lg:w-3/5 flex items-center justify-center p-6 overflow-y-auto">
+    <div class="w-full max-w-lg py-8">
+      <div class="lg:hidden text-center mb-6">
+        <a href="/" class="inline-flex items-center gap-2 font-bold text-xl" style="color:var(--cyan)">🏥 <span class="font-serif">HealthConnect</span></a>
+      </div>
+      <h2 class="text-3xl font-bold font-serif mb-2">Create your account</h2>
+      <p class="mb-8" style="color:var(--text3)">Already have one? <a href="/pages/auth/login.html" class="font-medium hover:underline" style="color:var(--cyan)">Sign In</a></p>
+
+      <div id="alert" class="hidden mb-4 p-4 rounded-xl text-sm font-medium"></div>
+
+      <!-- Role selector -->
+      <div class="mb-6">
+        <label class="block text-sm font-medium mb-2">I am a...</label>
+        <div class="grid grid-cols-2 gap-3">
+          <label class="role-card">
+            <input type="radio" name="role" value="patient" checked class="hidden">
+            <div><div class="font-semibold">Patient</div><div class="text-xs" style="color:var(--text3)">Looking for healthcare</div></div>
+          </label>
+          <label class="role-card">
+            <input type="radio" name="role" value="doctor" class="hidden">
+            <div><div class="font-semibold">Doctor</div><div class="text-xs" style="color:var(--text3)">Providing healthcare</div></div>
+          </label>
+        </div>
+      </div>
+
+      <!-- Google Sign Up -->
+      <button id="google-btn" class="btn-out w-full flex items-center justify-center gap-3 py-3 mb-4">
+        <svg class="w-5 h-5" viewBox="0 0 24 24"><path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/><path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/><path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/><path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/></svg>
+        Continue with Google
+      </button>
+
+      <div class="flex items-center gap-3 my-5">
+        <div class="flex-1 h-px" style="background:var(--border)"></div>
+        <span class="text-sm" style="color:var(--text3)">or fill in the form</span>
+        <div class="flex-1 h-px" style="background:var(--border)"></div>
+      </div>
+
+      <form id="register-form" class="space-y-4">
+        <div class="grid grid-cols-2 gap-4">
+          <div>
+            <label class="block text-sm font-medium mb-1.5">First Name</label>
+            <input type="text" id="firstName" required placeholder="John" class="input-dark">
+          </div>
+          <div>
+            <label class="block text-sm font-medium mb-1.5">Last Name</label>
+            <input type="text" id="lastName" required placeholder="Doe" class="input-dark">
+          </div>
+        </div>
+        <div>
+          <label class="block text-sm font-medium mb-1.5">Email Address</label>
+          <input type="email" id="email" required placeholder="you@example.com" class="input-dark">
+        </div>
+        <div>
+          <label class="block text-sm font-medium mb-1.5">Phone Number <span style="color:var(--text3)">(optional)</span></label>
+          <input type="tel" id="phone" placeholder="+254 7XX XXX XXX" class="input-dark">
+        </div>
+        <div>
+          <label class="block text-sm font-medium mb-1.5">Password</label>
+          <div class="relative">
+            <input type="password" id="password" required placeholder="Min. 8 characters" class="input-dark pr-12">
+            <button type="button" id="toggle-pw" class="absolute right-3 top-1/2 -translate-y-1/2 text-lg" style="color:var(--text3)">👁</button>
+          </div>
+          <div class="flex gap-1 mt-2" id="pw-strength">
+            <div class="h-1 flex-1 rounded" style="background:var(--border)" id="s1"></div>
+            <div class="h-1 flex-1 rounded" style="background:var(--border)" id="s2"></div>
+            <div class="h-1 flex-1 rounded" style="background:var(--border)" id="s3"></div>
+            <div class="h-1 flex-1 rounded" style="background:var(--border)" id="s4"></div>
+          </div>
+        </div>
+        <div>
+          <label class="block text-sm font-medium mb-1.5">Confirm Password</label>
+          <input type="password" id="confirmPassword" required placeholder="Repeat password" class="input-dark">
+        </div>
+
+        <!-- Doctor extra fields -->
+        <div id="doctor-fields" class="hidden space-y-4 p-4 rounded-xl" style="background:rgba(34,211,238,.04);border:1px solid rgba(34,211,238,.15)">
+          <p class="text-sm font-semibold" style="color:var(--cyan)">📋 Doctor Information (required for verification)</p>
+          <div>
+            <label class="block text-sm font-medium mb-1.5">Medical Specialization</label>
+            <select id="specialization" class="input-dark">
+              <option value="">Select specialization...</option>
+              <option>General Medicine</option><option>Pediatrics</option><option>Cardiology</option>
+              <option>Dermatology</option><option>Gynecology</option><option>Orthopedics</option>
+              <option>Psychiatry</option><option>Neurology</option><option>Oncology</option>
+              <option>Ophthalmology</option><option>ENT</option><option>Urology</option>
+              <option>Endocrinology</option><option>Infectious Diseases</option><option>Other</option>
+            </select>
+          </div>
+          <div>
+            <label class="block text-sm font-medium mb-1.5">Medical License Number</label>
+            <input type="text" id="licenseNumber" placeholder="e.g. MD-KE-12345" class="input-dark">
+          </div>
+          <p class="text-xs" style="color:var(--text3)">Your profile will be reviewed and verified by our admin team before activation.</p>
+        </div>
+
+        <div class="flex items-start gap-2">
+          <input type="checkbox" id="terms" required class="mt-1 rounded" style="accent-color:var(--cyan)">
+          <label for="terms" class="text-sm" style="color:var(--text2)">
+            I agree to the <a href="#" class="underline" style="color:var(--cyan)">Terms of Service</a> and <a href="#" class="underline" style="color:var(--cyan)">Privacy Policy</a>
+          </label>
+        </div>
+        <button type="submit" id="submit-btn" class="btn-teal w-full font-semibold py-3.5 disabled:opacity-50">
+          Create Account →
+        </button>
+      </form>
+    </div>
+  </div>
+
+  <script src="/js/config.js"></script>
+  <script src="/js/api.js"></script>
+  <script src="/js/utils.js"></script>
+  <script src="/js/auth.js"></script>
+  <script>
+    // Role selector visual feedback
+    document.querySelectorAll('input[name="role"]').forEach(radio => {
+      radio.addEventListener('change', (e) => {
+        document.getElementById('doctor-fields').classList.toggle('hidden', e.target.value !== 'doctor');
+      });
+    });
+
+    // Toggle password
+    document.getElementById('toggle-pw').addEventListener('click', () => {
+      const pw = document.getElementById('password');
+      pw.type = pw.type === 'password' ? 'text' : 'password';
+    });
+
+    // Password strength
+    document.getElementById('password').addEventListener('input', (e) => {
+      const pw = e.target.value;
+      const strength = [pw.length >= 8, /[A-Z]/.test(pw), /[0-9]/.test(pw), /[^A-Za-z0-9]/.test(pw)];
+      const colors = ['#EF4444','#F59E0B','#EAB308','#10B981'];
+      strength.forEach((met, i) => {
+        const el = document.getElementById('s' + (i + 1));
+        el.style.background = met ? colors[i] : 'var(--border)';
+      });
+    });
+
+    // Register form
+    document.getElementById('register-form').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const password = document.getElementById('password').value;
+      const confirm  = document.getElementById('confirmPassword').value;
+      if (password !== confirm) return showAlert('Passwords do not match.', 'error');
+      if (password.length < 8)  return showAlert('Password must be at least 8 characters.', 'error');
+
+      const role = document.querySelector('input[name="role"]:checked').value;
+      const body = {
+        email    : document.getElementById('email').value,
+        password,
+        firstName: document.getElementById('firstName').value,
+        lastName : document.getElementById('lastName').value,
+        phone    : document.getElementById('phone').value || undefined,
+        role,
+      };
+
+      const btn = document.getElementById('submit-btn');
+      btn.disabled = true;
+      btn.textContent = 'Creating account...';
+      try {
+        const res = await API.post('/auth/register', body);
+        Auth.saveSession(res.data.tokens, res.data.user);
+        Auth.redirectToDashboard(res.data.user.role);
+      } catch (err) {
+        showAlert(err.message || 'Registration failed', 'error');
+        btn.disabled = false;
+        btn.textContent = 'Create Account →';
+      }
+    });
+
+    function showAlert(msg, type) {
+      const el = document.getElementById('alert');
+      el.className = 'mb-4 p-4 rounded-xl text-sm font-medium';
+      el.style.background = type==='error'?'rgba(239,68,68,.08)':'rgba(16,185,129,.08)';
+      el.style.color = type==='error'?'#F87171':'#34D399';
+      el.style.border = '1px solid '+(type==='error'?'rgba(239,68,68,.2)':'rgba(16,185,129,.2)');
+      el.textContent = msg;
+      el.classList.remove('hidden');
+      setTimeout(() => el.classList.add('hidden'), 5000);
+    }
+
+    // Pre-fill role from URL
+    const urlRole = new URLSearchParams(window.location.search).get('role');
+    if (urlRole === 'doctor') {
+      document.querySelector('input[value="doctor"]').checked = true;
+      document.querySelector('input[value="doctor"]').dispatchEvent(new Event('change'));
+    }
+  </script>
+</body>
+</html>
