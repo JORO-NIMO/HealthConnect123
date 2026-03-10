@@ -61,8 +61,12 @@ router.get('/health/detailed', async (req, res) => {
   };
 
   // Check if critical env vars are set
-  const requiredEnvVars = ['DB_HOST', 'DB_NAME', 'JWT_SECRET'];
-  const missingEnvVars = requiredEnvVars.filter(v => !process.env[v]);
+  // Accept either individual DB_* vars OR the Railway-provided MYSQL_URL / DATABASE_URL
+  const hasDbConfig = process.env.MYSQL_URL || process.env.DATABASE_URL ||
+    (process.env.DB_HOST && process.env.DB_NAME);
+  const missingEnvVars = [];
+  if (!hasDbConfig) missingEnvVars.push('MYSQL_URL or DB_HOST+DB_NAME');
+  if (!process.env.JWT_SECRET) missingEnvVars.push('JWT_SECRET');
   checks.checks.environment = {
     status: missingEnvVars.length ? 'warning' : 'ok',
     missingVars: missingEnvVars,

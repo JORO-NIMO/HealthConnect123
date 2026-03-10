@@ -2,19 +2,13 @@ const mysql  = require('mysql2/promise');
 const logger = require('../utils/logger.util');
 
 // ─── Connection Pool ────────────────────────────────────────────────────────
-// Railway provides MYSQL_URL or individual DB_ vars
-const connectionConfig = process.env.MYSQL_URL || process.env.DATABASE_URL
-  ? {
-      uri: process.env.MYSQL_URL || process.env.DATABASE_URL,
-      connectionLimit   : parseInt(process.env.DB_CONNECTION_LIMIT || '10'),
-      waitForConnections: true,
-      queueLimit        : 0,
-      charset           : 'utf8mb4',
-      timezone          : '+00:00',
-      enableKeepAlive   : true,
-      keepAliveInitialDelay: 10000,
-    }
-  : {
+// Railway MySQL plugin injects MYSQL_URL automatically once you add the plugin.
+// mysql2 requires the URL to be passed as a plain string, NOT as { uri: url }.
+const MYSQL_URI = process.env.MYSQL_URL || process.env.DATABASE_URL;
+
+const pool = MYSQL_URI
+  ? mysql.createPool(MYSQL_URI)
+  : mysql.createPool({
       host              : process.env.DB_HOST     || 'localhost',
       port              : parseInt(process.env.DB_PORT || '3306'),
       user              : process.env.DB_USER     || 'root',
@@ -27,9 +21,7 @@ const connectionConfig = process.env.MYSQL_URL || process.env.DATABASE_URL
       timezone          : '+00:00',
       enableKeepAlive   : true,
       keepAliveInitialDelay: 10000,
-    };
-
-const pool = mysql.createPool(connectionConfig);
+    });
 
 // ─── Test & Initialize ─────────────────────────────────────────────────────
 async function initializeDatabase(retries = 5, delay = 3000) {

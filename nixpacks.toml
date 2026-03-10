@@ -1,0 +1,9 @@
+# Nixpacks build configuration for Railway
+# Explicitly tells Railway's builder how to install and start this app
+# regardless of root directory settings in the dashboard
+
+[phases.install]
+cmds = ["cd backend && npm install --production"]
+
+[start]
+cmd = "node backend/server.js"

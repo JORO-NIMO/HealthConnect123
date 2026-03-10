@@ -1,0 +1,12 @@
+{
+  "name": "healthconnect",
+  "version": "1.0.0",
+  "description": "HealthConnect AI Telemedicine Platform",
+  "scripts": {
+    "start": "node backend/server.js",
+    "dev": "cd backend && npm run dev"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  }
+}

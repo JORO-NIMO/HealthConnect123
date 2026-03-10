@@ -184,20 +184,27 @@ io.on('connection', (socket) => {
 const PORT = process.env.PORT || 5000;
 
 async function startServer() {
-  try {
-    await initializeDatabase();
-
-    // Initialize scheduled background jobs
-    initCronJobs();
-
-    httpServer.listen(PORT, () => {
+  // Bind to port FIRST — Railway health checks must get a response immediately.
+  // DB init happens after, so a slow/misconfigured DB never causes a 502.
+  await new Promise((resolve, reject) => {
+    httpServer.listen(PORT, '0.0.0.0', () => {
       logger.info(`🚀 HealthConnect API running on port ${PORT}`);
       logger.info(`🌍 Environment : ${process.env.NODE_ENV || 'development'}`);
       logger.info(`📡 Frontend    : ${process.env.FRONTEND_URL || 'http://localhost:' + PORT}`);
+      resolve();
     });
+    httpServer.on('error', reject);
+  });
+
+  // Now connect to DB in the background — server stays up even if DB is slow.
+  try {
+    await initializeDatabase();
+    initCronJobs();
+    logger.info('✅ Database connected and cron jobs started');
   } catch (err) {
-    logger.error('Failed to start server:', err);
-    process.exit(1);
+    logger.error('⚠️  Database initialisation failed — API is up but DB calls will fail:', err.message);
+    // Do NOT exit — let Railway keep the container alive so it can reconnect
+    // after the DB plugin finishes provisioning.
   }
 }
 
