@@ -2,6 +2,7 @@ const { v4: uuidv4 } = require('uuid');
 const UserModel    = require('../models/User.model');
 const PatientModel = require('../models/Patient.model');
 const DoctorModel  = require('../models/Doctor.model');
+const HospitalModel = require('../models/Hospital.model');
 const { generateTokens, verifyRefreshToken } = require('../utils/jwt.util');
 const { sendSuccess, sendError }             = require('../utils/response.util');
 const { sendVerificationEmail, sendPasswordResetEmail } = require('../services/email.service');
@@ -13,9 +14,9 @@ exports.register = async (req, res, next) => {
   try {
     const { email, password, firstName, lastName, phone, role = 'patient' } = req.body;
 
-    // Only allow patient and doctor self-registration
-    if (!['patient', 'doctor'].includes(role)) {
-      return sendError(res, 400, 'Invalid role. Choose patient or doctor.');
+    // Only allow patient, doctor, and hospital_admin self-registration
+    if (!['patient', 'doctor', 'hospital_admin'].includes(role)) {
+      return sendError(res, 400, 'Invalid role. Choose patient, doctor, or hospital_admin.');
     }
 
     const existing = await UserModel.findByEmail(email);
@@ -26,6 +27,7 @@ exports.register = async (req, res, next) => {
     // Create role-specific profile
     if (role === 'patient') await PatientModel.create(user.id);
     if (role === 'doctor')  await DoctorModel.create(user.id);
+    // hospital_admin profile is created when they register their hospital via /api/v1/hospitals/register
 
     const tokens = generateTokens(user);
     const expiresAt = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000);

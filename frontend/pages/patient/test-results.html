@@ -1,0 +1,387 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Test Results — HealthConnect</title>
+  <link rel="manifest" href="/manifest.json">
+  <link rel="stylesheet" href="/css/main.css">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>tailwind.config={theme:{extend:{colors:{primary:{DEFAULT:'#22D3EE',dark:'#0891B2'},secondary:{DEFAULT:'#10B981'}},fontFamily:{sans:['Plus Jakarta Sans','Inter','system-ui','sans-serif'],serif:['Instrument Serif','Georgia','serif']}}}}</script>
+</head>
+<body class="min-h-screen" style="background:var(--bg);color:var(--text)">
+  <div class="flex h-screen overflow-hidden">
+
+    <!-- Sidebar -->
+    <aside id="sidebar" class="w-[220px] flex flex-col fixed h-full z-30 -translate-x-full lg:translate-x-0 transition-transform duration-300" style="background:var(--surface2);border-right:1px solid rgba(34,211,238,.1)">
+      <div class="p-5 pb-3" style="border-bottom:1px solid var(--border)">
+        <a href="/" class="flex items-center gap-2 font-bold text-lg">
+          <div class="w-8 h-8 rounded-[10px] bg-[#22D3EE] flex items-center justify-center text-white text-sm">🏥</div>
+          <span class="font-serif text-[18px]">HealthConnect</span>
+        </a>
+      </div>
+      <nav class="flex-1 p-3 space-y-0.5 overflow-y-auto">
+        <a href="/pages/patient/dashboard.html"       class="sidebar-item">🏠 Dashboard</a>
+        <a href="/pages/patient/symptom-checker.html" class="sidebar-item">🤖 Symptom Checker</a>
+        <a href="/pages/patient/vitals.html"          class="sidebar-item">❤️ Vital Signs</a>
+        <a href="/pages/patient/appointments.html"    class="sidebar-item">📅 Appointments</a>
+        <a href="/pages/patient/drug-checker.html"    class="sidebar-item">💊 Drug Checker</a>
+        <a href="/pages/patient/documents.html"       class="sidebar-item">📁 Documents</a>
+        <a href="/pages/patient/find-doctors.html"   class="sidebar-item">🔍 Find Doctors</a>
+        <a href="/pages/patient/health-records.html"  class="sidebar-item">🏥 Health Records</a>
+        <a href="/pages/patient/medical-history.html" class="sidebar-item">📋 Medical History</a>
+        <a href="/pages/patient/emergency.html"       class="sidebar-item">🆘 Emergency</a>
+        <a href="/pages/patient/my-hospitals.html"    class="sidebar-item">🏥 My Hospitals</a>
+        <a href="/pages/patient/test-results.html"    class="sidebar-item active">🧪 Test Results</a>
+        <div class="pt-4 mt-4" style="border-top:1px solid var(--border)">
+          <a href="/pages/patient/payment.html" class="sidebar-item">💳 Payments</a>
+          <a href="#" id="logout-btn" class="sidebar-item" style="color:var(--red)">🚪 Sign Out</a>
+        </div>
+      </nav>
+    </aside>
+
+    <!-- Mobile overlay -->
+    <div id="sidebar-overlay" class="fixed inset-0 bg-black/40 z-20 hidden lg:hidden backdrop-blur-sm" onclick="toggleSidebar()"></div>
+
+    <!-- Main content -->
+    <main class="flex-1 lg:ml-[220px] overflow-y-auto">
+      <header class="px-4 sm:px-6 py-4 flex items-center justify-between sticky top-0 z-10" style="background:rgba(7,14,28,.88);backdrop-filter:blur(20px);border-bottom:1px solid rgba(34,211,238,.08)">
+        <div class="flex items-center gap-3">
+          <button onclick="toggleSidebar()" class="lg:hidden p-2" style="color:var(--text2)">
+            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/></svg>
+          </button>
+          <div>
+            <h1 class="text-xl font-bold font-serif">Test Results</h1>
+            <p class="text-xs" style="color:var(--text3)">Lab & medical test results from your hospitals</p>
+          </div>
+        </div>
+        <div class="flex items-center gap-3">
+          <div class="relative cursor-pointer notif-bell">
+            <span class="text-xl">🔔</span>
+            <span class="notif-badge absolute -top-1 -right-1 min-w-[18px] h-[18px] text-[10px] font-bold flex items-center justify-center rounded-full text-white hidden" style="background:var(--red);border:2px solid var(--bg)">0</span>
+          </div>
+        </div>
+      </header>
+
+      <div class="p-4 sm:p-6 space-y-5">
+
+        <!-- Filter bar -->
+        <div class="flex items-center gap-3 flex-wrap">
+          <select id="filter-status" onchange="loadTestResults()" class="px-3 py-2 text-sm rounded-xl" style="background:var(--surface2);border:1px solid var(--border);color:var(--text)">
+            <option value="">All Statuses</option>
+            <option value="completed">Completed</option>
+            <option value="pending">Pending</option>
+            <option value="in_progress">In Progress</option>
+          </select>
+          <select id="filter-type" onchange="loadTestResults()" class="px-3 py-2 text-sm rounded-xl" style="background:var(--surface2);border:1px solid var(--border);color:var(--text)">
+            <option value="">All Types</option>
+            <option value="blood_test">Blood Test</option>
+            <option value="urine_test">Urine Test</option>
+            <option value="imaging">Imaging</option>
+            <option value="pathology">Pathology</option>
+            <option value="genetic">Genetic</option>
+            <option value="other">Other</option>
+          </select>
+          <div class="flex-1"></div>
+          <span id="results-count" class="text-xs" style="color:var(--text3)"></span>
+        </div>
+
+        <!-- Critical results alert -->
+        <div id="critical-alert" class="hidden rounded-[18px] p-5" style="background:rgba(239,68,68,.08);border:1px solid rgba(239,68,68,.2)">
+          <div class="flex items-center gap-3">
+            <span class="text-2xl">⚠️</span>
+            <div>
+              <h3 class="font-bold text-sm" style="color:#F87171">Critical Results Require Attention</h3>
+              <p class="text-xs mt-0.5" style="color:var(--text3)">You have test results flagged as critical. Please consult your doctor.</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Results list -->
+        <div id="results-list">
+          <div class="text-center py-16" style="color:var(--text3)">
+            <div class="text-5xl mb-4">🧪</div>
+            <p class="text-sm font-medium">No test results yet</p>
+            <p class="text-xs mt-1">Test results from your linked hospitals will appear here</p>
+          </div>
+        </div>
+
+      </div>
+    </main>
+  </div>
+
+  <!-- Result Detail Modal -->
+  <div id="result-modal" class="fixed inset-0 z-50 hidden">
+    <div class="absolute inset-0 bg-black/60 backdrop-blur-sm" onclick="closeModal()"></div>
+    <div class="absolute inset-4 sm:inset-auto sm:top-1/2 sm:left-1/2 sm:-translate-x-1/2 sm:-translate-y-1/2 sm:w-full sm:max-w-2xl sm:max-h-[85vh] rounded-2xl overflow-y-auto" style="background:var(--surface2);border:1px solid rgba(34,211,238,.15)">
+      <div class="p-6">
+        <div class="flex items-center justify-between mb-5">
+          <h2 class="font-bold text-lg font-serif" id="modal-title">Test Result Details</h2>
+          <button onclick="closeModal()" class="p-2 rounded-lg transition-all" style="background:rgba(255,255,255,.05)" onmouseover="this.style.background='rgba(255,255,255,.1)'" onmouseout="this.style.background='rgba(255,255,255,.05)'">✕</button>
+        </div>
+        <div id="modal-content"></div>
+      </div>
+    </div>
+  </div>
+
+  <script src="/js/config.js"></script>
+  <script src="/js/api.js"></script>
+  <script src="/js/utils.js"></script>
+  <script src="/js/auth.js"></script>
+  <script src="https://cdn.socket.io/4.7.5/socket.io.min.js"></script>
+  <script src="/js/notifications.js"></script>
+  <script>
+    Auth.requireRole('patient');
+
+    function toggleSidebar() {
+      document.getElementById('sidebar').classList.toggle('-translate-x-full');
+      document.getElementById('sidebar-overlay').classList.toggle('hidden');
+    }
+
+    document.getElementById('logout-btn').addEventListener('click', (e) => {
+      e.preventDefault();
+      Auth.logout();
+    });
+
+    // Check URL params for hospital filter
+    const urlParams = new URLSearchParams(window.location.search);
+    const hospitalFilter = urlParams.get('hospital');
+
+    async function loadTestResults() {
+      const status = document.getElementById('filter-status').value;
+      const type = document.getElementById('filter-type').value;
+
+      let url = '/hospitals/patient/test-results?limit=50';
+      if (status) url += `&status=${status}`;
+      if (type) url += `&type=${type}`;
+      if (hospitalFilter) url += `&hospital_id=${hospitalFilter}`;
+
+      const el = document.getElementById('results-list');
+      el.innerHTML = '<div class="text-center py-12"><div class="loading-spinner mx-auto mb-3"></div><p class="text-sm" style="color:var(--text3)">Loading test results...</p></div>';
+
+      try {
+        const res = await API.get(url);
+        const results = res.data.testResults || res.data.test_results || [];
+        renderResults(results);
+      } catch (err) {
+        el.innerHTML = `
+          <div class="text-center py-12" style="color:var(--text3)">
+            <div class="text-4xl mb-3">⚠️</div>
+            <p class="text-sm">${err.message || 'Failed to load test results'}</p>
+          </div>
+        `;
+      }
+    }
+
+    function renderResults(results) {
+      const el = document.getElementById('results-list');
+      document.getElementById('results-count').textContent = `${results.length} result${results.length !== 1 ? 's' : ''}`;
+
+      // Check for critical results
+      const criticalCount = results.filter(r => r.is_critical).length;
+      document.getElementById('critical-alert').classList.toggle('hidden', criticalCount === 0);
+
+      if (!results.length) {
+        el.innerHTML = `
+          <div class="text-center py-16" style="color:var(--text3)">
+            <div class="text-5xl mb-4">🧪</div>
+            <p class="text-sm font-medium">No test results found</p>
+            <p class="text-xs mt-1">Try changing your filters or check back later</p>
+          </div>
+        `;
+        return;
+      }
+
+      el.innerHTML = results.map(r => {
+        const date = new Date(r.created_at).toLocaleDateString('en', { year: 'numeric', month: 'short', day: 'numeric' });
+        const statusColors = {
+          completed: 'b-green', pending: 'b-yellow', in_progress: 'b-cyan', cancelled: 'b-red'
+        };
+        const typeIcons = {
+          blood_test: '🩸', urine_test: '🧫', imaging: '📷', pathology: '🔬', genetic: '🧬', other: '🧪'
+        };
+
+        return `
+          <div class="p-5 rounded-xl mb-3 cursor-pointer transition-all ${r.is_critical ? 'ring-1 ring-red-400/30' : ''}" 
+               style="background:var(--bg2);border:1px solid ${r.is_critical ? 'rgba(239,68,68,.3)' : 'var(--border)'}" 
+               onmouseover="this.style.borderColor='rgba(34,211,238,.3)'" 
+               onmouseout="this.style.borderColor='${r.is_critical ? 'rgba(239,68,68,.3)' : 'var(--border)'}'"
+               onclick="viewResult('${r.id}')">
+            <div class="flex items-start gap-4">
+              <div class="w-12 h-12 rounded-xl flex items-center justify-center text-xl flex-shrink-0" style="background:${r.is_critical ? 'rgba(239,68,68,.1)' : 'rgba(34,211,238,.1)'}">
+                ${typeIcons[r.test_type] || '🧪'}
+              </div>
+              <div class="flex-1 min-w-0">
+                <div class="flex items-center gap-2 flex-wrap">
+                  <h3 class="font-bold text-sm">${r.test_name}</h3>
+                  <span class="badge ${statusColors[r.status] || 'b-cyan'} text-[11px]">${r.status?.replace(/_/g, ' ')}</span>
+                  ${r.is_critical ? '<span class="badge b-red text-[11px]">⚠️ Critical</span>' : ''}
+                  ${!r.viewed_at && r.status === 'completed' ? '<span class="w-2 h-2 rounded-full bg-cyan-400 flex-shrink-0"></span>' : ''}
+                </div>
+                <div class="flex items-center gap-3 mt-1.5 flex-wrap">
+                  <span class="text-xs" style="color:var(--text3)">🏥 ${r.hospital_name || 'Unknown Hospital'}</span>
+                  ${r.doctor_first_name ? `<span class="text-xs" style="color:var(--text3)">👨‍⚕️ Dr. ${r.doctor_first_name} ${r.doctor_last_name || ''}</span>` : ''}
+                  <span class="text-xs" style="color:var(--text3)">📅 ${date}</span>
+                </div>
+                ${r.test_type ? `<span class="text-[11px] mt-2 inline-block px-2 py-0.5 rounded-full" style="background:rgba(34,211,238,.06);color:var(--cyan)">${r.test_type.replace(/_/g, ' ')}</span>` : ''}
+              </div>
+              <span class="text-sm" style="color:var(--text3)">→</span>
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    async function viewResult(id) {
+      const modal = document.getElementById('result-modal');
+      const content = document.getElementById('modal-content');
+      modal.classList.remove('hidden');
+      content.innerHTML = '<div class="text-center py-8"><div class="loading-spinner mx-auto"></div></div>';
+
+      try {
+        const res = await API.get(`/hospitals/patient/test-results/${id}`);
+        const r = res.data.testResult || res.data.test_result || res.data;
+
+        document.getElementById('modal-title').textContent = r.test_name || 'Test Result';
+
+        const statusColors = { completed: 'b-green', pending: 'b-yellow', in_progress: 'b-cyan' };
+        const date = new Date(r.created_at).toLocaleDateString('en', { year: 'numeric', month: 'long', day: 'numeric' });
+        const completedDate = r.completed_at ? new Date(r.completed_at).toLocaleDateString('en', { year: 'numeric', month: 'long', day: 'numeric' }) : null;
+
+        let resultsHTML = '';
+        if (r.results) {
+          const data = typeof r.results === 'string' ? JSON.parse(r.results) : r.results;
+          if (Array.isArray(data)) {
+            resultsHTML = `
+              <table class="w-full text-sm">
+                <thead>
+                  <tr class="text-left" style="border-bottom:1px solid var(--border)">
+                    <th class="py-2 pr-4 font-semibold" style="color:var(--text3)">Parameter</th>
+                    <th class="py-2 pr-4 font-semibold" style="color:var(--text3)">Value</th>
+                    <th class="py-2 pr-4 font-semibold" style="color:var(--text3)">Reference</th>
+                    <th class="py-2 font-semibold" style="color:var(--text3)">Status</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  ${data.map(item => `
+                    <tr style="border-bottom:1px solid rgba(255,255,255,.03)">
+                      <td class="py-2.5 pr-4 font-medium">${item.parameter || item.name || '—'}</td>
+                      <td class="py-2.5 pr-4 font-mono text-xs">${item.value || '—'} ${item.unit || ''}</td>
+                      <td class="py-2.5 pr-4 text-xs" style="color:var(--text3)">${item.reference_range || item.reference || '—'}</td>
+                      <td class="py-2.5">
+                        ${item.flag === 'high' || item.status === 'abnormal' ? '<span class="badge b-red text-[10px]">High</span>' : 
+                          item.flag === 'low' ? '<span class="badge b-yellow text-[10px]">Low</span>' : 
+                          '<span class="badge b-green text-[10px]">Normal</span>'}
+                      </td>
+                    </tr>
+                  `).join('')}
+                </tbody>
+              </table>
+            `;
+          } else if (typeof data === 'object') {
+            resultsHTML = `<pre class="text-xs font-mono p-4 rounded-xl overflow-x-auto" style="background:var(--bg);border:1px solid var(--border)">${JSON.stringify(data, null, 2)}</pre>`;
+          }
+        }
+
+        content.innerHTML = `
+          <div class="space-y-5">
+            <!-- Status & Info -->
+            <div class="flex items-center gap-3 flex-wrap">
+              <span class="badge ${statusColors[r.status] || 'b-cyan'} text-xs">${r.status?.replace(/_/g, ' ')}</span>
+              ${r.is_critical ? '<span class="badge b-red text-xs">⚠️ Critical</span>' : ''}
+              <span class="text-xs" style="color:var(--text3)">${r.test_type?.replace(/_/g, ' ') || ''}</span>
+            </div>
+
+            <!-- Details grid -->
+            <div class="grid grid-cols-2 gap-4">
+              <div class="p-4 rounded-xl" style="background:var(--bg);border:1px solid var(--border)">
+                <div class="text-[11px] mb-1" style="color:var(--text3)">Hospital</div>
+                <div class="text-sm font-semibold">🏥 ${r.hospital_name || 'Unknown'}</div>
+              </div>
+              <div class="p-4 rounded-xl" style="background:var(--bg);border:1px solid var(--border)">
+                <div class="text-[11px] mb-1" style="color:var(--text3)">Ordered By</div>
+                <div class="text-sm font-semibold">${r.doctor_first_name ? `👨‍⚕️ Dr. ${r.doctor_first_name} ${r.doctor_last_name || ''}` : '—'}</div>
+              </div>
+              <div class="p-4 rounded-xl" style="background:var(--bg);border:1px solid var(--border)">
+                <div class="text-[11px] mb-1" style="color:var(--text3)">Ordered On</div>
+                <div class="text-sm font-semibold">📅 ${date}</div>
+              </div>
+              <div class="p-4 rounded-xl" style="background:var(--bg);border:1px solid var(--border)">
+                <div class="text-[11px] mb-1" style="color:var(--text3)">Completed On</div>
+                <div class="text-sm font-semibold">${completedDate ? `✅ ${completedDate}` : '⏳ Pending'}</div>
+              </div>
+            </div>
+
+            ${r.notes ? `
+              <div class="p-4 rounded-xl" style="background:rgba(34,211,238,.04);border:1px solid rgba(34,211,238,.1)">
+                <div class="text-[11px] mb-2 font-semibold" style="color:var(--cyan)">Doctor's Notes</div>
+                <p class="text-sm" style="color:var(--text2)">${r.notes}</p>
+              </div>
+            ` : ''}
+
+            ${resultsHTML ? `
+              <div>
+                <h3 class="font-bold text-sm mb-3">Results</h3>
+                <div class="rounded-xl overflow-hidden" style="border:1px solid var(--border)">
+                  <div class="p-4 overflow-x-auto">${resultsHTML}</div>
+                </div>
+              </div>
+            ` : r.status === 'pending' ? `
+              <div class="text-center py-8" style="color:var(--text3)">
+                <div class="text-4xl mb-3">⏳</div>
+                <p class="text-sm">Results are pending</p>
+                <p class="text-xs mt-1">You'll be notified when results are ready.</p>
+              </div>
+            ` : ''}
+
+            ${r.attachments ? `
+              <div>
+                <h3 class="font-bold text-sm mb-3">Attachments</h3>
+                <div class="space-y-2">
+                  ${(typeof r.attachments === 'string' ? JSON.parse(r.attachments) : r.attachments).map(a => `
+                    <a href="${a.url || a}" target="_blank" class="flex items-center gap-3 p-3 rounded-xl transition-all" style="background:var(--bg);border:1px solid var(--border)" onmouseover="this.style.borderColor='rgba(34,211,238,.3)'" onmouseout="this.style.borderColor='var(--border)'">
+                      <span>📎</span>
+                      <span class="text-sm">${a.name || a.filename || 'Download'}</span>
+                    </a>
+                  `).join('')}
+                </div>
+              </div>
+            ` : ''}
+          </div>
+        `;
+      } catch (err) {
+        content.innerHTML = `
+          <div class="text-center py-8" style="color:var(--text3)">
+            <div class="text-4xl mb-3">⚠️</div>
+            <p class="text-sm">${err.message || 'Failed to load result details'}</p>
+          </div>
+        `;
+      }
+    }
+
+    function closeModal() {
+      document.getElementById('result-modal').classList.add('hidden');
+    }
+
+    // Close modal on Escape
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') closeModal();
+    });
+
+    // Listen for real-time test result notifications
+    if (typeof io !== 'undefined') {
+      const user = Auth.getUser();
+      if (user) {
+        const socket = io(CONFIG.WS_URL || CONFIG.API_BASE.replace('/api', ''), {
+          auth: { token: Auth.getToken() }
+        });
+        socket.on('test_result_ready', () => {
+          loadTestResults();
+        });
+      }
+    }
+
+    loadTestResults();
+  </script>
+</body>
+</html>

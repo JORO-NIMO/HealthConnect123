@@ -16,8 +16,10 @@ class AppointmentModel {
   static async findById(id) {
     return queryOne(
       `SELECT a.*,
-              up.first_name AS patient_first_name, up.last_name AS patient_last_name, up.email AS patient_email,
+              up.first_name AS patient_first_name, up.last_name AS patient_last_name, 
+              up.email AS patient_email, up.phone AS patient_phone,
               ud.first_name AS doctor_first_name,  ud.last_name AS doctor_last_name,
+              ud.phone AS doctor_phone,
               d.specialization, d.consultation_fee
        FROM appointments a
        JOIN patients   p  ON p.id   = a.patient_id

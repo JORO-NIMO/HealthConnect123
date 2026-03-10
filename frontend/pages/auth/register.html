@@ -52,14 +52,18 @@
       <!-- Role selector -->
       <div class="mb-6">
         <label class="block text-sm font-medium mb-2">I am a...</label>
-        <div class="grid grid-cols-2 gap-3">
+        <div class="grid grid-cols-3 gap-3">
           <label class="role-card">
             <input type="radio" name="role" value="patient" checked class="hidden">
-            <div><div class="font-semibold">Patient</div><div class="text-xs" style="color:var(--text3)">Looking for healthcare</div></div>
+            <div><div class="font-semibold">Patient</div><div class="text-xs" style="color:var(--text3)">Looking for care</div></div>
           </label>
           <label class="role-card">
             <input type="radio" name="role" value="doctor" class="hidden">
-            <div><div class="font-semibold">Doctor</div><div class="text-xs" style="color:var(--text3)">Providing healthcare</div></div>
+            <div><div class="font-semibold">Doctor</div><div class="text-xs" style="color:var(--text3)">Providing care</div></div>
+          </label>
+          <label class="role-card">
+            <input type="radio" name="role" value="hospital_admin" class="hidden">
+            <div><div class="font-semibold">Hospital</div><div class="text-xs" style="color:var(--text3)">Managing a facility</div></div>
           </label>
         </div>
       </div>
@@ -221,9 +225,12 @@
 
     // Pre-fill role from URL
     const urlRole = new URLSearchParams(window.location.search).get('role');
-    if (urlRole === 'doctor') {
-      document.querySelector('input[value="doctor"]').checked = true;
-      document.querySelector('input[value="doctor"]').dispatchEvent(new Event('change'));
+    if (urlRole === 'doctor' || urlRole === 'hospital_admin') {
+      const radio = document.querySelector('input[value="' + urlRole + '"]');
+      if (radio) {
+        radio.checked = true;
+        radio.dispatchEvent(new Event('change'));
+      }
     }
   </script>
 </body>

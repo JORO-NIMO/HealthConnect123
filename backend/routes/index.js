@@ -1,6 +1,9 @@
 const express = require('express');
 const router  = express.Router();
 
+// ── Health & Monitoring ─────────────────────────────────────────────────
+router.use('/',                  require('./health.routes'));
+
 router.use('/auth',              require('./auth.routes'));
 router.use('/patients',          require('./patient.routes'));
 router.use('/doctors',           require('./doctor.routes'));
@@ -20,5 +23,6 @@ router.use('/export',            require('./export.routes'));
 router.use('/health-records',    require('./healthRecords.routes'));
 router.use('/waitlist',          require('./waitlist.routes'));
 router.use('/payments',          require('./payment.routes'));
+router.use('/hospitals',         require('./hospital.routes'));
 
 module.exports = router;

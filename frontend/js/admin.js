@@ -15,7 +15,7 @@
   };
 
   // ─── Section Navigation ───────────────────────────────────────────────
-  const sections = ['overview', 'users', 'doctors', 'revenue', 'audit'];
+  const sections = ['overview', 'users', 'doctors', 'hospitals', 'revenue', 'audit'];
 
   window.showSection = function (name) {
     sections.forEach(s => document.getElementById(`section-${s}`)?.classList.toggle('hidden', s !== name));
@@ -26,6 +26,7 @@
     // Lazy-load section data
     if (name === 'users' && !allUsers.length) loadUsers();
     if (name === 'doctors') loadPendingDoctors();
+    if (name === 'hospitals') loadAdminHospitals();
     if (name === 'revenue') loadRevenue();
     if (name === 'audit') loadAudit();
   };
@@ -39,17 +40,25 @@
       ]);
 
       if (dashRes.status === 'fulfilled') {
-        const d = dashRes.value.data || {};
-        document.getElementById('stat-users').textContent  = d.totalUsers || '—';
-        document.getElementById('stat-doctors').textContent= d.activeDoctors || '—';
-        document.getElementById('stat-appointments').textContent = d.totalAppointments || '—';
-        document.getElementById('stat-revenue').textContent = Utils.formatCurrency(d.totalRevenue || 0);
+        const s = dashRes.value.data?.stats || dashRes.value.data || {};
+        document.getElementById('stat-users').textContent  = s.total_patients || s.totalUsers || '—';
+        document.getElementById('stat-doctors').textContent= s.total_doctors || s.activeDoctors || '—';
+        document.getElementById('stat-appointments').textContent = s.total_appointments || s.totalAppointments || '—';
+        document.getElementById('stat-revenue').textContent = Utils.formatCurrency(s.total_revenue || s.totalRevenue || 0);
 
-        const pendingCount = d.pendingDoctors || 0;
+        const pendingCount = s.pending_doctors || s.pendingDoctors || 0;
         if (pendingCount > 0) {
           document.getElementById('pending-alert').classList.remove('hidden');
           document.getElementById('pending-alert-text').textContent =
             `${pendingCount} doctor${pendingCount > 1 ? 's' : ''} awaiting verification`;
+        }
+
+        const pendingHospitals = s.pending_hospitals || s.pendingHospitals || 0;
+        if (pendingHospitals > 0) {
+          document.getElementById('pending-hospitals-alert')?.classList.remove('hidden');
+          const alertText = document.getElementById('pending-hospitals-alert-text');
+          if (alertText) alertText.textContent =
+            `${pendingHospitals} hospital${pendingHospitals > 1 ? 's' : ''} awaiting verification`;
         }
       }
 
@@ -200,6 +209,93 @@
       await API.put(`/admin/doctors/${id}/verify`, { status });
       Utils.toast(`Doctor ${status === 'verified' ? 'approved' : 'rejected'}`, status === 'verified' ? 'success' : 'info');
       await loadPendingDoctors();
+    } catch (err) {
+      Utils.toast(err.message || 'Action failed', 'error');
+    }
+  };
+
+  // ─── Hospital Verification ─────────────────────────────────────────────
+  let _verifyHospitalId = null;
+
+  window.loadAdminHospitals = async function () {
+    const container = document.getElementById('hospitals-list');
+    const noMsg     = document.getElementById('no-hospitals-msg');
+    if (!container) return;
+    container.innerHTML = '';
+    const statusFilter = document.getElementById('hospital-status-filter')?.value || 'pending';
+    try {
+      const url = statusFilter
+        ? `/admin/hospitals?status=${statusFilter}`
+        : '/admin/hospitals';
+      const res = await API.get(url);
+      const hospitals = res.data?.hospitals || [];
+      if (!hospitals.length) {
+        noMsg?.classList.remove('hidden');
+        const noMsgText = noMsg?.querySelector('p');
+        if (noMsgText) noMsgText.textContent = statusFilter === 'pending' ? 'No pending hospitals!' : 'No hospitals found.';
+        return;
+      }
+      noMsg?.classList.add('hidden');
+      container.innerHTML = hospitals.map(h => `
+        <div class="rounded-[18px] p-5" style="background:var(--surface2);border:1px solid var(--border)">
+          <div class="flex items-start justify-between gap-4 flex-wrap">
+            <div class="flex items-center gap-3">
+              <div class="w-12 h-12 rounded-xl flex items-center justify-center text-white font-bold flex-shrink-0"
+                   style="background:linear-gradient(135deg,var(--cyan),var(--purple))">
+                🏥
+              </div>
+              <div>
+                <div class="font-bold">${Utils.escapeHtml(h.name || '')}</div>
+                <div class="text-sm" style="color:var(--text2)">
+                  ${Utils.escapeHtml(h.type || 'general')} · ${Utils.escapeHtml(h.city || '')}${h.state ? ', ' + Utils.escapeHtml(h.state) : ''}, ${Utils.escapeHtml(h.country || '')}
+                </div>
+                <div class="text-xs mt-1" style="color:var(--text3)">
+                  Reg#: ${Utils.escapeHtml(h.registration_number || h.registrationNumber || '—')}
+                  · Admin: ${Utils.escapeHtml((h.first_name || h.firstName || '') + ' ' + (h.last_name || h.lastName || ''))} (${Utils.escapeHtml(h.email || h.admin_email || '')})
+                </div>
+                <div class="text-xs" style="color:var(--text3)">
+                  📞 ${Utils.escapeHtml(h.phone || '—')} · 🛏️ ${h.bed_count || h.bedCount || 0} beds · 🚨 Emergency: ${(h.emergency_available || h.emergencyAvailable) ? 'Yes' : 'No'}
+                </div>
+                ${h.description ? `<div class="text-xs mt-1" style="color:var(--text3)">${Utils.escapeHtml(h.description.substring(0, 120))}${h.description.length > 120 ? '…' : ''}</div>` : ''}
+                <div class="text-xs mt-1" style="color:var(--text3)">Registered ${Utils.formatDate(h.created_at || h.createdAt)}</div>
+              </div>
+            </div>
+            <div class="flex items-center gap-2 flex-shrink-0">
+              ${h.verification_status === 'pending' ? `
+                <button onclick="openHospitalVerifyModal('${h.id}', '${Utils.escapeHtml(h.name)}')"
+                  class="text-sm font-medium px-4 py-2 rounded-xl text-white transition" style="background:var(--cyan)">
+                  ⚡ Review
+                </button>
+              ` : `
+                <span class="badge ${h.verification_status === 'verified' ? 'b-green' : 'b-red'}">
+                  ${h.verification_status === 'verified' ? '✅ Verified' : '❌ Rejected'}
+                </span>
+              `}
+            </div>
+          </div>
+          ${h.admin_note ? `<div class="mt-3 text-xs px-3 py-2 rounded-lg" style="background:var(--bg2);color:var(--text3)">📝 Note: ${Utils.escapeHtml(h.admin_note)}</div>` : ''}
+        </div>
+      `).join('');
+    } catch {
+      container.innerHTML = '<div class="text-center py-8" style="color:var(--text3)">⚠️ Could not load hospitals</div>';
+    }
+  };
+
+  window.openHospitalVerifyModal = function (id, name) {
+    _verifyHospitalId = id;
+    document.getElementById('hospital-verify-title').textContent = `Verify: ${name}`;
+    document.getElementById('hospital-verify-note').value = '';
+    document.getElementById('hospital-verify-modal').classList.remove('hidden');
+  };
+
+  window.submitHospitalVerification = async function (status) {
+    if (!_verifyHospitalId) return;
+    const note = document.getElementById('hospital-verify-note')?.value || '';
+    try {
+      await API.put(`/admin/hospitals/${_verifyHospitalId}/verify`, { status, note });
+      document.getElementById('hospital-verify-modal').classList.add('hidden');
+      Utils.toast(`Hospital ${status === 'verified' ? 'approved' : 'rejected'}`, status === 'verified' ? 'success' : 'info');
+      await loadAdminHospitals();
     } catch (err) {
       Utils.toast(err.message || 'Action failed', 'error');
     }

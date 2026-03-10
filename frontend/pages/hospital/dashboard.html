@@ -1,0 +1,342 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Hospital Dashboard — HealthConnect</title>
+  <link rel="stylesheet" href="/css/main.css">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>tailwind.config={theme:{extend:{colors:{primary:{DEFAULT:'#22D3EE',dark:'#0891B2'},secondary:{DEFAULT:'#10B981'}},fontFamily:{sans:['Plus Jakarta Sans','Inter','system-ui','sans-serif'],serif:['Instrument Serif','Georgia','serif']}}}}</script>
+</head>
+<body class="min-h-screen" style="background:var(--bg);color:var(--text)">
+
+  <!-- Mobile Sidebar Overlay -->
+  <div id="sidebar-overlay" class="fixed inset-0 bg-black/40 backdrop-blur-sm z-20 lg:hidden hidden" onclick="toggleSidebar()"></div>
+
+  <!-- Sidebar -->
+  <aside id="sidebar" class="fixed left-0 top-0 h-full w-[220px] z-30 -translate-x-full lg:translate-x-0 transition-transform duration-300 flex flex-col" style="background:var(--surface2);border-right:1px solid rgba(34,211,238,.1)">
+    <div class="p-5 pb-3" style="border-bottom:1px solid var(--border)">
+      <a href="/" class="flex items-center gap-2 font-bold text-lg">
+        <div class="w-8 h-8 rounded-[10px] bg-[#22D3EE] flex items-center justify-center text-white text-sm">🏥</div>
+        <span class="font-serif text-[18px]">HealthConnect</span>
+      </a>
+      <div class="text-[11px] mt-1" style="color:var(--text3)">Hospital Portal</div>
+    </div>
+    <div class="px-4 py-4" style="border-bottom:1px solid var(--border)">
+      <div class="flex items-center gap-3">
+        <div class="w-10 h-10 rounded-full flex items-center justify-center text-white font-bold text-sm" style="background:var(--cyan)">🏥</div>
+        <div>
+          <div id="hospital-name-sidebar" class="font-semibold text-sm">My Hospital</div>
+          <div id="hospital-type-sidebar" class="text-xs" style="color:var(--text3)">General</div>
+        </div>
+      </div>
+    </div>
+    <nav class="flex-1 p-3 space-y-0.5 overflow-y-auto">
+      <a href="/pages/hospital/dashboard.html" class="sidebar-item active">🏠 Dashboard</a>
+      <a href="javascript:void(0)" onclick="showTab('doctors')" class="sidebar-item">👨‍⚕️ Doctors</a>
+      <a href="javascript:void(0)" onclick="showTab('patients')" class="sidebar-item">👥 Patients</a>
+      <a href="javascript:void(0)" onclick="showTab('test-results')" class="sidebar-item">🧪 Test Results</a>
+      <a href="javascript:void(0)" onclick="showTab('profile')" class="sidebar-item">⚙️ Hospital Profile</a>
+      <div class="pt-4 mt-4" style="border-top:1px solid var(--border)">
+        <button onclick="Auth.logout()" class="sidebar-item w-full text-left" style="color:var(--red)">🚪 Sign Out</button>
+      </div>
+    </nav>
+  </aside>
+
+  <!-- Main Content -->
+  <main class="lg:ml-[220px] min-h-screen">
+    <!-- Top Bar -->
+    <div class="px-4 sm:px-6 py-4 flex items-center gap-4 sticky top-0 z-10" style="background:rgba(7,14,28,.88);backdrop-filter:blur(20px);border-bottom:1px solid rgba(34,211,238,.08)">
+      <button class="lg:hidden text-xl" style="color:var(--text2)" onclick="toggleSidebar()">☰</button>
+      <div>
+        <h1 class="font-bold font-serif">Hospital Dashboard</h1>
+        <p class="text-xs" style="color:var(--text3)" id="today-date"></p>
+      </div>
+      <div class="ml-auto">
+        <span id="verification-badge" class="badge text-xs"></span>
+      </div>
+    </div>
+
+    <div class="p-4 sm:p-6 max-w-6xl mx-auto">
+
+      <!-- No Hospital Registered Banner -->
+      <div id="no-hospital-banner" class="hidden rounded-2xl p-8 text-center mb-6" style="background:var(--surface2);border:1px solid var(--border)">
+        <div class="text-5xl mb-4">🏥</div>
+        <h2 class="text-xl font-bold mb-2">Register Your Hospital</h2>
+        <p class="text-sm mb-6" style="color:var(--text3)">Set up your hospital profile to start managing doctors, patients, and test results.</p>
+        <button onclick="showTab('profile')" class="btn-teal px-6 py-3 font-semibold rounded-xl">Register Hospital</button>
+      </div>
+
+      <!-- Stats Cards -->
+      <div id="stats-section" class="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-6">
+        <div class="stat-card rounded-2xl p-4" style="background:var(--surface2);border:1px solid var(--border)">
+          <div class="text-2xl mb-1">👨‍⚕️</div>
+          <div class="text-2xl font-bold" id="stat-doctors">0</div>
+          <div class="text-xs" style="color:var(--text3)">Doctors</div>
+        </div>
+        <div class="stat-card rounded-2xl p-4" style="background:var(--surface2);border:1px solid var(--border)">
+          <div class="text-2xl mb-1">👥</div>
+          <div class="text-2xl font-bold" id="stat-patients">0</div>
+          <div class="text-xs" style="color:var(--text3)">Patients</div>
+        </div>
+        <div class="stat-card rounded-2xl p-4" style="background:var(--surface2);border:1px solid var(--border)">
+          <div class="text-2xl mb-1">🧪</div>
+          <div class="text-2xl font-bold" id="stat-tests">0</div>
+          <div class="text-xs" style="color:var(--text3)">Total Tests</div>
+        </div>
+        <div class="stat-card rounded-2xl p-4" style="background:var(--surface2);border:1px solid var(--border)">
+          <div class="text-2xl mb-1">📅</div>
+          <div class="text-2xl font-bold" id="stat-appointments">0</div>
+          <div class="text-xs" style="color:var(--text3)">Appointments</div>
+        </div>
+      </div>
+
+      <!-- Tabs -->
+      <div id="tab-overview" class="tab-content">
+        <div class="grid md:grid-cols-2 gap-4">
+          <!-- Quick Actions -->
+          <div class="rounded-2xl p-5" style="background:var(--surface2);border:1px solid var(--border)">
+            <h3 class="font-bold mb-4">⚡ Quick Actions</h3>
+            <div class="space-y-2">
+              <button onclick="showTab('doctors')" class="w-full text-left px-4 py-3 rounded-xl text-sm flex items-center gap-3 hover:opacity-80 transition" style="background:var(--surface1);border:1px solid var(--border)">
+                <span>👨‍⚕️</span> <span>Manage Doctors</span>
+              </button>
+              <button onclick="showTab('patients')" class="w-full text-left px-4 py-3 rounded-xl text-sm flex items-center gap-3 hover:opacity-80 transition" style="background:var(--surface1);border:1px solid var(--border)">
+                <span>👥</span> <span>Manage Patients</span>
+              </button>
+              <button onclick="showTab('test-results')" class="w-full text-left px-4 py-3 rounded-xl text-sm flex items-center gap-3 hover:opacity-80 transition" style="background:var(--surface1);border:1px solid var(--border)">
+                <span>🧪</span> <span>Send Test Results</span>
+              </button>
+            </div>
+          </div>
+          <!-- Hospital Info -->
+          <div class="rounded-2xl p-5" style="background:var(--surface2);border:1px solid var(--border)">
+            <h3 class="font-bold mb-4">🏥 Hospital Info</h3>
+            <div class="space-y-2 text-sm">
+              <div class="flex justify-between"><span style="color:var(--text3)">Name</span><span id="info-name" class="font-semibold">—</span></div>
+              <div class="flex justify-between"><span style="color:var(--text3)">Type</span><span id="info-type" class="capitalize">—</span></div>
+              <div class="flex justify-between"><span style="color:var(--text3)">City</span><span id="info-city">—</span></div>
+              <div class="flex justify-between"><span style="color:var(--text3)">Rating</span><span id="info-rating">—</span></div>
+              <div class="flex justify-between"><span style="color:var(--text3)">Emergency</span><span id="info-emergency">—</span></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Doctors Tab -->
+      <div id="tab-doctors" class="tab-content hidden">
+        <div class="flex items-center justify-between mb-4">
+          <h2 class="font-bold text-lg">👨‍⚕️ Hospital Doctors</h2>
+          <button onclick="showAddDoctorModal()" class="btn-teal text-xs px-4 py-2 rounded-lg">+ Add Doctor</button>
+        </div>
+        <div id="doctors-list" class="space-y-3">
+          <div class="text-center py-8 text-sm" style="color:var(--text3)">Loading doctors...</div>
+        </div>
+      </div>
+
+      <!-- Patients Tab -->
+      <div id="tab-patients" class="tab-content hidden">
+        <div class="flex items-center justify-between mb-4">
+          <h2 class="font-bold text-lg">👥 Hospital Patients</h2>
+          <button onclick="showAddPatientModal()" class="btn-teal text-xs px-4 py-2 rounded-lg">+ Register Patient</button>
+        </div>
+        <div id="patients-list" class="space-y-3">
+          <div class="text-center py-8 text-sm" style="color:var(--text3)">Loading patients...</div>
+        </div>
+      </div>
+
+      <!-- Test Results Tab -->
+      <div id="tab-test-results" class="tab-content hidden">
+        <div class="flex items-center justify-between mb-4">
+          <h2 class="font-bold text-lg">🧪 Test Results</h2>
+          <button onclick="showCreateTestModal()" class="btn-teal text-xs px-4 py-2 rounded-lg">+ New Test</button>
+        </div>
+        <div id="test-results-list" class="space-y-3">
+          <div class="text-center py-8 text-sm" style="color:var(--text3)">Loading test results...</div>
+        </div>
+      </div>
+
+      <!-- Hospital Profile Tab -->
+      <div id="tab-profile" class="tab-content hidden">
+        <h2 class="font-bold text-lg mb-4">⚙️ Hospital Profile</h2>
+        <form id="hospital-form" class="rounded-2xl p-5 space-y-4" style="background:var(--surface2);border:1px solid var(--border)">
+          <div class="grid md:grid-cols-2 gap-4">
+            <div>
+              <label class="text-xs font-semibold block mb-1" style="color:var(--text3)">Hospital Name *</label>
+              <input type="text" id="h-name" class="w-full px-3 py-2 rounded-lg text-sm" style="background:var(--surface1);border:1px solid var(--border);color:var(--text1)" required>
+            </div>
+            <div>
+              <label class="text-xs font-semibold block mb-1" style="color:var(--text3)">Registration Number</label>
+              <input type="text" id="h-reg" class="w-full px-3 py-2 rounded-lg text-sm" style="background:var(--surface1);border:1px solid var(--border);color:var(--text1)">
+            </div>
+            <div>
+              <label class="text-xs font-semibold block mb-1" style="color:var(--text3)">Type</label>
+              <select id="h-type" class="w-full px-3 py-2 rounded-lg text-sm" style="background:var(--surface1);border:1px solid var(--border);color:var(--text1)">
+                <option value="general">General Hospital</option>
+                <option value="specialist">Specialist Hospital</option>
+                <option value="clinic">Clinic</option>
+                <option value="pharmacy">Pharmacy</option>
+                <option value="lab">Laboratory</option>
+                <option value="teaching">Teaching Hospital</option>
+              </select>
+            </div>
+            <div>
+              <label class="text-xs font-semibold block mb-1" style="color:var(--text3)">Phone</label>
+              <input type="tel" id="h-phone" class="w-full px-3 py-2 rounded-lg text-sm" style="background:var(--surface1);border:1px solid var(--border);color:var(--text1)">
+            </div>
+            <div>
+              <label class="text-xs font-semibold block mb-1" style="color:var(--text3)">Email</label>
+              <input type="email" id="h-email" class="w-full px-3 py-2 rounded-lg text-sm" style="background:var(--surface1);border:1px solid var(--border);color:var(--text1)">
+            </div>
+            <div>
+              <label class="text-xs font-semibold block mb-1" style="color:var(--text3)">City</label>
+              <input type="text" id="h-city" class="w-full px-3 py-2 rounded-lg text-sm" style="background:var(--surface1);border:1px solid var(--border);color:var(--text1)">
+            </div>
+            <div>
+              <label class="text-xs font-semibold block mb-1" style="color:var(--text3)">State/Region</label>
+              <input type="text" id="h-state" class="w-full px-3 py-2 rounded-lg text-sm" style="background:var(--surface1);border:1px solid var(--border);color:var(--text1)">
+            </div>
+            <div>
+              <label class="text-xs font-semibold block mb-1" style="color:var(--text3)">Country</label>
+              <input type="text" id="h-country" value="Uganda" class="w-full px-3 py-2 rounded-lg text-sm" style="background:var(--surface1);border:1px solid var(--border);color:var(--text1)">
+            </div>
+          </div>
+          <div>
+            <label class="text-xs font-semibold block mb-1" style="color:var(--text3)">Address</label>
+            <textarea id="h-address" rows="2" class="w-full px-3 py-2 rounded-lg text-sm" style="background:var(--surface1);border:1px solid var(--border);color:var(--text1)"></textarea>
+          </div>
+          <div>
+            <label class="text-xs font-semibold block mb-1" style="color:var(--text3)">Description</label>
+            <textarea id="h-description" rows="3" class="w-full px-3 py-2 rounded-lg text-sm" style="background:var(--surface1);border:1px solid var(--border);color:var(--text1)" placeholder="Brief description of your hospital..."></textarea>
+          </div>
+          <div class="grid md:grid-cols-3 gap-4">
+            <div>
+              <label class="text-xs font-semibold block mb-1" style="color:var(--text3)">Bed Count</label>
+              <input type="number" id="h-beds" class="w-full px-3 py-2 rounded-lg text-sm" style="background:var(--surface1);border:1px solid var(--border);color:var(--text1)" min="0">
+            </div>
+            <div class="flex items-center gap-2 pt-5">
+              <input type="checkbox" id="h-emergency" class="rounded">
+              <label for="h-emergency" class="text-sm">Emergency services available</label>
+            </div>
+            <div>
+              <label class="text-xs font-semibold block mb-1" style="color:var(--text3)">📍 Location</label>
+              <button type="button" onclick="detectHospitalLocation()" class="text-xs px-3 py-2 rounded-lg" style="background:var(--surface1);border:1px solid var(--border);color:var(--cyan)">📍 Auto-detect location</button>
+              <input type="hidden" id="h-lat">
+              <input type="hidden" id="h-lng">
+              <span id="h-location-status" class="text-xs ml-2" style="color:var(--text3)"></span>
+            </div>
+          </div>
+          <div class="flex gap-3 pt-2">
+            <button type="submit" id="save-hospital-btn" class="btn-teal px-6 py-2.5 font-semibold rounded-xl">Save Hospital</button>
+          </div>
+        </form>
+      </div>
+
+    </div>
+  </main>
+
+  <!-- Add Doctor Modal -->
+  <div id="add-doctor-modal" class="fixed inset-0 z-50 hidden flex items-center justify-center p-4" style="background:rgba(0,0,0,.6);backdrop-filter:blur(4px)">
+    <div class="rounded-2xl p-6 w-full max-w-md" style="background:var(--surface2);border:1px solid var(--border)">
+      <h3 class="font-bold text-lg mb-4">Add Doctor to Hospital</h3>
+      <div class="space-y-3">
+        <div>
+          <label class="text-xs font-semibold block mb-1" style="color:var(--text3)">Search Doctor (by name)</label>
+          <input type="text" id="search-doctor-input" placeholder="Type doctor name..." class="w-full px-3 py-2 rounded-lg text-sm" style="background:var(--surface1);border:1px solid var(--border);color:var(--text1)">
+          <div id="doctor-search-results" class="mt-2 max-h-40 overflow-y-auto space-y-1"></div>
+        </div>
+        <div>
+          <label class="text-xs font-semibold block mb-1" style="color:var(--text3)">Department</label>
+          <input type="text" id="add-doctor-dept" placeholder="e.g. Cardiology" class="w-full px-3 py-2 rounded-lg text-sm" style="background:var(--surface1);border:1px solid var(--border);color:var(--text1)">
+        </div>
+        <div>
+          <label class="text-xs font-semibold block mb-1" style="color:var(--text3)">Position</label>
+          <input type="text" id="add-doctor-position" placeholder="e.g. Consultant" class="w-full px-3 py-2 rounded-lg text-sm" style="background:var(--surface1);border:1px solid var(--border);color:var(--text1)">
+        </div>
+      </div>
+      <div class="flex gap-3 mt-5">
+        <button onclick="closeModal('add-doctor-modal')" class="flex-1 px-4 py-2 rounded-lg text-sm" style="background:var(--surface1);border:1px solid var(--border)">Cancel</button>
+        <button id="confirm-add-doctor" class="flex-1 btn-teal px-4 py-2 rounded-lg text-sm font-semibold" disabled>Add Doctor</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Add Patient Modal -->
+  <div id="add-patient-modal" class="fixed inset-0 z-50 hidden flex items-center justify-center p-4" style="background:rgba(0,0,0,.6);backdrop-filter:blur(4px)">
+    <div class="rounded-2xl p-6 w-full max-w-md" style="background:var(--surface2);border:1px solid var(--border)">
+      <h3 class="font-bold text-lg mb-4">Register Patient</h3>
+      <div class="space-y-3">
+        <div>
+          <label class="text-xs font-semibold block mb-1" style="color:var(--text3)">Patient ID</label>
+          <input type="text" id="add-patient-id" placeholder="Enter patient system ID" class="w-full px-3 py-2 rounded-lg text-sm" style="background:var(--surface1);border:1px solid var(--border);color:var(--text1)">
+        </div>
+        <div>
+          <label class="text-xs font-semibold block mb-1" style="color:var(--text3)">Hospital File Number</label>
+          <input type="text" id="add-patient-number" placeholder="e.g. HP-2024-001" class="w-full px-3 py-2 rounded-lg text-sm" style="background:var(--surface1);border:1px solid var(--border);color:var(--text1)">
+        </div>
+      </div>
+      <div class="flex gap-3 mt-5">
+        <button onclick="closeModal('add-patient-modal')" class="flex-1 px-4 py-2 rounded-lg text-sm" style="background:var(--surface1);border:1px solid var(--border)">Cancel</button>
+        <button onclick="confirmAddPatient()" class="flex-1 btn-teal px-4 py-2 rounded-lg text-sm font-semibold">Register</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Create Test Result Modal -->
+  <div id="create-test-modal" class="fixed inset-0 z-50 hidden flex items-center justify-center p-4" style="background:rgba(0,0,0,.6);backdrop-filter:blur(4px)">
+    <div class="rounded-2xl p-6 w-full max-w-lg max-h-[90vh] overflow-y-auto" style="background:var(--surface2);border:1px solid var(--border)">
+      <h3 class="font-bold text-lg mb-4">🧪 Create Test Result</h3>
+      <div class="space-y-3">
+        <div>
+          <label class="text-xs font-semibold block mb-1" style="color:var(--text3)">Patient ID *</label>
+          <input type="text" id="test-patient-id" placeholder="Patient system ID" class="w-full px-3 py-2 rounded-lg text-sm" style="background:var(--surface1);border:1px solid var(--border);color:var(--text1)" required>
+        </div>
+        <div>
+          <label class="text-xs font-semibold block mb-1" style="color:var(--text3)">Test Name *</label>
+          <input type="text" id="test-name" placeholder="e.g. Complete Blood Count" class="w-full px-3 py-2 rounded-lg text-sm" style="background:var(--surface1);border:1px solid var(--border);color:var(--text1)" required>
+        </div>
+        <div>
+          <label class="text-xs font-semibold block mb-1" style="color:var(--text3)">Test Type</label>
+          <select id="test-type" class="w-full px-3 py-2 rounded-lg text-sm" style="background:var(--surface1);border:1px solid var(--border);color:var(--text1)">
+            <option value="lab">Lab Test</option>
+            <option value="imaging">Imaging (X-Ray, CT, MRI)</option>
+            <option value="pathology">Pathology</option>
+            <option value="cardiology">Cardiology (ECG, Echo)</option>
+            <option value="other">Other</option>
+          </select>
+        </div>
+        <div>
+          <label class="text-xs font-semibold block mb-1" style="color:var(--text3)">Description</label>
+          <textarea id="test-description" rows="2" class="w-full px-3 py-2 rounded-lg text-sm" style="background:var(--surface1);border:1px solid var(--border);color:var(--text1)"></textarea>
+        </div>
+        <div>
+          <label class="text-xs font-semibold block mb-1" style="color:var(--text3)">Result Summary</label>
+          <textarea id="test-summary" rows="3" placeholder="Enter test results..." class="w-full px-3 py-2 rounded-lg text-sm" style="background:var(--surface1);border:1px solid var(--border);color:var(--text1)"></textarea>
+        </div>
+        <div>
+          <label class="text-xs font-semibold block mb-1" style="color:var(--text3)">Status</label>
+          <select id="test-status" class="w-full px-3 py-2 rounded-lg text-sm" style="background:var(--surface1);border:1px solid var(--border);color:var(--text1)">
+            <option value="ordered">Ordered</option>
+            <option value="in_progress">In Progress</option>
+            <option value="completed">Completed</option>
+          </select>
+        </div>
+        <div class="flex items-center gap-2">
+          <input type="checkbox" id="test-critical">
+          <label for="test-critical" class="text-sm">⚠️ Mark as critical</label>
+        </div>
+      </div>
+      <div class="flex gap-3 mt-5">
+        <button onclick="closeModal('create-test-modal')" class="flex-1 px-4 py-2 rounded-lg text-sm" style="background:var(--surface1);border:1px solid var(--border)">Cancel</button>
+        <button onclick="submitTestResult()" class="flex-1 btn-teal px-4 py-2 rounded-lg text-sm font-semibold">Send Result</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="/js/config.js"></script>
+  <script src="/js/auth.js"></script>
+  <script src="/js/api.js"></script>
+  <script src="/js/utils.js"></script>
+  <script src="/js/hospital-dashboard.js"></script>
+</body>
+</html>

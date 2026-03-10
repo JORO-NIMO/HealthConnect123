@@ -37,6 +37,7 @@ class PatientModel {
       'chronic_conditions', 'emergency_contact_name',
       'emergency_contact_phone', 'address', 'insurance_number',
       'weight_kg', 'height_cm',
+      'latitude', 'longitude', 'city', 'state', 'country',
     ];
     const keys = Object.keys(fields).filter(k => allowed.includes(k));
     if (!keys.length) return this.findByUserId(userId);

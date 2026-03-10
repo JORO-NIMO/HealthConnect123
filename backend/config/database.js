@@ -2,31 +2,54 @@ const mysql  = require('mysql2/promise');
 const logger = require('../utils/logger.util');
 
 // ─── Connection Pool ────────────────────────────────────────────────────────
-const pool = mysql.createPool({
-  host              : process.env.DB_HOST     || 'localhost',
-  port              : parseInt(process.env.DB_PORT || '3306'),
-  user              : process.env.DB_USER     || 'root',
-  password          : process.env.DB_PASSWORD || '',
-  database          : process.env.DB_NAME     || 'mucosa_db',
-  connectionLimit   : parseInt(process.env.DB_CONNECTION_LIMIT || '10'),
-  waitForConnections: true,
-  queueLimit        : 0,
-  charset           : 'utf8mb4',
-  timezone          : '+00:00',
-  enableKeepAlive   : true,
-  keepAliveInitialDelay: 0,
-});
+// Railway provides MYSQL_URL or individual DB_ vars
+const connectionConfig = process.env.MYSQL_URL || process.env.DATABASE_URL
+  ? {
+      uri: process.env.MYSQL_URL || process.env.DATABASE_URL,
+      connectionLimit   : parseInt(process.env.DB_CONNECTION_LIMIT || '10'),
+      waitForConnections: true,
+      queueLimit        : 0,
+      charset           : 'utf8mb4',
+      timezone          : '+00:00',
+      enableKeepAlive   : true,
+      keepAliveInitialDelay: 10000,
+    }
+  : {
+      host              : process.env.DB_HOST     || 'localhost',
+      port              : parseInt(process.env.DB_PORT || '3306'),
+      user              : process.env.DB_USER     || 'root',
+      password          : process.env.DB_PASSWORD || '',
+      database          : process.env.DB_NAME     || 'mucosa_db',
+      connectionLimit   : parseInt(process.env.DB_CONNECTION_LIMIT || '10'),
+      waitForConnections: true,
+      queueLimit        : 0,
+      charset           : 'utf8mb4',
+      timezone          : '+00:00',
+      enableKeepAlive   : true,
+      keepAliveInitialDelay: 10000,
+    };
+
+const pool = mysql.createPool(connectionConfig);
 
 // ─── Test & Initialize ─────────────────────────────────────────────────────
-async function initializeDatabase() {
-  try {
-    const conn = await pool.getConnection();
-    await conn.ping();
-    conn.release();
-    logger.info('✅ MySQL database connected successfully');
-  } catch (err) {
-    logger.error('❌ MySQL connection failed:', err.message);
-    throw err;
+async function initializeDatabase(retries = 5, delay = 3000) {
+  for (let attempt = 1; attempt <= retries; attempt++) {
+    try {
+      const conn = await pool.getConnection();
+      await conn.ping();
+      conn.release();
+      logger.info('✅ MySQL database connected successfully');
+      return;
+    } catch (err) {
+      logger.error(`❌ MySQL connection attempt ${attempt}/${retries} failed:`, err.message);
+      if (attempt === retries) {
+        logger.error('All database connection attempts failed. Exiting.');
+        throw err;
+      }
+      logger.info(`Retrying in ${delay / 1000} seconds...`);
+      await new Promise(resolve => setTimeout(resolve, delay));
+      delay *= 1.5; // Exponential backoff
+    }
   }
 }
 

@@ -38,6 +38,9 @@
       <a href="#" onclick="showSection('doctors')" class="admin-nav sidebar-item flex items-center gap-3 text-sm">
         <span>🩺</span> Doctor Verification
       </a>
+      <a href="#" onclick="showSection('hospitals')" class="admin-nav sidebar-item flex items-center gap-3 text-sm">
+        <span>🏥</span> Hospital Verification
+      </a>
       <a href="#" onclick="showSection('revenue')" class="admin-nav sidebar-item flex items-center gap-3 text-sm">
         <span>💰</span> Revenue
       </a>
@@ -92,6 +95,15 @@
           </div>
         </div>
 
+        <!-- Pending Hospitals Alert -->
+        <div id="pending-hospitals-alert" class="hidden rounded-[18px] p-4 flex items-center gap-3" style="background:rgba(139,92,246,.06);border:1px solid rgba(139,92,246,.2)">
+          <span class="text-2xl">🏥</span>
+          <div>
+            <div class="font-semibold" style="color:var(--purple)" id="pending-hospitals-alert-text"></div>
+            <button onclick="showSection('hospitals')" class="text-sm underline" style="color:var(--purple);opacity:.8">Review now →</button>
+          </div>
+        </div>
+
         <!-- Recent Activity -->
         <div class="rounded-[18px] p-5" style="background:var(--surface2);border:1px solid var(--border)">
           <h2 class="font-bold mb-4">Recent Audit Log</h2>
@@ -138,6 +150,42 @@
         <div id="no-pending-msg" class="hidden text-center py-16" style="color:var(--text3)">
           <div class="text-5xl mb-3">✅</div>
           <p class="font-medium">All doctors are verified!</p>
+        </div>
+      </div>
+
+      <!-- Hospital Verification Section -->
+      <div id="section-hospitals" class="hidden space-y-4 animate-fade-up">
+        <div class="flex flex-wrap items-center justify-between gap-3">
+          <h2 class="font-bold text-lg">Hospital Verification</h2>
+          <select id="hospital-status-filter" onchange="loadAdminHospitals()" class="input-dark" style="width:auto">
+            <option value="pending">⏳ Pending</option>
+            <option value="verified">✅ Verified</option>
+            <option value="rejected">❌ Rejected</option>
+            <option value="">All</option>
+          </select>
+        </div>
+        <div id="hospitals-list" class="space-y-4"></div>
+        <div id="no-hospitals-msg" class="hidden text-center py-16" style="color:var(--text3)">
+          <div class="text-5xl mb-3">✅</div>
+          <p class="font-medium">No pending hospitals!</p>
+        </div>
+      </div>
+
+      <!-- Hospital Verify Modal -->
+      <div id="hospital-verify-modal" class="modal-bg hidden">
+        <div class="modal-panel max-w-md">
+          <h3 class="font-bold text-center mb-4 text-lg" id="hospital-verify-title">Verify Hospital</h3>
+          <div class="space-y-3">
+            <div>
+              <label class="text-xs font-medium block mb-1" style="color:var(--text3)">Admin Note (optional)</label>
+              <textarea id="hospital-verify-note" rows="3" class="input-dark" placeholder="Reason for approval/rejection..."></textarea>
+            </div>
+          </div>
+          <div class="flex gap-3 mt-5">
+            <button onclick="document.getElementById('hospital-verify-modal').classList.add('hidden')" class="btn-out flex-1 py-3 text-sm font-medium">Cancel</button>
+            <button id="hospital-reject-btn" onclick="submitHospitalVerification('rejected')" class="flex-1 py-3 text-sm font-medium rounded-xl transition" style="background:rgba(239,68,68,.1);color:var(--red)">✕ Reject</button>
+            <button id="hospital-approve-btn" onclick="submitHospitalVerification('verified')" class="flex-1 py-3 text-sm font-medium rounded-xl text-white transition" style="background:var(--green)">✓ Approve</button>
+          </div>
         </div>
       </div>
 

@@ -75,6 +75,7 @@
 
   function doctorCard(d, showMatch = false) {
     const stars = '⭐'.repeat(Math.round(d.rating || 0));
+    const availBadge = `<span class="text-[10px] px-2 py-0.5 rounded-full font-semibold" style="background:rgba(16,185,129,.1);color:#10B981;border:1px solid rgba(16,185,129,.2)">● Available</span>`;
     const matchHtml = showMatch && d.matchScore ? `
       <div class="mt-3 pt-3" style="border-top:1px solid var(--border)">
         <div class="flex items-center justify-between mb-1">
@@ -99,6 +100,7 @@
               <span>·</span>
               <span>${d.years_experience || 0} yrs exp</span>
             </div>
+            <div class="mt-1">${availBadge}</div>
           </div>
           <div class="text-right flex-shrink-0">
             <div class="text-sm font-bold" style="color:var(--cyan)">${Utils.formatCurrency(d.consultation_fee)}</div>

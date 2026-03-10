@@ -195,18 +195,32 @@
     Utils.setLoading(analyzeBtn, true, 'Analyzing…');
     goToStep(3); // Shows loading spinner
 
+    // Try to get patient's location for nearby doctor recommendations
+    let locationData = {};
+    try {
+      const pos = await new Promise((resolve, reject) => {
+        if (navigator.geolocation) {
+          navigator.geolocation.getCurrentPosition(resolve, reject, { timeout: 5000, enableHighAccuracy: false });
+        } else { reject(new Error('No geolocation')); }
+      });
+      locationData = { latitude: pos.coords.latitude, longitude: pos.coords.longitude, radiusKm: 50 };
+    } catch (e) { /* Location unavailable — that's fine, we'll still recommend */ }
+
     var payload = {
       symptoms:        selectedSymptoms,
       patientAge:      document.getElementById('patient-age')  ? document.getElementById('patient-age').value  : undefined,
       patientGender:   document.getElementById('patient-gender')? document.getElementById('patient-gender').value : undefined,
       duration:        document.getElementById('symptom-duration') ? document.getElementById('symptom-duration').value : undefined,
       additionalNotes: document.getElementById('additional-notes') ? document.getElementById('additional-notes').value.trim() : undefined,
+      ...locationData,
     };
 
     try {
       var res = await API.post('/symptoms/analyze', payload);
       currentReport = res.data ? res.data.analysis : null;
+      var recommendedDoctors = res.data ? res.data.recommendedDoctors : [];
       renderResults(currentReport);
+      renderRecommendedDoctors(recommendedDoctors);
     } catch (err) {
       renderError(err.message || 'Analysis failed. Please try again.');
     } finally {
@@ -288,6 +302,82 @@
     // Disclaimer
     var discEl = document.getElementById('disclaimer');
     if (discEl) discEl.textContent = analysis.disclaimer || 'This is for informational purposes only. Consult a healthcare professional.';
+  }
+
+  // ─── Render Recommended Doctors ──────────────────────────────────────
+
+  function renderRecommendedDoctors(doctors) {
+    // Create or find the recommended doctors section
+    var container = document.getElementById('recommended-doctors');
+    if (!container) {
+      // Create the section dynamically after results
+      var resultsEl = document.getElementById('results-content');
+      if (!resultsEl) return;
+      var section = document.createElement('div');
+      section.id = 'recommended-doctors';
+      section.className = 'mt-6';
+      resultsEl.appendChild(section);
+      container = section;
+    }
+
+    if (!doctors || !doctors.length) {
+      container.innerHTML = '';
+      return;
+    }
+
+    var html = '<div class="rounded-2xl p-5" style="background:var(--surface2);border:1px solid var(--border)">'
+      + '<div class="flex items-center gap-2 mb-4">'
+      + '  <span class="text-2xl">👨‍⚕️</span>'
+      + '  <h3 class="text-lg font-bold" style="color:var(--text1)">AI-Recommended Doctors</h3>'
+      + '</div>'
+      + '<p class="text-xs mb-4" style="color:var(--text3)">Based on your symptoms, these doctors are the best match for your condition:</p>'
+      + '<div class="space-y-3">';
+
+    doctors.forEach(function (doc) {
+      var distanceLabel = doc.distance_km != null ? '<span class="text-xs" style="color:var(--cyan)">📍 ' + doc.distance_km.toFixed(1) + ' km away</span>' : '';
+      var hospitalLabel = '';
+      if (doc.hospitals && doc.hospitals.length) {
+        hospitalLabel = '<span class="text-xs" style="color:var(--text3)">🏥 ' + doc.hospitals.map(function(h) { return esc(h.name); }).join(', ') + '</span>';
+      } else if (doc.hospital_affiliation) {
+        hospitalLabel = '<span class="text-xs" style="color:var(--text3)">🏥 ' + esc(doc.hospital_affiliation) + '</span>';
+      }
+      var matchBar = doc.matchScore ? '<div class="pbar mt-1 mb-1" style="height:4px"><div class="pfill" style="width:' + doc.matchScore + '%;background:var(--cyan)"></div></div>' : '';
+
+      html += '<div class="rounded-xl p-4" style="background:var(--surface1);border:1px solid var(--border);cursor:pointer" onclick="window.location.href=\'/pages/patient/find-doctors.html?doctorId=' + doc.id + '\'">'
+        + '<div class="flex items-start justify-between gap-3">'
+        + '  <div class="flex items-center gap-3 flex-1">'
+        + '    <div class="w-10 h-10 rounded-full flex items-center justify-center text-lg" style="background:var(--surface2)">'
+        + (doc.avatar_url ? '<img src="' + esc(doc.avatar_url) + '" class="w-10 h-10 rounded-full object-cover">' : '👨‍⚕️')
+        + '    </div>'
+        + '    <div class="flex-1">'
+        + '      <p class="font-semibold text-sm" style="color:var(--text1)">Dr. ' + esc(doc.first_name || '') + ' ' + esc(doc.last_name || '') + '</p>'
+        + '      <p class="text-xs" style="color:var(--cyan)">' + esc(doc.specialization || 'General Practice') + '</p>'
+        + '      <div class="flex flex-wrap gap-2 mt-1">'
+        + distanceLabel
+        + hospitalLabel
+        + '      </div>'
+        + '      <p class="text-xs mt-1" style="color:var(--text3)">' + esc(doc.matchReason || '') + '</p>'
+        + matchBar
+        + '    </div>'
+        + '  </div>'
+        + '  <div class="text-right flex-shrink-0">'
+        + '    <div class="flex items-center gap-1">'
+        + '      <span style="color:#FBBF24">⭐</span>'
+        + '      <span class="text-sm font-bold" style="color:var(--text1)">' + (doc.rating ? parseFloat(doc.rating).toFixed(1) : 'New') + '</span>'
+        + '    </div>'
+        + '    <p class="text-xs mt-1" style="color:var(--text3)">' + (doc.consultation_fee ? '$' + parseFloat(doc.consultation_fee).toFixed(0) : 'Free') + '</p>'
+        + '    <span class="text-xs font-bold" style="color:var(--green)">' + (doc.matchScore || 0) + '% match</span>'
+        + '  </div>'
+        + '</div>'
+        + '<div class="flex gap-2 mt-3">'
+        + '  <a href="/pages/patient/appointments.html?doctorId=' + doc.id + '" class="btn-teal text-xs px-3 py-1.5 rounded-lg flex-1 text-center" onclick="event.stopPropagation()">📅 Book Now</a>'
+        + '  <a href="/pages/patient/find-doctors.html?doctorId=' + doc.id + '" class="text-xs px-3 py-1.5 rounded-lg flex-1 text-center" style="background:var(--surface2);color:var(--text2);border:1px solid var(--border)" onclick="event.stopPropagation()">View Profile</a>'
+        + '</div>'
+        + '</div>';
+    });
+
+    html += '</div></div>';
+    container.innerHTML = html;
   }
 
   function renderError(message) {

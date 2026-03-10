@@ -57,6 +57,19 @@ exports.getAppointment = async (req, res, next) => {
   try {
     const appointment = await AppointmentModel.findById(req.params.id);
     if (!appointment) return sendError(res, 404, 'Appointment not found.');
+
+    // Ownership check: only the patient, doctor, or admin can view
+    if (req.user.role !== 'admin') {
+      const patient = await PatientModel.findByUserId(req.user.id);
+      const doctor = await DoctorModel.findByUserId(req.user.id);
+      if (
+        (!patient || appointment.patient_id !== patient.id) &&
+        (!doctor || appointment.doctor_id !== doctor.id)
+      ) {
+        return sendError(res, 403, 'Access denied. This is not your appointment.');
+      }
+    }
+
     return sendSuccess(res, 200, 'Appointment retrieved.', { appointment });
   } catch (err) { next(err); }
 };
@@ -96,6 +109,18 @@ exports.cancel = async (req, res, next) => {
     const appointment = await AppointmentModel.findById(req.params.id);
     if (!appointment) return sendError(res, 404, 'Appointment not found.');
 
+    // Ownership check: only the patient, their doctor, or admin can cancel
+    if (req.user.role !== 'admin') {
+      const patient = await PatientModel.findByUserId(req.user.id);
+      const doctor = await DoctorModel.findByUserId(req.user.id);
+      if (
+        (!patient || appointment.patient_id !== patient.id) &&
+        (!doctor || appointment.doctor_id !== doctor.id)
+      ) {
+        return sendError(res, 403, 'Access denied. You cannot cancel this appointment.');
+      }
+    }
+
     if (['completed', 'cancelled'].includes(appointment.status)) {
       return sendError(res, 400, `Cannot cancel an appointment that is already ${appointment.status}.`);
     }
@@ -108,8 +133,24 @@ exports.cancel = async (req, res, next) => {
 // ─── Confirm Appointment (Doctor) ─────────────────────────────────────────
 exports.confirm = async (req, res, next) => {
   try {
-    const appointment = await AppointmentModel.updateStatus(req.params.id, 'confirmed');
-    return sendSuccess(res, 200, 'Appointment confirmed.', { appointment });
+    const appointment = await AppointmentModel.findById(req.params.id);
+    if (!appointment) return sendError(res, 404, 'Appointment not found.');
+
+    // Only the assigned doctor or admin can confirm
+    if (req.user.role !== 'admin') {
+      const doctor = await DoctorModel.findByUserId(req.user.id);
+      if (!doctor || appointment.doctor_id !== doctor.id) {
+        return sendError(res, 403, 'Access denied. This is not your appointment to confirm.');
+      }
+    }
+
+    const updated = await AppointmentModel.updateStatus(req.params.id, 'confirmed');
+
+    // Send confirmation notifications
+    sendAppointmentConfirmation(updated).catch(e => logger.warn('Confirm email failed:', e.message));
+    sendAppointmentSMS(updated).catch(e => logger.warn('Confirm SMS failed:', e.message));
+
+    return sendSuccess(res, 200, 'Appointment confirmed.', { appointment: updated });
   } catch (err) { next(err); }
 };
 
@@ -118,6 +159,13 @@ exports.startConsultation = async (req, res, next) => {
   try {
     const appointment = await AppointmentModel.findById(req.params.id);
     if (!appointment) return sendError(res, 404, 'Appointment not found.');
+
+    // Only the assigned doctor can start a consultation
+    const doctor = await DoctorModel.findByUserId(req.user.id);
+    if (!doctor || appointment.doctor_id !== doctor.id) {
+      return sendError(res, 403, 'Access denied. Only the assigned doctor can start this consultation.');
+    }
+
     if (appointment.status === 'completed') return sendError(res, 400, 'Appointment already completed.');
 
     await AppointmentModel.updateStatus(req.params.id, 'in_progress');

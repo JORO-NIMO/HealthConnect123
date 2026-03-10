@@ -49,10 +49,10 @@ function initCronJobs() {
 
         // SMS reminder
         if (appt.phone) {
-          SMSService.sendAppointmentReminder(appt.phone, {
-            doctorName: `Dr. ${appt.doctor_first_name} ${appt.doctor_last_name}`,
-            date: 'today',
-            time: appt.appointment_time?.toString().slice(0, 5),
+          SMSService.sendAppointmentReminder({
+            patient_phone: appt.phone,
+            doctor_last_name: appt.doctor_last_name,
+            appointment_time: appt.appointment_time?.toString().slice(0, 5),
           }).catch(err => logger.error('Reminder SMS failed:', err.message));
         }
       }

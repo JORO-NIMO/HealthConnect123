@@ -12,6 +12,9 @@ router.delete('/users/:id',      ctrl.deactivateUser);
 router.get('/doctors/pending',   ctrl.getPendingDoctors);
 router.put('/doctors/:id/verify', ctrl.verifyDoctor);
 router.get('/revenue',           ctrl.getRevenue);
+router.get('/hospitals',          ctrl.listAllHospitals);
+router.get('/hospitals/pending',  ctrl.getPendingHospitals);
+router.put('/hospitals/:id/verify', ctrl.verifyHospital);
 router.get('/audit-logs',        ctrl.getAuditLogs);
 
 module.exports = router;

@@ -28,6 +28,23 @@ function errorHandler(err, req, res, _next) {
     });
   }
 
+  // MySQL connection errors
+  if (err.code === 'ECONNREFUSED' || err.code === 'PROTOCOL_CONNECTION_LOST' || err.code === 'ER_CON_COUNT_ERROR') {
+    return res.status(503).json({
+      success: false,
+      message: 'Database temporarily unavailable. Please try again shortly.',
+    });
+  }
+
+  // MySQL bad field/table errors
+  if (err.code === 'ER_BAD_FIELD_ERROR' || err.code === 'ER_NO_SUCH_TABLE') {
+    logger.error('Database schema error:', err.message);
+    return res.status(500).json({
+      success: false,
+      message: 'An internal database error occurred.',
+    });
+  }
+
   // JWT errors
   if (err.name === 'JsonWebTokenError' || err.name === 'TokenExpiredError') {
     return res.status(401).json({
@@ -40,7 +57,40 @@ function errorHandler(err, req, res, _next) {
   if (err.code === 'LIMIT_FILE_SIZE') {
     return res.status(413).json({
       success: false,
-      message: 'File too large. Maximum size is 5MB.',
+      message: 'File too large. Maximum size is 25MB.',
+    });
+  }
+
+  // Multer unexpected field
+  if (err.code === 'LIMIT_UNEXPECTED_FILE') {
+    return res.status(400).json({
+      success: false,
+      message: 'Unexpected file field. Please check the upload form.',
+    });
+  }
+
+  // Syntax error in JSON body
+  if (err.type === 'entity.parse.failed') {
+    return res.status(400).json({
+      success: false,
+      message: 'Invalid JSON in request body.',
+    });
+  }
+
+  // Request entity too large (body parser)
+  if (err.type === 'entity.too.large') {
+    return res.status(413).json({
+      success: false,
+      message: 'Request body too large. Maximum size is 10MB.',
+    });
+  }
+
+  // Validation errors (express-validator)
+  if (err.name === 'ValidationError' || err.array) {
+    return res.status(400).json({
+      success: false,
+      message: 'Validation failed.',
+      errors: err.array ? err.array() : [{ msg: err.message }],
     });
   }
 

@@ -1,6 +1,7 @@
 const { query, queryOne } = require('../config/database');
 const UserModel    = require('../models/User.model');
 const DoctorModel  = require('../models/Doctor.model');
+const HospitalModel = require('../models/Hospital.model');
 const PaymentModel = require('../models/Payment.model');
 const { sendSuccess, sendError } = require('../utils/response.util');
 const logger = require('../utils/logger.util');
@@ -17,7 +18,9 @@ exports.getDashboard = async (req, res, next) => {
         (SELECT COUNT(*) FROM appointments) AS total_appointments,
         (SELECT COUNT(*) FROM appointments WHERE DATE(created_at) = CURDATE()) AS today_appointments,
         (SELECT COUNT(*) FROM symptom_reports) AS total_symptom_checks,
-        (SELECT COALESCE(SUM(amount), 0) FROM payments WHERE status = 'completed') AS total_revenue
+        (SELECT COALESCE(SUM(amount), 0) FROM payments WHERE status = 'completed') AS total_revenue,
+        (SELECT COUNT(*) FROM hospitals WHERE verification_status = 'pending') AS pending_hospitals,
+        (SELECT COUNT(*) FROM hospitals) AS total_hospitals
     `);
     return sendSuccess(res, 200, 'Dashboard stats retrieved.', { stats });
   } catch (err) { next(err); }
@@ -83,6 +86,55 @@ exports.getRevenue = async (req, res, next) => {
   try {
     const stats = await PaymentModel.getRevenueStats(req.query);
     return sendSuccess(res, 200, 'Revenue analytics retrieved.', { stats });
+  } catch (err) { next(err); }
+};
+
+// ─── Pending Hospitals ─────────────────────────────────────────────────────
+exports.getPendingHospitals = async (req, res, next) => {
+  try {
+    const hospitals = await query(`
+      SELECT h.*, u.first_name, u.last_name, u.email, u.phone AS admin_phone
+      FROM hospitals h
+      LEFT JOIN users u ON u.id = h.admin_user_id
+      WHERE h.verification_status = 'pending'
+      ORDER BY h.created_at ASC
+    `);
+    return sendSuccess(res, 200, 'Pending hospitals retrieved.', { hospitals });
+  } catch (err) { next(err); }
+};
+
+// ─── List All Hospitals (admin) ────────────────────────────────────────────
+exports.listAllHospitals = async (req, res, next) => {
+  try {
+    const { status, limit = 50, offset = 0 } = req.query;
+    let sql = `
+      SELECT h.*, u.first_name, u.last_name, u.email AS admin_email
+      FROM hospitals h
+      LEFT JOIN users u ON u.id = h.admin_user_id
+      WHERE 1=1
+    `;
+    const params = [];
+    if (status) { sql += ' AND h.verification_status = ?'; params.push(status); }
+    sql += ' ORDER BY h.created_at DESC LIMIT ? OFFSET ?';
+    params.push(parseInt(limit), parseInt(offset));
+    const hospitals = await query(sql, params);
+    return sendSuccess(res, 200, 'Hospitals retrieved.', { hospitals });
+  } catch (err) { next(err); }
+};
+
+// ─── Approve / Reject Hospital ─────────────────────────────────────────────
+exports.verifyHospital = async (req, res, next) => {
+  try {
+    const { status, note } = req.body;
+    if (!['verified', 'rejected'].includes(status)) {
+      return sendError(res, 400, 'Status must be "verified" or "rejected".');
+    }
+    const hospital = await HospitalModel.findById(req.params.id);
+    if (!hospital) return sendError(res, 404, 'Hospital not found.');
+
+    await HospitalModel.setVerificationStatus(req.params.id, status, note);
+    logger.info(`Admin ${req.user.id} ${status} hospital ${req.params.id} (${hospital.name})`);
+    return sendSuccess(res, 200, `Hospital ${status} successfully.`);
   } catch (err) { next(err); }
 };
 

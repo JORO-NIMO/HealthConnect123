@@ -8,6 +8,10 @@ class UserModel {
     const id           = uuidv4();
     const passwordHash = await bcrypt.hash(password, 12);
 
+    // Validate role
+    const validRoles = ['patient', 'doctor', 'admin', 'hospital_admin'];
+    if (!validRoles.includes(role)) role = 'patient';
+
     await query(
       `INSERT INTO users (id, email, password_hash, first_name, last_name, phone, role, created_at, updated_at)
        VALUES (?, ?, ?, ?, ?, ?, ?, NOW(), NOW())`,

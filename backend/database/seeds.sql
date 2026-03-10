@@ -13,38 +13,7 @@ VALUES (
   'System', 'Admin', '+254700000001', 'admin', 1, 1
 );
 
--- ─── Demo Doctor (password: Doctor@123456) ───────────────────────────────
-INSERT IGNORE INTO users (id, email, password_hash, first_name, last_name, phone, role, is_active, is_verified)
-VALUES (
-  'doctor-000-0000-0000-000000000001',
-  'dr.amara@healthconnect.health',
-  '$2a$12$qI7NIeZk08fCtW.QNdKIZOkvs1O43nTf1VsM5sqSHwWsQ0b0V/gr.',
-  'Amara', 'Osei', '+254711000001', 'doctor', 1, 1
-);
-INSERT IGNORE INTO doctors (id, user_id, specialization, years_experience, bio, license_number, consultation_fee, rating, total_reviews, verification_status)
-VALUES (
-  'dprof-000-0000-0000-000000000001',
-  'doctor-000-0000-0000-000000000001',
-  'General Medicine', 8,
-  'Dr. Amara Osei is an experienced general practitioner with 8 years of experience in primary care, infectious diseases, and preventive medicine across East Africa.',
-  'MD-KE-12345', 25.00, 4.8, 47, 'verified'
-);
-
-INSERT IGNORE INTO users (id, email, password_hash, first_name, last_name, phone, role, is_active, is_verified)
-VALUES (
-  'doctor-000-0000-0000-000000000002',
-  'dr.fatima@healthconnect.health',
-  '$2a$12$qI7NIeZk08fCtW.QNdKIZOkvs1O43nTf1VsM5sqSHwWsQ0b0V/gr.',
-  'Fatima', 'Al-Hassan', '+254711000002', 'doctor', 1, 1
-);
-INSERT IGNORE INTO doctors (id, user_id, specialization, years_experience, bio, license_number, consultation_fee, rating, total_reviews, verification_status)
-VALUES (
-  'dprof-000-0000-0000-000000000002',
-  'doctor-000-0000-0000-000000000002',
-  'Pediatrics', 12,
-  'Dr. Fatima Al-Hassan is a board-certified pediatrician with over 12 years of experience in child healthcare, nutrition, and developmental medicine.',
-  'MD-KE-67890', 30.00, 4.9, 83, 'verified'
-);
+-- ─── Demo Doctors removed — real doctors register via the app ────────────
 
 -- ─── Demo Patient (password: Patient@123456) ─────────────────────────────
 INSERT IGNORE INTO users (id, email, password_hash, first_name, last_name, phone, role, is_active, is_verified)
@@ -57,17 +26,7 @@ VALUES (
 INSERT IGNORE INTO patients (id, user_id, date_of_birth, gender, blood_type)
 VALUES ('pprof-000-0000-0000-000000000001', 'patient-00-0000-0000-000000000001', '1990-05-15', 'male', 'O+');
 
--- ─── Doctor Availability ──────────────────────────────────────────────────
-INSERT IGNORE INTO doctor_availability (id, doctor_id, day_of_week, start_time, end_time)
-VALUES
-  (UUID(), 'dprof-000-0000-0000-000000000001', 1, '08:00:00', '17:00:00'),
-  (UUID(), 'dprof-000-0000-0000-000000000001', 2, '08:00:00', '17:00:00'),
-  (UUID(), 'dprof-000-0000-0000-000000000001', 3, '08:00:00', '17:00:00'),
-  (UUID(), 'dprof-000-0000-0000-000000000001', 4, '08:00:00', '17:00:00'),
-  (UUID(), 'dprof-000-0000-0000-000000000001', 5, '08:00:00', '12:00:00'),
-  (UUID(), 'dprof-000-0000-0000-000000000002', 1, '09:00:00', '18:00:00'),
-  (UUID(), 'dprof-000-0000-0000-000000000002', 3, '09:00:00', '18:00:00'),
-  (UUID(), 'dprof-000-0000-0000-000000000002', 5, '09:00:00', '13:00:00');
+-- ─── Doctor Availability (created dynamically by doctors via the app) ─────
 
 -- ─── Symptom Master List ──────────────────────────────────────────────────
 INSERT IGNORE INTO symptoms (name, category, icd10_hint) VALUES

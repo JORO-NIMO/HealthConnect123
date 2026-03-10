@@ -22,10 +22,14 @@ const httpServer = createServer(app);
 // ─── Socket.IO for Real-Time Consultation ──────────────────────────────────
 const io = new Server(httpServer, {
   cors: {
-    origin: process.env.FRONTEND_URL || '*',
+    origin: process.env.FRONTEND_URL 
+      ? process.env.FRONTEND_URL.split(',').map(url => url.trim())
+      : '*',
     methods: ['GET', 'POST'],
     credentials: true,
   },
+  pingTimeout: 60000,
+  pingInterval: 25000,
 });
 
 // Expose io to controllers
@@ -41,10 +45,19 @@ app.use(helmet({
   contentSecurityPolicy: false,
   crossOriginEmbedderPolicy: false,
 }));
+
+// ─── CORS Configuration ───────────────────────────────────────────────────
+const corsOrigins = process.env.FRONTEND_URL 
+  ? process.env.FRONTEND_URL.split(',').map(url => url.trim())
+  : '*';
+
 app.use(cors({
-  origin: process.env.FRONTEND_URL || '*',
+  origin: corsOrigins,
   credentials: true,
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With'],
 }));
+
 app.use(compression());
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true, limit: '10mb' }));
@@ -68,15 +81,9 @@ app.use(express.static(path.join(__dirname, '../frontend'), {
 // ─── API Routes ────────────────────────────────────────────────────────────
 app.use('/api/v1', routes);
 
-// ─── Health Check ──────────────────────────────────────────────────────────
-app.get('/api/health', (req, res) => {
-  res.json({
-    status: 'ok',
-    timestamp: new Date().toISOString(),
-    version: '1.0.0',
-    service: 'HealthConnect API',
-  });
-});
+// ─── Health checks at /api root for Railway/K8s compatibility ──────────────
+const healthRoutes = require('./routes/health.routes');
+app.use('/api', healthRoutes);
 
 // ─── Serve Frontend SPA ────────────────────────────────────────────────────
 app.get('*', (req, res) => {
@@ -91,41 +98,81 @@ app.use(errorHandler);
 io.on('connection', (socket) => {
   logger.info(`Socket connected: ${socket.id}`);
 
+  // Error handler for socket
+  socket.on('error', (error) => {
+    logger.error(`Socket error ${socket.id}:`, error);
+  });
+
   // Join consultation room
   socket.on('join-room', (roomId, userId) => {
-    socket.join(roomId);
-    socket.to(roomId).emit('user-connected', userId);
-    logger.info(`User ${userId} joined room ${roomId}`);
+    try {
+      socket.join(roomId);
+      socket.to(roomId).emit('user-connected', userId);
+      logger.info(`User ${userId} joined room ${roomId}`);
+    } catch (err) {
+      logger.error('Error joining room:', err);
+      socket.emit('error', { message: 'Failed to join room' });
+    }
   });
 
   // Join user's personal notification channel
   socket.on('join-user', (userId) => {
-    socket.join(`user:${userId}`);
-    logger.info(`User ${userId} joined personal channel`);
+    try {
+      socket.join(`user:${userId}`);
+      logger.info(`User ${userId} joined personal channel`);
+    } catch (err) {
+      logger.error('Error joining user channel:', err);
+      socket.emit('error', { message: 'Failed to join user channel' });
+    }
   });
 
   // Chat messages
   socket.on('send-message', ({ roomId, message }) => {
-    io.to(roomId).emit('receive-message', message);
+    try {
+      io.to(roomId).emit('receive-message', message);
+    } catch (err) {
+      logger.error('Error sending message:', err);
+      socket.emit('error', { message: 'Failed to send message' });
+    }
   });
 
   // WebRTC signaling
   socket.on('webrtc-offer', ({ roomId, offer }) => {
-    socket.to(roomId).emit('webrtc-offer', offer);
+    try {
+      socket.to(roomId).emit('webrtc-offer', offer);
+    } catch (err) {
+      logger.error('Error sending WebRTC offer:', err);
+    }
   });
   socket.on('webrtc-answer', ({ roomId, answer }) => {
-    socket.to(roomId).emit('webrtc-answer', answer);
+    try {
+      socket.to(roomId).emit('webrtc-answer', answer);
+    } catch (err) {
+      logger.error('Error sending WebRTC answer:', err);
+    }
   });
   socket.on('webrtc-ice-candidate', ({ roomId, candidate }) => {
-    socket.to(roomId).emit('webrtc-ice-candidate', candidate);
+    try {
+      socket.to(roomId).emit('webrtc-ice-candidate', candidate);
+    } catch (err) {
+      logger.error('Error sending ICE candidate:', err);
+    }
   });
 
   // Typing indicators
   socket.on('typing', ({ roomId, userId }) => {
-    socket.to(roomId).emit('user-typing', userId);
+    try {
+      socket.to(roomId).emit('user-typing', userId);
+    } catch (err) {
+      logger.error('Error sending typing indicator:', err);
+    }
   });
   socket.on('stop-typing', ({ roomId, userId }) => {
-    socket.to(roomId).emit('user-stop-typing', userId);
+    try {
+      socket.to(roomId).emit('user-stop-typing', userId);
+    } catch (err) {
+      logger.error('Error sending stop-typing indicator:', err);
+    }
   });
 
   socket.on('disconnect', () => {
@@ -154,5 +201,42 @@ async function startServer() {
   }
 }
 
+// ─── Graceful Shutdown ─────────────────────────────────────────────────────
+const gracefulShutdown = async (signal) => {
+  logger.info(`${signal} received. Starting graceful shutdown...`);
+  
+  // Stop accepting new connections
+  httpServer.close(() => {
+    logger.info('HTTP server closed');
+  });
+
+  // Close Socket.IO connections
+  io.close(() => {
+    logger.info('Socket.IO connections closed');
+  });
+
+  // Give ongoing requests time to complete
+  setTimeout(() => {
+    logger.info('Forcing shutdown after timeout');
+    process.exit(0);
+  }, 30000); // 30 seconds timeout
+};
+
+// Handle termination signals
+process.on('SIGTERM', () => gracefulShutdown('SIGTERM'));
+process.on('SIGINT', () => gracefulShutdown('SIGINT'));
+
+// Handle uncaught errors
+process.on('uncaughtException', (err) => {
+  logger.error('Uncaught Exception:', err);
+  gracefulShutdown('UNCAUGHT_EXCEPTION');
+});
+
+process.on('unhandledRejection', (reason, promise) => {
+  logger.error('Unhandled Rejection at:', promise, 'reason:', reason);
+  gracefulShutdown('UNHANDLED_REJECTION');
+});
+
 startServer();
 module.exports = { app, io };
+

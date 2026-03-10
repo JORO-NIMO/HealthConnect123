@@ -15,7 +15,7 @@ CREATE TABLE IF NOT EXISTS users (
   first_name    VARCHAR(100) NOT NULL,
   last_name     VARCHAR(100) NOT NULL,
   phone         VARCHAR(20)  NULL,
-  role          ENUM('patient','doctor','admin') NOT NULL DEFAULT 'patient',
+  role          ENUM('patient','doctor','admin','hospital_admin') NOT NULL DEFAULT 'patient',
   avatar_url    VARCHAR(500) NULL,
   google_id     VARCHAR(255) NULL UNIQUE,
   is_active     TINYINT(1)   NOT NULL DEFAULT 1,

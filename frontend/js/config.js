@@ -27,16 +27,18 @@ const CONFIG = {
 
   // User roles
   ROLES: {
-    PATIENT: 'patient',
-    DOCTOR:  'doctor',
-    ADMIN:   'admin',
+    PATIENT:        'patient',
+    DOCTOR:         'doctor',
+    ADMIN:          'admin',
+    HOSPITAL_ADMIN: 'hospital_admin',
   },
 
   // Dashboard paths per role
   DASHBOARDS: {
-    patient: '/pages/patient/dashboard.html',
-    doctor:  '/pages/doctor/dashboard.html',
-    admin:   '/pages/admin/dashboard.html',
+    patient:        '/pages/patient/dashboard.html',
+    doctor:         '/pages/doctor/dashboard.html',
+    admin:          '/pages/admin/dashboard.html',
+    hospital_admin: '/pages/hospital/dashboard.html',
   },
 
   // Urgency level config

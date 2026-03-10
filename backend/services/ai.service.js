@@ -176,11 +176,8 @@ function getFallbackAnalysis(symptoms) {
 // ─── Smart Doctor Recommendation ──────────────────────────────────────────
 async function recommendDoctors(symptoms, availableDoctors, patientContext = {}) {
   if (!openai || !availableDoctors.length) {
-    // Fallback: rank by rating and review count
-    return availableDoctors
-      .sort((a, b) => (b.rating || 0) - (a.rating || 0) || (b.total_reviews || 0) - (a.total_reviews || 0))
-      .slice(0, 5)
-      .map(d => ({ ...d, matchScore: 70, matchReason: 'Recommended based on ratings and experience.' }));
+    // Fallback: rank by rating, distance, and review count
+    return rankDoctorsFallback(availableDoctors, patientContext);
   }
 
   const doctorList = availableDoctors.map(d => ({
@@ -192,19 +189,29 @@ async function recommendDoctors(symptoms, availableDoctors, patientContext = {})
     reviews: d.total_reviews,
     fee: d.consultation_fee,
     languages: d.languages,
+    city: d.city || null,
+    hospital: d.hospital_affiliation || d.hospital_name || null,
+    distanceKm: d.distance_km || null,
   }));
 
   try {
     const requestOpts = {
       model: AI_CONFIG.model,
-      max_tokens: 800,
+      max_tokens: 1200,
       temperature: 0.3,
       messages: [
         {
           role: 'system',
           content: `You are a medical triage assistant. Given patient symptoms and a list of available doctors, recommend the best matches.
-Return valid JSON only: { "recommendations": [{ "doctorId": "...", "matchScore": 0-100, "matchReason": "Brief explanation" }] }
-Rank by specialization relevance, experience, and ratings. Return top 5 max.`,
+Consider these factors in order of importance:
+1. Specialization relevance to the symptoms/conditions
+2. Geographic proximity (if distance data available, prefer closer doctors)
+3. Doctor experience and ratings
+4. Hospital affiliation (doctors at reputable hospitals get a slight boost)
+5. Consultation fee (suggest a range of options)
+
+Return valid JSON only: { "recommendations": [{ "doctorId": "...", "matchScore": 0-100, "matchReason": "Brief explanation including why this specialist fits and distance if available" }] }
+Return top 5 max. Always explain why each doctor is a good match.`,
         },
         {
           role: 'user',
@@ -212,6 +219,8 @@ Rank by specialization relevance, experience, and ratings. Return top 5 max.`,
 ${patientContext.age ? `Age: ${patientContext.age}` : ''}
 ${patientContext.gender ? `Gender: ${patientContext.gender}` : ''}
 ${patientContext.conditions ? `Existing conditions: ${patientContext.conditions}` : ''}
+${patientContext.city ? `Patient location: ${patientContext.city}` : ''}
+${patientContext.latitude ? `Patient coordinates: ${patientContext.latitude}, ${patientContext.longitude}` : ''}
 
 Available doctors:
 ${JSON.stringify(doctorList, null, 2)}`,
@@ -233,11 +242,54 @@ ${JSON.stringify(doctorList, null, 2)}`,
     }).filter(Boolean);
   } catch (err) {
     logger.error('Doctor recommendation AI error:', err.message);
-    return availableDoctors
-      .sort((a, b) => (b.rating || 0) - (a.rating || 0))
-      .slice(0, 5)
-      .map(d => ({ ...d, matchScore: 70, matchReason: 'Recommended based on ratings.' }));
+    return rankDoctorsFallback(availableDoctors, patientContext);
   }
 }
 
-module.exports = { analyzeSymptoms, generateFollowUpQuestions, recommendDoctors };
+// ─── Fallback ranking when AI is unavailable ──────────────────────────────
+function rankDoctorsFallback(doctors, patientContext = {}) {
+  return doctors
+    .map(d => {
+      let score = 70;
+      // Boost for higher rating
+      score += (d.rating || 0) * 3;
+      // Boost for more reviews (trust)
+      score += Math.min((d.total_reviews || 0), 10);
+      // Boost for proximity
+      if (d.distance_km !== undefined && d.distance_km !== null) {
+        if (d.distance_km <= 5) score += 15;
+        else if (d.distance_km <= 15) score += 10;
+        else if (d.distance_km <= 30) score += 5;
+      }
+      // Boost if in same city
+      if (patientContext.city && d.city && d.city.toLowerCase() === patientContext.city.toLowerCase()) {
+        score += 10;
+      }
+      return {
+        ...d,
+        matchScore: Math.min(score, 100),
+        matchReason: `Recommended based on ratings${d.distance_km ? ` (${d.distance_km.toFixed(1)} km away)` : ''} and experience.`,
+      };
+    })
+    .sort((a, b) => b.matchScore - a.matchScore)
+    .slice(0, 5);
+}
+
+// ─── Recommend Doctors for a Symptom Report ───────────────────────────────
+// Called automatically after symptom analysis to suggest matching doctors
+async function recommendDoctorsForReport(analysisResult, availableDoctors, patientContext = {}) {
+  // Extract conditions from AI analysis to build better symptom list
+  const conditions = (analysisResult.possibleConditions || []).map(c => c.name);
+  const symptoms = [
+    ...(analysisResult.symptoms || []),
+    ...conditions,
+  ].filter(Boolean);
+
+  if (!symptoms.length) {
+    return rankDoctorsFallback(availableDoctors, patientContext);
+  }
+
+  return recommendDoctors(symptoms, availableDoctors, patientContext);
+}
+
+module.exports = { analyzeSymptoms, generateFollowUpQuestions, recommendDoctors, recommendDoctorsForReport };

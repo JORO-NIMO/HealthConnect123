@@ -56,7 +56,7 @@
     if (!list) return;
 
     try {
-      const res = await API.get(`/doctors?search=${encodeURIComponent(search)}&limit=10`);
+      const res = await API.get(`/doctors/search?q=${encodeURIComponent(search)}&limit=10`);
       allDoctors = res.data?.doctors || [];
       renderDoctorsList(allDoctors);
     } catch {
@@ -74,14 +74,14 @@
     list.innerHTML = doctors.map(d => `
       <button onclick="selectDoctor(${JSON.stringify(d).replace(/"/g, '&quot;')})"
         class="w-full flex items-center gap-3 p-3 rounded-xl text-left transition" style="border:1px solid var(--border)" onmouseover="this.style.borderColor='var(--cyan)'" onmouseout="this.style.borderColor='var(--border)'">
-        <div class="w-10 h-10 rounded-xl ${Utils.avatarColor(d.firstName)} flex items-center justify-center text-white text-sm font-bold flex-shrink-0">
-          ${Utils.initials((d.firstName || '') + ' ' + (d.lastName || ''))}
+        <div class="w-10 h-10 rounded-xl ${Utils.avatarColor(d.first_name)} flex items-center justify-center text-white text-sm font-bold flex-shrink-0">
+          ${Utils.initials((d.first_name || '') + ' ' + (d.last_name || ''))}
         </div>
         <div class="flex-1 min-w-0">
-          <div class="font-semibold text-sm">Dr. ${Utils.escapeHtml((d.firstName || '') + ' ' + (d.lastName || ''))}</div>
-          <div class="text-xs" style="color:var(--text3)">${Utils.escapeHtml(d.specialization || '')} · ⭐ ${d.averageRating ? Number(d.averageRating).toFixed(1) : '—'}</div>
+          <div class="font-semibold text-sm">Dr. ${Utils.escapeHtml((d.first_name || '') + ' ' + (d.last_name || ''))}</div>
+          <div class="text-xs" style="color:var(--text3)">${Utils.escapeHtml(d.specialization || '')} · ⭐ ${d.rating ? Number(d.rating).toFixed(1) : '—'}</div>
         </div>
-        <div class="text-xs font-bold" style="color:var(--cyan)">${Utils.formatCurrency(d.consultationFee, d.currency || 'USD')}</div>
+        <div class="text-xs font-bold" style="color:var(--cyan)">${Utils.formatCurrency(d.consultation_fee, d.currency || 'USD')}</div>
       </button>
     `).join('');
   }
@@ -98,10 +98,10 @@
     document.getElementById('doctors-list').innerHTML = '';
     const card = document.getElementById('selected-doctor-card');
     card.classList.remove('hidden');
-    document.getElementById('selected-doc-avatar').textContent = Utils.initials((doc.firstName || '') + ' ' + (doc.lastName || ''));
-    document.getElementById('selected-doc-name').textContent = `Dr. ${doc.firstName || ''} ${doc.lastName || ''}`;
+    document.getElementById('selected-doc-avatar').textContent = Utils.initials((doc.first_name || '') + ' ' + (doc.last_name || ''));
+    document.getElementById('selected-doc-name').textContent = `Dr. ${doc.first_name || ''} ${doc.last_name || ''}`;
     document.getElementById('selected-doc-spec').textContent = doc.specialization || '';
-    document.getElementById('selected-doc-fee').textContent = Utils.formatCurrency(doc.consultationFee, doc.currency || 'USD');
+    document.getElementById('selected-doc-fee').textContent = Utils.formatCurrency(doc.consultation_fee, doc.currency || 'USD');
 
     const dateVal = document.getElementById('appointment-date').value;
     if (dateVal) loadTimeSlots(doc.id, dateVal);

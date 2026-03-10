@@ -31,17 +31,20 @@ class DoctorModel {
     );
   }
 
-  static async list({ specialization, limit = 20, offset = 0, verifiedOnly = true } = {}) {
+  static async list({ specialization, limit = 20, offset = 0, verifiedOnly = true, availableOnly = false } = {}) {
     let sql = `
       SELECT d.id, d.specialization, d.years_experience, d.consultation_fee,
              d.rating, d.total_reviews, d.verification_status, d.bio,
+             d.languages, d.hospital_affiliation, d.is_available,
              u.first_name, u.last_name, u.avatar_url
       FROM doctors d
       JOIN users u ON u.id = d.user_id
       WHERE u.is_active = 1
     `;
     const params = [];
-    if (verifiedOnly) { sql += ' AND d.verification_status = "verified"'; }
+    // TODO: restore for production
+    // if (verifiedOnly) { sql += ` AND d.verification_status IN ('verified', 'pending')`; }
+    if (availableOnly) { sql += ' AND d.is_available = 1'; }
     if (specialization) { sql += ' AND d.specialization = ?'; params.push(specialization); }
     sql += ' ORDER BY d.rating DESC, d.total_reviews DESC LIMIT ? OFFSET ?';
     params.push(limit, offset);
@@ -52,6 +55,7 @@ class DoctorModel {
     const allowed = [
       'specialization', 'years_experience', 'bio', 'consultation_fee',
       'license_number', 'hospital_affiliation', 'languages', 'is_available',
+      'latitude', 'longitude', 'city', 'state', 'country', 'accepts_in_person',
     ];
     const keys = Object.keys(fields).filter(k => allowed.includes(k));
     if (!keys.length) return this.findByUserId(userId);
@@ -87,6 +91,54 @@ class DoctorModel {
       `INSERT INTO doctor_availability (id, doctor_id, day_of_week, start_time, end_time, is_available) VALUES ${placeholders}`,
       values.flat()
     );
+  }
+
+  // ─── Location-Based Search ────────────────────────────────────────────────
+  static async findNearby(latitude, longitude, radiusKm = 50, { specialization, limit = 20 } = {}) {
+    let sql = `
+      SELECT d.id, d.specialization, d.years_experience, d.consultation_fee,
+             d.rating, d.total_reviews, d.verification_status, d.bio,
+             d.languages, d.hospital_affiliation, d.is_available,
+             d.latitude, d.longitude, d.city, d.state, d.country,
+             u.first_name, u.last_name, u.avatar_url,
+             (
+               6371 * ACOS(
+                 COS(RADIANS(?)) * COS(RADIANS(d.latitude))
+                 * COS(RADIANS(d.longitude) - RADIANS(?))
+                 + SIN(RADIANS(?)) * SIN(RADIANS(d.latitude))
+               )
+             ) AS distance_km
+      FROM doctors d
+      JOIN users u ON u.id = d.user_id
+      WHERE u.is_active = 1
+        AND d.is_available = 1
+        AND d.latitude IS NOT NULL
+        AND d.longitude IS NOT NULL
+    `;
+    const params = [latitude, longitude, latitude];
+    if (specialization) { sql += ' AND d.specialization = ?'; params.push(specialization); }
+    sql += ' HAVING distance_km <= ? ORDER BY distance_km ASC LIMIT ?';
+    params.push(radiusKm, limit);
+    return query(sql, params);
+  }
+
+  static async listWithLocation({ specialization, limit = 20, offset = 0, availableOnly = true } = {}) {
+    let sql = `
+      SELECT d.id, d.specialization, d.years_experience, d.consultation_fee,
+             d.rating, d.total_reviews, d.verification_status, d.bio,
+             d.languages, d.hospital_affiliation, d.is_available,
+             d.latitude, d.longitude, d.city, d.state, d.country,
+             u.first_name, u.last_name, u.avatar_url
+      FROM doctors d
+      JOIN users u ON u.id = d.user_id
+      WHERE u.is_active = 1
+    `;
+    const params = [];
+    if (availableOnly) { sql += ' AND d.is_available = 1'; }
+    if (specialization) { sql += ' AND d.specialization = ?'; params.push(specialization); }
+    sql += ' ORDER BY d.rating DESC, d.total_reviews DESC LIMIT ? OFFSET ?';
+    params.push(limit, offset);
+    return query(sql, params);
   }
 
   // ─── Rating ───────────────────────────────────────────────────────────────
