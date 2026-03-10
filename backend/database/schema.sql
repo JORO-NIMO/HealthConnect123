@@ -55,6 +55,20 @@ CREATE TABLE IF NOT EXISTS patients (
   blood_type               ENUM('A+','A-','B+','B-','AB+','AB-','O+','O-') NULL,
   weight_kg                DECIMAL(5,2) NULL,
   height_cm                DECIMAL(5,2) NULL,
+  allergies                TEXT         NULL,
+  chronic_conditions       TEXT         NULL,
+  current_medications      TEXT         NULL,
+  emergency_contact_name   VARCHAR(200) NULL,
+  emergency_contact_phone  VARCHAR(20)  NULL,
+  address                  TEXT         NULL,
+  insurance_number         VARCHAR(100) NULL,
+  created_at               DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  updated_at               DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
+  INDEX idx_user_id (user_id)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- ─── Vital Signs ──────────────────────────────────────────────────────────
 CREATE TABLE IF NOT EXISTS vital_signs (
   id                VARCHAR(36)   NOT NULL PRIMARY KEY,
   patient_id        VARCHAR(36)   NOT NULL,
@@ -76,18 +90,6 @@ CREATE TABLE IF NOT EXISTS vital_signs (
   FOREIGN KEY (patient_id) REFERENCES patients(id) ON DELETE CASCADE,
   INDEX idx_patient_id (patient_id),
   INDEX idx_recorded_at (recorded_at)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-  allergies                TEXT         NULL,
-  chronic_conditions       TEXT         NULL,
-  current_medications      TEXT         NULL,
-  emergency_contact_name   VARCHAR(200) NULL,
-  emergency_contact_phone  VARCHAR(20)  NULL,
-  address                  TEXT         NULL,
-  insurance_number         VARCHAR(100) NULL,
-  created_at               DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  updated_at               DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-  FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
-  INDEX idx_user_id (user_id)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- ─── Doctors ──────────────────────────────────────────────────────────────
@@ -333,6 +335,86 @@ CREATE TABLE IF NOT EXISTS drug_interaction_checks (
   INDEX idx_patient_id (patient_id),
   INDEX idx_created_at (created_at)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- ─── Notifications ────────────────────────────────────────────────────────
+CREATE TABLE IF NOT EXISTS notifications (
+  id          VARCHAR(36)  NOT NULL PRIMARY KEY,
+  user_id     VARCHAR(36)  NOT NULL,
+  title       VARCHAR(255) NOT NULL,
+  message     TEXT         NOT NULL,
+  type        VARCHAR(50)  NOT NULL DEFAULT 'system',
+  action_url  VARCHAR(500) NULL,
+  metadata    JSON         NULL,
+  is_read     TINYINT(1)   NOT NULL DEFAULT 0,
+  read_at     DATETIME     NULL,
+  created_at  DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
+  INDEX idx_user_id    (user_id),
+  INDEX idx_is_read    (is_read),
+  INDEX idx_created_at (created_at)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- ─── Medical Documents ────────────────────────────────────────────────────
+CREATE TABLE IF NOT EXISTS medical_documents (
+  id            VARCHAR(36)   NOT NULL PRIMARY KEY,
+  patient_id    VARCHAR(36)   NOT NULL,
+  uploaded_by   VARCHAR(36)   NOT NULL,
+  title         VARCHAR(255)  NOT NULL,
+  description   TEXT          NULL,
+  doc_type      ENUM('lab_result','prescription','imaging','discharge_summary','referral','insurance','other') NOT NULL DEFAULT 'other',
+  file_url      VARCHAR(500)  NOT NULL,
+  file_name     VARCHAR(255)  NOT NULL,
+  file_size     INT           NULL,
+  mime_type     VARCHAR(100)  NULL,
+  doc_date      DATE          NULL,
+  facility      VARCHAR(255)  NULL,
+  doctor_name   VARCHAR(255)  NULL,
+  tags          JSON          NULL,
+  is_sensitive  TINYINT(1)    NOT NULL DEFAULT 0,
+  created_at    DATETIME      NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  updated_at    DATETIME      NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  FOREIGN KEY (patient_id)  REFERENCES patients(id) ON DELETE CASCADE,
+  FOREIGN KEY (uploaded_by) REFERENCES users(id)    ON DELETE CASCADE,
+  INDEX idx_patient_id (patient_id),
+  INDEX idx_doc_type   (doc_type),
+  INDEX idx_created_at (created_at)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- ─── Hospitals ────────────────────────────────────────────────────────────
+CREATE TABLE IF NOT EXISTS hospitals (
+  id                   VARCHAR(36)   NOT NULL PRIMARY KEY,
+  admin_user_id        VARCHAR(36)   NULL,
+  name                 VARCHAR(255)  NOT NULL,
+  registration_number  VARCHAR(100)  NULL,
+  type                 ENUM('general','specialist','clinic','teaching','referral') NOT NULL DEFAULT 'general',
+  description          TEXT          NULL,
+  phone                VARCHAR(20)   NULL,
+  email                VARCHAR(255)  NULL,
+  website              VARCHAR(500)  NULL,
+  logo_url             VARCHAR(500)  NULL,
+  address              TEXT          NULL,
+  city                 VARCHAR(100)  NULL,
+  state                VARCHAR(100)  NULL,
+  country              VARCHAR(100)  NOT NULL DEFAULT 'Uganda',
+  latitude             DECIMAL(10,7) NULL,
+  longitude            DECIMAL(10,7) NULL,
+  specializations      JSON          NULL,
+  services             JSON          NULL,
+  operating_hours      JSON          NULL,
+  emergency_available  TINYINT(1)    NOT NULL DEFAULT 0,
+  bed_count            INT           NOT NULL DEFAULT 0,
+  is_verified          TINYINT(1)    NOT NULL DEFAULT 0,
+  is_active            TINYINT(1)    NOT NULL DEFAULT 1,
+  created_at           DATETIME      NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  updated_at           DATETIME      NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  FOREIGN KEY (admin_user_id) REFERENCES users(id) ON DELETE SET NULL,
+  INDEX idx_admin     (admin_user_id),
+  INDEX idx_city      (city),
+  INDEX idx_country   (country),
+  INDEX idx_type      (type),
+  INDEX idx_active    (is_active)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
 -- ─── Audit Logs ───────────────────────────────────────────────────────────
 CREATE TABLE IF NOT EXISTS audit_logs (
   id          BIGINT       NOT NULL PRIMARY KEY AUTO_INCREMENT,
