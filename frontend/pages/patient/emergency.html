@@ -61,11 +61,11 @@
       <div class="p-4 sm:p-6 space-y-5" style="background-image:var(--g-hero)">
 
         <!-- SOS Button -->
-        <div class="animate-fade-up rounded-[18px] p-8 text-center" style="background:linear-gradient(135deg, rgba(244,63,94,.12), rgba(244,63,94,.04));border:2px solid rgba(244,63,94,.3)">
-          <div class="text-6xl mb-4">🚨</div>
-          <h2 class="text-2xl font-bold mb-2" style="color:var(--red)">Emergency SOS</h2>
-          <p class="text-sm mb-6" style="color:var(--text3)">Press the button below to alert your emergency contacts and nearby healthcare providers.</p>
-          <button id="sos-btn" onclick="triggerSOS()" class="px-10 py-4 text-lg font-bold text-white rounded-2xl transition-all hover:scale-105 active:scale-95 animate-pulse-ring" style="background:linear-gradient(135deg, #F43F5E, #DC2626);box-shadow:0 0 30px rgba(244,63,94,.4)">
+        <div class="animate-fade-up rounded-[18px] p-5 sm:p-8 text-center" style="background:linear-gradient(135deg, rgba(244,63,94,.12), rgba(244,63,94,.04));border:2px solid rgba(244,63,94,.3)">
+          <div class="text-4xl sm:text-6xl mb-3 sm:mb-4">🚨</div>
+          <h2 class="text-xl sm:text-2xl font-bold mb-2" style="color:var(--red)">Emergency SOS</h2>
+          <p class="text-sm mb-4 sm:mb-6" style="color:var(--text3)">Press the button below to alert your emergency contacts and nearby healthcare providers.</p>
+          <button id="sos-btn" onclick="triggerSOS()" class="px-6 sm:px-10 py-3.5 sm:py-4 text-base sm:text-lg font-bold text-white rounded-2xl transition-all hover:scale-105 active:scale-95 animate-pulse-ring" style="background:linear-gradient(135deg, #F43F5E, #DC2626);box-shadow:0 0 30px rgba(244,63,94,.4)">
             🚨 TRIGGER SOS
           </button>
           <p class="text-xs mt-4" style="color:var(--text3)">Your location and latest vitals will be shared with emergency contacts.</p>
@@ -76,7 +76,7 @@
         </div>
 
         <!-- Emergency Contacts -->
-        <div class="animate-fade-up-1 rounded-[18px] p-6" style="background:var(--surface2);border:1px solid rgba(34,211,238,.1)">
+        <div class="animate-fade-up-1 rounded-[18px] p-4 sm:p-6" style="background:var(--surface2);border:1px solid rgba(34,211,238,.1)">
           <div class="flex items-center justify-between mb-4">
             <h3 class="font-bold">Emergency Contacts</h3>
             <button onclick="showContactModal()" class="btn-teal text-xs font-semibold px-4 py-2">+ Add Contact</button>
@@ -91,7 +91,7 @@
         </div>
 
         <!-- SOS History -->
-        <div class="animate-fade-up-2 rounded-[18px] p-6" style="background:var(--surface2);border:1px solid rgba(34,211,238,.1)">
+        <div class="animate-fade-up-2 rounded-[18px] p-4 sm:p-6" style="background:var(--surface2);border:1px solid rgba(34,211,238,.1)">
           <h3 class="font-bold mb-4">SOS History</h3>
           <div id="sos-history" class="space-y-3">
             <div class="text-center py-6" style="color:var(--text3)">
@@ -101,7 +101,7 @@
         </div>
 
         <!-- Important Numbers -->
-        <div class="animate-fade-up-3 rounded-[18px] p-6" style="background:var(--surface2);border:1px solid rgba(34,211,238,.1)">
+        <div class="animate-fade-up-3 rounded-[18px] p-4 sm:p-6" style="background:var(--surface2);border:1px solid rgba(34,211,238,.1)">
           <h3 class="font-bold mb-4">🏥 Emergency Numbers</h3>
           <div class="grid sm:grid-cols-2 lg:grid-cols-3 gap-3">
             <a href="tel:911" class="flex items-center gap-3 p-4 rounded-xl" style="background:rgba(244,63,94,.06);border:1px solid rgba(244,63,94,.12)">
@@ -154,7 +154,7 @@
 
   <!-- Add Contact Modal -->
   <div id="contact-modal" class="hidden modal-bg">
-    <div class="modal-panel p-6 max-w-md">
+    <div class="modal-panel p-4 sm:p-6 max-w-md">
       <div class="flex items-center justify-between mb-5">
         <h2 class="text-lg font-bold font-serif">Add Emergency Contact</h2>
         <button onclick="hideContactModal()" class="text-xl" style="color:var(--text3)">&times;</button>

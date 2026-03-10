@@ -22,7 +22,7 @@
   <div id="sidebar-overlay" class="fixed inset-0 bg-black/50 z-20 lg:hidden hidden" onclick="toggleSidebar()"></div>
 
   <!-- Sidebar -->
-  <aside id="sidebar" class="fixed left-0 top-0 h-full w-64 z-30 -translate-x-full lg:translate-x-0 transition-transform duration-300 flex flex-col" style="background:var(--surface);border-right:1px solid var(--border)">
+  <aside id="sidebar" class="fixed left-0 top-0 h-full w-64 max-w-[80vw] z-30 -translate-x-full lg:translate-x-0 transition-transform duration-300 flex flex-col" style="background:var(--surface);border-right:1px solid var(--border)">
     <div class="p-6" style="border-bottom:1px solid var(--border)">
       <div class="w-10 h-10 rounded-xl flex items-center justify-center text-white font-bold text-lg mb-3" style="background:linear-gradient(135deg,var(--cyan),var(--green))">M</div>
       <div class="font-bold font-serif text-lg">HealthConnect</div>
@@ -57,9 +57,9 @@
 
   <!-- Main Content -->
   <main class="lg:ml-64 min-h-screen">
-    <div class="px-4 sm:px-6 py-4 flex items-center gap-4 sticky top-0 z-10" style="background:rgba(7,14,28,.75);backdrop-filter:blur(20px);border-bottom:1px solid var(--border)">
+    <div class="px-4 sm:px-6 py-3 sm:py-4 flex items-center gap-3 sm:gap-4 sticky top-0 z-10" style="background:rgba(7,14,28,.75);backdrop-filter:blur(20px);border-bottom:1px solid var(--border)">
       <button class="lg:hidden text-xl" style="color:var(--text2)" onclick="toggleSidebar()">☰</button>
-      <h1 class="font-bold font-serif text-lg">Admin Dashboard</h1>
+      <h1 class="font-bold font-serif text-base sm:text-lg">Admin Dashboard</h1>
       <span class="ml-auto text-xs font-semibold px-3 py-1 rounded-full" style="background:rgba(239,68,68,.1);color:#F87171">ADMIN</span>
     </div>
 
@@ -114,8 +114,8 @@
       <!-- Users Section -->
       <div id="section-users" class="hidden space-y-4 animate-fade-up">
         <div class="flex flex-wrap items-center justify-between gap-3">
-          <h2 class="font-bold text-lg">All Users</h2>
-          <div class="flex gap-2">
+          <h2 class="font-bold text-base sm:text-lg">All Users</h2>
+          <div class="flex flex-wrap gap-2 w-full sm:w-auto">
             <input type="text" id="user-search" placeholder="Search name or email..." class="input-dark" style="width:auto" oninput="filterUsers()">
             <select id="role-filter" onchange="filterUsers()" class="input-dark" style="width:auto">
               <option value="">All Roles</option>
@@ -145,7 +145,7 @@
 
       <!-- Doctor Verification Section -->
       <div id="section-doctors" class="hidden space-y-4 animate-fade-up">
-        <h2 class="font-bold text-lg">Pending Doctor Verification</h2>
+        <h2 class="font-bold text-base sm:text-lg">Pending Doctor Verification</h2>
         <div id="pending-doctors-list" class="space-y-4"></div>
         <div id="no-pending-msg" class="hidden text-center py-16" style="color:var(--text3)">
           <div class="text-5xl mb-3">✅</div>
@@ -156,7 +156,7 @@
       <!-- Hospital Verification Section -->
       <div id="section-hospitals" class="hidden space-y-4 animate-fade-up">
         <div class="flex flex-wrap items-center justify-between gap-3">
-          <h2 class="font-bold text-lg">Hospital Verification</h2>
+          <h2 class="font-bold text-base sm:text-lg">Hospital Verification</h2>
           <select id="hospital-status-filter" onchange="loadAdminHospitals()" class="input-dark" style="width:auto">
             <option value="pending">⏳ Pending</option>
             <option value="verified">✅ Verified</option>
@@ -191,7 +191,7 @@
 
       <!-- Revenue Section -->
       <div id="section-revenue" class="hidden space-y-4 animate-fade-up">
-        <h2 class="font-bold text-lg">Revenue Overview</h2>
+        <h2 class="font-bold text-base sm:text-lg">Revenue Overview</h2>
         <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
           <div class="rounded-[18px] p-5" style="background:var(--surface2);border:1px solid var(--border)">
             <div class="text-2xl font-bold" style="color:var(--cyan)" id="rev-today">—</div>
@@ -227,7 +227,7 @@
 
       <!-- Audit Logs Section -->
       <div id="section-audit" class="hidden space-y-4 animate-fade-up">
-        <h2 class="font-bold text-lg">Audit Logs</h2>
+        <h2 class="font-bold text-base sm:text-lg">Audit Logs</h2>
         <div class="rounded-[18px] overflow-hidden" style="background:var(--surface2);border:1px solid var(--border)">
           <div class="overflow-x-auto">
             <table class="w-full text-xs sm:text-sm dark-table">

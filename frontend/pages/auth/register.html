@@ -39,20 +39,20 @@
   </div>
 
   <!-- Right panel -->
-  <div class="w-full lg:w-3/5 flex items-center justify-center p-6 overflow-y-auto">
+  <div class="w-full lg:w-3/5 flex items-center justify-center p-4 sm:p-6 overflow-y-auto">
     <div class="w-full max-w-lg py-8">
       <div class="lg:hidden text-center mb-6">
         <a href="/" class="inline-flex items-center gap-2 font-bold text-xl" style="color:var(--cyan)">🏥 <span class="font-serif">HealthConnect</span></a>
       </div>
-      <h2 class="text-3xl font-bold font-serif mb-2">Create your account</h2>
-      <p class="mb-8" style="color:var(--text3)">Already have one? <a href="/pages/auth/login.html" class="font-medium hover:underline" style="color:var(--cyan)">Sign In</a></p>
+      <h2 class="text-2xl sm:text-3xl font-bold font-serif mb-2">Create your account</h2>
+      <p class="mb-6 sm:mb-8" style="color:var(--text3)">Already have one? <a href="/pages/auth/login.html" class="font-medium hover:underline" style="color:var(--cyan)">Sign In</a></p>
 
       <div id="alert" class="hidden mb-4 p-4 rounded-xl text-sm font-medium"></div>
 
       <!-- Role selector -->
       <div class="mb-6">
         <label class="block text-sm font-medium mb-2">I am a...</label>
-        <div class="grid grid-cols-3 gap-3">
+        <div class="grid grid-cols-3 gap-2 sm:gap-3">
           <label class="role-card">
             <input type="radio" name="role" value="patient" checked class="hidden">
             <div><div class="font-semibold">Patient</div><div class="text-xs" style="color:var(--text3)">Looking for care</div></div>
@@ -81,7 +81,7 @@
       </div>
 
       <form id="register-form" class="space-y-4">
-        <div class="grid grid-cols-2 gap-4">
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div>
             <label class="block text-sm font-medium mb-1.5">First Name</label>
             <input type="text" id="firstName" required placeholder="John" class="input-dark">

@@ -63,7 +63,7 @@
             <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/></svg>
           </button>
           <div>
-            <h1 class="text-xl font-bold font-serif">🔍 Find a Doctor</h1>
+            <h1 class="text-lg sm:text-xl font-bold font-serif">🔍 Find a Doctor</h1>
             <p class="text-xs" style="color:var(--text3)">Search or get AI-powered recommendations</p>
           </div>
         </div>
@@ -103,7 +103,7 @@
 
     <!-- AI Recommend Mode -->
     <div id="recommend-section" class="hidden">
-      <div class="rounded-xl p-6 mb-6" style="background:var(--surface2);border:1px solid var(--border)">
+      <div class="rounded-xl p-4 sm:p-6 mb-6" style="background:var(--surface2);border:1px solid var(--border)">
         <h3 class="font-semibold mb-1">🤖 Smart Doctor Match</h3>
         <p class="text-sm mb-4" style="color:var(--text3)">Describe your symptoms and our AI will recommend the best matching doctors for you.</p>
         <div class="space-y-3">
@@ -125,11 +125,11 @@
   <!-- Doctor Profile Modal -->
   <div id="doctor-modal" class="modal-bg hidden">
     <div class="modal-panel w-full max-w-lg max-h-[90vh] overflow-y-auto">
-      <div class="p-6 flex items-center justify-between sticky top-0 z-10" style="background:var(--surface2);border-bottom:1px solid var(--border)">
+      <div class="p-4 sm:p-6 flex items-center justify-between sticky top-0 z-10" style="background:var(--surface2);border-bottom:1px solid var(--border)">
         <h2 class="text-lg font-bold font-serif" id="modal-doc-name">Doctor Profile</h2>
         <button onclick="document.getElementById('doctor-modal').classList.add('hidden')" class="text-2xl leading-none" style="color:var(--text3)">×</button>
       </div>
-      <div class="p-6 space-y-5" id="modal-doc-body"></div>
+      <div class="p-4 sm:p-6 space-y-5" id="modal-doc-body"></div>
     </div>
   </div>
 

@@ -51,7 +51,7 @@
             <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/></svg>
           </button>
           <div>
-            <h1 class="text-xl font-bold font-serif">Test Results</h1>
+            <h1 class="text-lg sm:text-xl font-bold font-serif">Test Results</h1>
             <p class="text-xs" style="color:var(--text3)">Lab & medical test results from your hospitals</p>
           </div>
         </div>
@@ -114,7 +114,7 @@
   <div id="result-modal" class="fixed inset-0 z-50 hidden">
     <div class="absolute inset-0 bg-black/60 backdrop-blur-sm" onclick="closeModal()"></div>
     <div class="absolute inset-4 sm:inset-auto sm:top-1/2 sm:left-1/2 sm:-translate-x-1/2 sm:-translate-y-1/2 sm:w-full sm:max-w-2xl sm:max-h-[85vh] rounded-2xl overflow-y-auto" style="background:var(--surface2);border:1px solid rgba(34,211,238,.15)">
-      <div class="p-6">
+      <div class="p-4 sm:p-6">
         <div class="flex items-center justify-between mb-5">
           <h2 class="font-bold text-lg font-serif" id="modal-title">Test Result Details</h2>
           <button onclick="closeModal()" class="p-2 rounded-lg transition-all" style="background:rgba(255,255,255,.05)" onmouseover="this.style.background='rgba(255,255,255,.1)'" onmouseout="this.style.background='rgba(255,255,255,.05)'">✕</button>
@@ -293,7 +293,7 @@
             </div>
 
             <!-- Details grid -->
-            <div class="grid grid-cols-2 gap-4">
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div class="p-4 rounded-xl" style="background:var(--bg);border:1px solid var(--border)">
                 <div class="text-[11px] mb-1" style="color:var(--text3)">Hospital</div>
                 <div class="text-sm font-semibold">🏥 ${r.hospital_name || 'Unknown'}</div>

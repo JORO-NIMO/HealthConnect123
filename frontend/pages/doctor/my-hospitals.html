@@ -45,7 +45,7 @@
             <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/></svg>
           </button>
           <div>
-            <h1 class="text-xl font-bold font-serif">My Hospital Affiliations</h1>
+            <h1 class="text-lg sm:text-xl font-bold font-serif">My Hospital Affiliations</h1>
             <p class="text-xs" style="color:var(--text3)">Hospitals where you practice</p>
           </div>
         </div>
@@ -97,7 +97,7 @@
         }
 
         el.innerHTML = hospitals.map(h => `
-          <div class="rounded-[18px] p-6 mb-4 transition-all" style="background:var(--surface2);border:1px solid rgba(34,211,238,.1)" onmouseover="this.style.borderColor='rgba(34,211,238,.25)'" onmouseout="this.style.borderColor='rgba(34,211,238,.1)'">
+          <div class="rounded-[18px] p-4 sm:p-6 mb-4 transition-all" style="background:var(--surface2);border:1px solid rgba(34,211,238,.1)" onmouseover="this.style.borderColor='rgba(34,211,238,.25)'" onmouseout="this.style.borderColor='rgba(34,211,238,.1)'">
             <div class="flex items-start gap-5">
               <div class="w-16 h-16 rounded-2xl flex items-center justify-center text-3xl flex-shrink-0" style="background:rgba(34,211,238,.08)">🏥</div>
               <div class="flex-1 min-w-0">

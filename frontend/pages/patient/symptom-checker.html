@@ -85,8 +85,8 @@
 
     <!-- ── STEP 1: Enter Symptoms ── -->
     <div id="step-1" class="animate-fade-up">
-      <div class="rounded-[18px] p-6" style="background:var(--surface2);border:1px solid rgba(34,211,238,.1)">
-        <h2 class="text-xl font-bold mb-1">What symptoms are you experiencing?</h2>
+      <div class="rounded-[18px] p-4 sm:p-6" style="background:var(--surface2);border:1px solid rgba(34,211,238,.1)">
+        <h2 class="text-lg sm:text-xl font-bold mb-1">What symptoms are you experiencing?</h2>
         <p class="text-sm mb-5" style="color:var(--text3)">Tap the symptoms that apply, or type your own below.</p>
 
         <!-- Selected symptoms bar -->
@@ -243,8 +243,8 @@
 
     <!-- ── STEP 2: Patient Details ── -->
     <div id="step-2" class="hidden animate-fade-up">
-      <div class="rounded-[18px] p-6" style="background:var(--surface2);border:1px solid rgba(34,211,238,.1)">
-        <h2 class="text-xl font-bold mb-2">Tell us more about yourself</h2>
+      <div class="rounded-[18px] p-4 sm:p-6" style="background:var(--surface2);border:1px solid rgba(34,211,238,.1)">
+        <h2 class="text-lg sm:text-xl font-bold mb-2">Tell us more about yourself</h2>
         <p class="text-sm mb-5" style="color:var(--text3)">This helps the AI give more accurate results. All fields are optional.</p>
 
         <div class="space-y-4">
@@ -293,7 +293,7 @@
     <div id="step-3" class="hidden animate-fade-up">
 
       <!-- Loading state -->
-      <div id="results-loading" class="rounded-[18px] p-10 text-center" style="background:var(--surface2);border:1px solid rgba(34,211,238,.1)">
+      <div id="results-loading" class="rounded-[18px] p-6 sm:p-10 text-center" style="background:var(--surface2);border:1px solid rgba(34,211,238,.1)">
         <div class="relative w-20 h-20 mx-auto mb-6">
           <div class="absolute inset-0 rounded-full opacity-20 animate-ping" style="background:var(--cyan)"></div>
           <div class="relative w-20 h-20 rounded-full flex items-center justify-center text-3xl" style="background:linear-gradient(135deg,var(--cyan),#1A9090)">🤖</div>
@@ -341,11 +341,11 @@
         </div>
 
         <!-- CTA: Book doctor -->
-        <div class="rounded-[18px] p-6 text-center text-white" style="background:linear-gradient(135deg,var(--cyan),#1A9090)">
-          <h3 class="text-lg font-bold mb-2">Want a professional consultation?</h3>
+        <div class="rounded-[18px] p-4 sm:p-6 text-center text-white" style="background:linear-gradient(135deg,var(--cyan),#1A9090)">
+          <h3 class="text-base sm:text-lg font-bold mb-2">Want a professional consultation?</h3>
           <p class="text-white/70 text-sm mb-4">Book a video or chat session with a verified doctor based on your results.</p>
           <a href="/pages/patient/appointments.html" id="book-from-report"
-            class="inline-block font-bold px-8 py-3 rounded-xl transition-all" style="background:rgba(255,255,255,.15);border:1.5px solid rgba(255,255,255,.3);backdrop-filter:blur(8px)">
+            class="inline-block font-bold px-5 sm:px-8 py-3 rounded-xl transition-all" style="background:rgba(255,255,255,.15);border:1.5px solid rgba(255,255,255,.3);backdrop-filter:blur(8px)">
             Book Doctor Consultation →
           </a>
         </div>

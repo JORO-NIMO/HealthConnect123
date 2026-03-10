@@ -14,7 +14,7 @@
   <div id="sidebar-overlay" class="fixed inset-0 bg-black/40 backdrop-blur-sm z-20 lg:hidden hidden" onclick="toggleSidebar()"></div>
 
   <!-- Sidebar -->
-  <aside id="sidebar" class="fixed left-0 top-0 h-full w-[220px] z-30 -translate-x-full lg:translate-x-0 transition-transform duration-300 flex flex-col" style="background:var(--surface2);border-right:1px solid rgba(34,211,238,.1)">
+  <aside id="sidebar" class="fixed left-0 top-0 h-full w-[220px] max-w-[80vw] z-30 -translate-x-full lg:translate-x-0 transition-transform duration-300 flex flex-col" style="background:var(--surface2);border-right:1px solid rgba(34,211,238,.1)">
     <div class="p-5 pb-3" style="border-bottom:1px solid var(--border)">
       <a href="/" class="flex items-center gap-2 font-bold text-lg">
         <div class="w-8 h-8 rounded-[10px] bg-[#22D3EE] flex items-center justify-center text-white text-sm">🏥</div>
@@ -60,9 +60,9 @@
     <div class="p-4 sm:p-6 max-w-6xl mx-auto">
 
       <!-- No Hospital Registered Banner -->
-      <div id="no-hospital-banner" class="hidden rounded-2xl p-8 text-center mb-6" style="background:var(--surface2);border:1px solid var(--border)">
-        <div class="text-5xl mb-4">🏥</div>
-        <h2 class="text-xl font-bold mb-2">Register Your Hospital</h2>
+      <div id="no-hospital-banner" class="hidden rounded-2xl p-5 sm:p-8 text-center mb-6" style="background:var(--surface2);border:1px solid var(--border)">
+        <div class="text-4xl sm:text-5xl mb-3 sm:mb-4">🏥</div>
+        <h2 class="text-lg sm:text-xl font-bold mb-2">Register Your Hospital</h2>
         <p class="text-sm mb-6" style="color:var(--text3)">Set up your hospital profile to start managing doctors, patients, and test results.</p>
         <button onclick="showTab('profile')" class="btn-teal px-6 py-3 font-semibold rounded-xl">Register Hospital</button>
       </div>
@@ -93,7 +93,7 @@
 
       <!-- Tabs -->
       <div id="tab-overview" class="tab-content">
-        <div class="grid md:grid-cols-2 gap-4">
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
           <!-- Quick Actions -->
           <div class="rounded-2xl p-5" style="background:var(--surface2);border:1px solid var(--border)">
             <h3 class="font-bold mb-4">⚡ Quick Actions</h3>
@@ -159,8 +159,8 @@
       <!-- Hospital Profile Tab -->
       <div id="tab-profile" class="tab-content hidden">
         <h2 class="font-bold text-lg mb-4">⚙️ Hospital Profile</h2>
-        <form id="hospital-form" class="rounded-2xl p-5 space-y-4" style="background:var(--surface2);border:1px solid var(--border)">
-          <div class="grid md:grid-cols-2 gap-4">
+        <form id="hospital-form" class="rounded-2xl p-4 sm:p-5 space-y-4" style="background:var(--surface2);border:1px solid var(--border)">
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
               <label class="text-xs font-semibold block mb-1" style="color:var(--text3)">Hospital Name *</label>
               <input type="text" id="h-name" class="w-full px-3 py-2 rounded-lg text-sm" style="background:var(--surface1);border:1px solid var(--border);color:var(--text1)" required>
@@ -209,7 +209,7 @@
             <label class="text-xs font-semibold block mb-1" style="color:var(--text3)">Description</label>
             <textarea id="h-description" rows="3" class="w-full px-3 py-2 rounded-lg text-sm" style="background:var(--surface1);border:1px solid var(--border);color:var(--text1)" placeholder="Brief description of your hospital..."></textarea>
           </div>
-          <div class="grid md:grid-cols-3 gap-4">
+          <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
             <div>
               <label class="text-xs font-semibold block mb-1" style="color:var(--text3)">Bed Count</label>
               <input type="number" id="h-beds" class="w-full px-3 py-2 rounded-lg text-sm" style="background:var(--surface1);border:1px solid var(--border);color:var(--text1)" min="0">
