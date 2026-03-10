@@ -4,7 +4,14 @@
  */
 
 (async () => {
-  Auth.requireRole('hospital_admin');
+  const user = Auth.requireRole('hospital_admin');
+  if (!user) return;
+
+  // Block unverified hospital admins
+  if (user.verificationStatus && user.verificationStatus !== 'verified') {
+    window.location.href = '/pages/auth/pending-verification.html';
+    return;
+  }
 
   // ─── State ────────────────────────────────────────────────────────────
   let hospital = null;

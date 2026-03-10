@@ -1,6 +1,128 @@
 /**
  * HealthConnect — Auth Page Logic
- * Handles login form, OTP flow, Google OAuth, and registration
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+</html></body>  </script>    })();      document.getElementById('logout-btn').addEventListener('click', () => Auth.logout());      // Logout      });        }          document.getElementById('status-message').textContent = 'Could not check status. Please try again.';        } catch (err) {          }            document.getElementById('status-message').textContent = 'Still under review. Check back soon!';          if (vs === 'pending') {          render(vs);          Auth.saveUser(me);          me.verificationStatus = vs;          // Update stored user          }            } catch { vs = 'pending'; }              vs = hRes.data?.hospital?.verification_status || 'pending';              const hRes = await API.get('/hospitals/my-hospital');            try {          } else if (me.role === 'hospital_admin') {            vs = dRes.data?.doctor?.verification_status || 'pending';            const dRes = await API.get('/doctors/me/profile');          if (me.role === 'doctor') {          let vs = 'pending';          // Determine verification status from profile          const me  = res.data.user;          const res = await API.get('/auth/me');        try {      document.getElementById('check-status-btn').addEventListener('click', async () => {      // Check status button      render(user.verificationStatus);      // Render initial state from stored user      }        }          if (note) { noteEl.textContent = 'Admin note: ' + note; noteEl.style.display = 'block'; }          pill.textContent  = '❌ Rejected';          pill.className    = 'status-pill pill-rejected';          msg.textContent   = 'Unfortunately your account verification was not approved. Please review the note below or contact support.';          title.textContent = 'Verification Declined';          icon.textContent  = '❌';        if (status === 'rejected') {        }          return;          Auth.redirectToDashboard(user.role);        if (status === 'verified') {        const noteEl  = document.getElementById('rejected-note');        const pill    = document.getElementById('status-pill');        const msg     = document.getElementById('status-message');        const title   = document.getElementById('status-title');        const icon    = document.getElementById('status-icon');      function render(status, note) {      }        return;        Auth.redirectToDashboard(user.role);      if (user.verificationStatus === 'verified') {      // If already verified, redirect      }        return;        Auth.redirectToDashboard(user.role);      if (user.role === 'patient' || user.role === 'admin') {      // Patients and admins don't need verification      if (!user) { window.location.href = '/pages/auth/login.html'; return; }      const user = Auth.getUser();    (async () => {  <script>  <script src="/js/auth.js"></script>  <script src="/js/api.js"></script>  <script src="/js/config.js"></script>  </div>    </div>      <button class="btn btn-ghost" id="logout-btn">Sign Out</button>      <button class="btn btn-ghost" id="check-status-btn">🔄 Check Status</button>      <a href="/" class="btn btn-primary">← Back to Home</a>    <div class="actions">    <div id="rejected-note" class="rejected-msg" style="display:none;"></div>    </div>      <span class="status-pill pill-pending" id="status-pill">⏳ Pending Verification</span>    <div id="status-pill-wrap">    </p>      This usually takes 24–48 hours. You'll receive a notification once your account is approved.      Your account has been submitted and is awaiting admin verification.    <p class="sub" id="status-message">    <h1 id="status-title">Account Under Review</h1>    <div class="icon" id="status-icon">⏳</div>  <div class="card" id="verification-card"><body></head>  </style>    .rejected-msg { margin-top: 16px; padding: 16px; border-radius: 12px; background: rgba(239,68,68,.06); border: 1px solid rgba(239,68,68,.15); color: #EF4444; font-size: 14px; text-align: left; }    .btn-ghost { background: transparent; color: var(--text3); border: 1px solid var(--border); }    .btn-primary { background: var(--primary); color: #fff; }    .btn { padding: 12px 24px; border-radius: 12px; font-weight: 600; font-size: 14px; text-decoration: none; display: inline-block; cursor: pointer; border: none; }    .actions { margin-top: 32px; display: flex; flex-direction: column; gap: 12px; }    .pill-rejected { background: rgba(239,68,68,.1);  color: #EF4444; border: 1px solid rgba(239,68,68,.25); }    .pill-pending  { background: rgba(245,158,11,.1); color: #F59E0B; border: 1px solid rgba(245,158,11,.25); }    .status-pill { display: inline-flex; align-items: center; gap: 6px; padding: 8px 20px; border-radius: 99px; font-size: 14px; font-weight: 600; }    .sub { color: var(--text3); font-size: 15px; line-height: 1.7; margin-bottom: 28px; }    h1 { font-size: 24px; font-weight: 700; margin-bottom: 8px; }    .icon { font-size: 56px; margin-bottom: 16px; }    .card { background: var(--surface); border: 1px solid var(--border); border-radius: 20px; max-width: 480px; width: 100%; padding: 48px 36px; text-align: center; }    body { background: var(--bg); color: var(--text); min-height: 100vh; display: flex; align-items: center; justify-content: center; }  <style>  <link rel="stylesheet" href="/css/main.css" />  <title>Pending Verification — HealthConnect</title>  <meta name="viewport" content="width=device-width, initial-scale=1.0" />  <meta charset="UTF-8" /><head> * Handles login form, OTP flow, Google OAuth, and registration
  */
 
 // ─── Login Page ───────────────────────────────────────────────────────────
@@ -48,6 +170,14 @@ if (document.getElementById('login-form')) {
         password: document.getElementById('password').value,
       });
       Auth.saveSession(data.data.tokens, data.data.user);
+
+      // Check if doctor/hospital is pending verification
+      const vs = data.data.user.verificationStatus;
+      if ((data.data.user.role === 'doctor' || data.data.user.role === 'hospital_admin') && vs && vs !== 'verified') {
+        window.location.href = '/pages/auth/pending-verification.html';
+        return;
+      }
+
       Auth.redirectToDashboard(data.data.user.role);
     } catch (err) {
       Utils.showAlert('login-alert', err.message || 'Invalid credentials', 'error');
@@ -179,6 +309,13 @@ if (document.getElementById('register-form')) {
     try {
       const data = await API.post('/auth/register', payload);
       Auth.saveSession(data.data.tokens, data.data.user);
+
+      // Doctors and hospital_admin need admin verification first
+      if (role === 'doctor' || role === 'hospital_admin') {
+        window.location.href = '/pages/auth/pending-verification.html';
+        return;
+      }
+
       Auth.redirectToDashboard(data.data.user.role);
     } catch (err) {
       const msg = err.errors ? err.errors.map(e => e.msg).join(', ') : err.message;

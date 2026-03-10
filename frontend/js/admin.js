@@ -135,7 +135,7 @@
         <td class="px-5 py-4 text-xs" style="color:var(--text3)">${Utils.formatDate(u.createdAt)}</td>
         <td class="px-5 py-4">
           ${u.role !== 'admin' ? `
-            <button onclick="confirmDelete(${u.id})" class="text-xs font-medium" style="color:var(--red)">Delete</button>
+            <button onclick="confirmDelete('${u.id}')" class="text-xs font-medium" style="color:var(--red)">Delete</button>
           ` : ''}
         </td>
       </tr>
@@ -187,11 +187,11 @@
               </div>
             </div>
             <div class="flex gap-2">
-              <button onclick="verifyDoctor(${d.doctorId || d.id}, 'verified')"
+              <button onclick="verifyDoctor('${d.doctorId || d.id}', 'verified')"
                 class="text-sm font-medium px-4 py-2 rounded-xl text-white transition" style="background:var(--green)">
                 ✓ Approve
               </button>
-              <button onclick="verifyDoctor(${d.doctorId || d.id}, 'rejected')"
+              <button onclick="verifyDoctor('${d.doctorId || d.id}', 'rejected')"
                 class="text-sm font-medium px-4 py-2 rounded-xl transition" style="background:rgba(239,68,68,.1);color:var(--red)">
                 ✕ Reject
               </button>

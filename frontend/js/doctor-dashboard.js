@@ -6,6 +6,12 @@
   const user = Auth.requireRole('doctor');
   if (!user) return;
 
+  // Block unverified doctors
+  if (user.verificationStatus && user.verificationStatus !== 'verified') {
+    window.location.href = '/pages/auth/pending-verification.html';
+    return;
+  }
+
   let allAppointments = [];
   let currentTab = 'dashboard';
 

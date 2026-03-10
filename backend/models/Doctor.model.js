@@ -42,8 +42,7 @@ class DoctorModel {
       WHERE u.is_active = 1
     `;
     const params = [];
-    // TODO: restore for production
-    // if (verifiedOnly) { sql += ` AND d.verification_status IN ('verified', 'pending')`; }
+    if (verifiedOnly) { sql += ` AND d.verification_status = 'verified'`; }
     if (availableOnly) { sql += ' AND d.is_available = 1'; }
     if (specialization) { sql += ' AND d.specialization = ?'; params.push(specialization); }
     sql += ' ORDER BY d.rating DESC, d.total_reviews DESC LIMIT ? OFFSET ?';

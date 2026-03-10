@@ -204,6 +204,13 @@
       try {
         const res = await API.post('/auth/register', body);
         Auth.saveSession(res.data.tokens, res.data.user);
+
+        // Doctors and hospital_admin need admin verification
+        if (role === 'doctor' || role === 'hospital_admin') {
+          window.location.href = '/pages/auth/pending-verification.html';
+          return;
+        }
+
         Auth.redirectToDashboard(res.data.user.role);
       } catch (err) {
         showAlert(err.message || 'Registration failed', 'error');

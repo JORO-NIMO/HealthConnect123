@@ -36,8 +36,15 @@ exports.register = async (req, res, next) => {
     // Send welcome email (non-blocking)
     sendVerificationEmail(user).catch(err => logger.warn('Email failed:', err.message));
 
+    const verificationStatus = (role === 'doctor' || role === 'hospital_admin') ? 'pending' : null;
+
     return sendSuccess(res, 201, 'Account created successfully.', {
-      user  : { id: user.id, email: user.email, firstName: user.first_name, lastName: user.last_name, role: user.role },
+      user  : {
+        id: user.id, email: user.email,
+        firstName: user.first_name, lastName: user.last_name,
+        role: user.role,
+        verificationStatus,
+      },
       tokens,
     });
   } catch (err) { next(err); }
@@ -54,13 +61,30 @@ exports.login = async (req, res, next) => {
     const valid = await UserModel.validatePassword(password, user.password_hash);
     if (!valid) return sendError(res, 401, 'Invalid email or password.');
 
+    if (!user.is_active) return sendError(res, 403, 'Your account has been deactivated. Contact support.');
+
+    // Check verification status for doctors and hospital_admin
+    let verificationStatus = null;
+    if (user.role === 'doctor') {
+      const doctor = await DoctorModel.findByUserId(user.id);
+      verificationStatus = doctor?.verification_status || 'pending';
+    } else if (user.role === 'hospital_admin') {
+      const hospital = await HospitalModel.findByAdminUserId(user.id);
+      verificationStatus = hospital?.verification_status || 'pending';
+    }
+
     const tokens = generateTokens(user);
     const expiresAt = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000);
     await UserModel.saveRefreshToken(user.id, tokens.refreshToken, expiresAt);
 
     logger.info(`User logged in: ${user.email}`);
     return sendSuccess(res, 200, 'Login successful.', {
-      user  : { id: user.id, email: user.email, firstName: user.first_name, lastName: user.last_name, role: user.role },
+      user  : {
+        id: user.id, email: user.email,
+        firstName: user.first_name, lastName: user.last_name,
+        role: user.role,
+        verificationStatus,
+      },
       tokens,
     });
   } catch (err) { next(err); }
