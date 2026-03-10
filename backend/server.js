@@ -69,14 +69,24 @@ app.use(morgan('combined', {
 app.use('/api', auditMiddleware);
 
 // ─── Static Frontend ───────────────────────────────────────────────────────
-app.use(express.static(path.join(__dirname, '../frontend'), {
-  etag: false,
-  setHeaders(res, filePath) {
-    if (filePath.endsWith('.html') || filePath.endsWith('.js') || filePath.endsWith('.css')) {
-      res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate');
-    }
-  },
-}));
+const fs = require('fs');
+const FRONTEND_DIR   = path.join(__dirname, '../frontend');
+const FRONTEND_INDEX = path.join(FRONTEND_DIR, 'index.html');
+const hasFrontend    = fs.existsSync(FRONTEND_INDEX);
+
+if (hasFrontend) {
+  app.use(express.static(FRONTEND_DIR, {
+    etag: false,
+    setHeaders(res, filePath) {
+      if (filePath.endsWith('.html') || filePath.endsWith('.js') || filePath.endsWith('.css')) {
+        res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate');
+      }
+    },
+  }));
+} else {
+  logger.warn('⚠️  Frontend directory not found at ' + FRONTEND_DIR);
+  logger.warn('   If running on Railway, set Root Directory to "/" (repo root), not "backend/"');
+}
 
 // ─── API Routes ────────────────────────────────────────────────────────────
 app.use('/api/v1', routes);
@@ -86,9 +96,11 @@ const healthRoutes = require('./routes/health.routes');
 app.use('/api', healthRoutes);
 
 // ─── Serve Frontend SPA ────────────────────────────────────────────────────
-app.get('*', (req, res) => {
-  res.sendFile(path.join(__dirname, '../frontend/index.html'));
-});
+if (hasFrontend) {
+  app.get('*', (req, res) => {
+    res.sendFile(FRONTEND_INDEX);
+  });
+}
 
 // ─── Error Handlers ────────────────────────────────────────────────────────
 app.use(notFound);
