@@ -4,7 +4,7 @@
  * Optimised for low-bandwidth African networks
  */
 
-const CACHE_VERSION = 'v2.0.0';
+const CACHE_VERSION = 'v3.0.0';
 const STATIC_CACHE  = `healthconnect-static-${CACHE_VERSION}`;
 const DYNAMIC_CACHE = `healthconnect-dynamic-${CACHE_VERSION}`;
 
@@ -78,15 +78,16 @@ self.addEventListener('fetch', event => {
   // Skip non-GET and cross-origin (Socket.IO etc.)
   if (request.method !== 'GET' || url.origin !== self.location.origin) return;
 
-  // Network-only for critical API calls
-  if (NETWORK_ONLY.some(p => url.pathname.startsWith(p))) {
-    event.respondWith(fetch(request));
-    return;
-  }
-
-  // Network-first for all API calls (fresh data with cache fallback)
+  // ALL API calls must be network-only — never serve cached API data
   if (url.pathname.startsWith('/api/')) {
-    event.respondWith(networkFirst(request));
+    event.respondWith(
+      fetch(request).catch(() =>
+        new Response(JSON.stringify({ success: false, message: 'You are offline' }), {
+          status: 503,
+          headers: { 'Content-Type': 'application/json' },
+        })
+      )
+    );
     return;
   }
 
