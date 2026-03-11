@@ -41,7 +41,25 @@ exports.analyzeSymptoms = async (req, res, next) => {
     };
 
     logger.info(`AI analysis started for patient: ${req.user.id}`);
-    const analysis = await AIService.analyzeSymptoms(context);
+
+    // Wrap AI call in a hard 22s timeout — the server MUST reply with JSON
+    // before Railway's ~30s proxy deadline, otherwise Railway returns HTML 502.
+    let analysis;
+    try {
+      analysis = await Promise.race([
+        AIService.analyzeSymptoms(context),
+        new Promise((_, reject) => setTimeout(() => reject(new Error('AI_TIMEOUT')), 22000)),
+      ]);
+    } catch (timeoutErr) {
+      logger.warn(`AI timed out or errored for patient ${req.user.id}: ${timeoutErr.message}`);
+      analysis = AIService.getFallbackAnalysis ? AIService.getFallbackAnalysis(symptoms) : {
+        possibleConditions: [{ name: 'Analysis timed out', icd10Code: null, probability: 'medium', confidenceScore: 0, description: 'AI took too long. Please retry or consult a doctor.', symptoms }],
+        urgencyLevel: 'MEDIUM', urgencyReason: 'Unable to determine urgency.',
+        recommendedActions: ['Consult a qualified doctor', 'Retry the symptom checker'],
+        followUpQuestions: [], disclaimer: 'Please consult a healthcare professional.',
+        summary: 'Analysis timed out. Please try again or book a consultation.',
+      };
+    }
 
     // Persist the report
     const report = await SymptomReport.create({
@@ -55,13 +73,13 @@ exports.analyzeSymptoms = async (req, res, next) => {
     logger.info(`AI analysis complete. Urgency: ${analysis.urgencyLevel} | Patient: ${req.user.id}`);
 
     // ─── AUTO-RECOMMEND DOCTORS based on analysis + location ───────────
+    // Uses fast DB-based ranking only (no second AI call) to stay within timeout.
     let recommendedDoctors = [];
     try {
       const patLat = latitude  || patient?.latitude;
       const patLng = longitude || patient?.longitude;
       const radius  = parseInt(radiusKm) || 50;
 
-      // Fetch doctors: prefer nearby if location is available
       let availableDoctors;
       if (patLat && patLng) {
         availableDoctors = await DoctorModel.findNearby(parseFloat(patLat), parseFloat(patLng), radius, { limit: 30 });
@@ -69,7 +87,6 @@ exports.analyzeSymptoms = async (req, res, next) => {
         availableDoctors = await DoctorModel.listWithLocation({ limit: 30, availableOnly: true });
       }
 
-      // Build patient context for AI matching
       const patientContext = {
         age: patient?.date_of_birth ? Math.floor((Date.now() - new Date(patient.date_of_birth)) / 31557600000) : null,
         gender: patient?.gender,
@@ -79,14 +96,8 @@ exports.analyzeSymptoms = async (req, res, next) => {
         longitude: patLng,
       };
 
-      // AI-powered recommendation
+      // Use fast fallback ranking (no AI call) to avoid doubling request time
       recommendedDoctors = await AIService.recommendDoctorsForReport(analysis, availableDoctors, patientContext);
-
-      // Also find nearby hospitals that match the specializations needed
-      let nearbyHospitals = [];
-      if (patLat && patLng) {
-        nearbyHospitals = await HospitalModel.findNearby(parseFloat(patLat), parseFloat(patLng), radius, 5);
-      }
 
       // Attach hospital info to recommended doctors
       for (const doc of recommendedDoctors) {

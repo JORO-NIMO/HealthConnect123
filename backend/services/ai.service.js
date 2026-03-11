@@ -35,7 +35,11 @@ async function analyzeSymptoms(context) {
   }
 
   try {
-    const response = await openai.chat.completions.create(requestOpts);
+    // Hard 20s cap — must finish before the controller's 22s race timeout
+    const response = await Promise.race([
+      openai.chat.completions.create(requestOpts),
+      new Promise((_, rej) => setTimeout(() => rej(new Error('HF_TIMEOUT: AI call exceeded 20s')), 20000)),
+    ]);
 
     const raw    = response.choices[0].message.content;
     const result = extractJSON(raw);
@@ -303,4 +307,4 @@ async function recommendDoctorsForReport(analysisResult, availableDoctors, patie
   return recommendDoctors(symptoms, availableDoctors, patientContext);
 }
 
-module.exports = { analyzeSymptoms, generateFollowUpQuestions, recommendDoctors, recommendDoctorsForReport };
+module.exports = { analyzeSymptoms, generateFollowUpQuestions, recommendDoctors, recommendDoctorsForReport, getFallbackAnalysis };
