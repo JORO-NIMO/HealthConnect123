@@ -2,49 +2,47 @@ const mysql  = require('mysql2/promise');
 const logger = require('../utils/logger.util');
 
 // ─── Connection Pool ────────────────────────────────────────────────────────
-// Railway MySQL plugin injects MYSQL_URL automatically once you add the plugin.
-const MYSQL_URI = process.env.MYSQL_URL || process.env.DATABASE_URL;
-const isProduction = process.env.NODE_ENV === 'production';
+// Railway MySQL plugin auto-injects: MYSQL_URL, MYSQLHOST, MYSQLPORT,
+// MYSQLUSER, MYSQLPASSWORD, MYSQLDATABASE.
+// This config mirrors the working Orion project pattern.
 
-// Railway (and most cloud MySQL) requires SSL for external connections.
-// We enable it automatically in production or when using a connection URL.
-const sslConfig = isProduction || MYSQL_URI
-  ? { rejectUnauthorized: false }
-  : undefined;
+let dbConfig = {
+  waitForConnections   : true,
+  connectionLimit      : parseInt(process.env.DB_CONNECTION_LIMIT || '10'),
+  queueLimit           : 0,
+  charset              : 'utf8mb4',
+  timezone             : '+00:00',
+  enableKeepAlive      : true,
+  keepAliveInitialDelay: 10000,
+};
 
-function buildPoolConfig() {
-  if (MYSQL_URI) {
-    // Parse the URL and merge SSL + pool settings
-    return {
-      uri               : MYSQL_URI,
-      ssl               : sslConfig,
-      connectionLimit   : parseInt(process.env.DB_CONNECTION_LIMIT || '10'),
-      waitForConnections: true,
-      queueLimit        : 0,
-      charset           : 'utf8mb4',
-      timezone          : '+00:00',
-      enableKeepAlive   : true,
-      keepAliveInitialDelay: 10000,
-    };
+// 1) If a full DATABASE_URL / MYSQL_URL is provided, parse it into pieces
+const rawDbUrl = process.env.MYSQL_URL || process.env.DATABASE_URL;
+if (rawDbUrl) {
+  try {
+    const parsed = new URL(rawDbUrl);
+    dbConfig.host     = parsed.hostname;
+    dbConfig.port     = Number(parsed.port || 3306);
+    dbConfig.user     = decodeURIComponent(parsed.username);
+    dbConfig.password = decodeURIComponent(parsed.password);
+    dbConfig.database = parsed.pathname ? parsed.pathname.replace(/^\//, '') : '';
+    logger.info('📦 DB config: parsed from MYSQL_URL / DATABASE_URL');
+  } catch (err) {
+    logger.warn('⚠️  Failed to parse DATABASE_URL, falling back to individual env vars:', err.message);
   }
-  return {
-    host              : process.env.DB_HOST     || 'localhost',
-    port              : parseInt(process.env.DB_PORT || '3306'),
-    user              : process.env.DB_USER     || 'root',
-    password          : process.env.DB_PASSWORD || '',
-    database          : process.env.DB_NAME     || 'mucosa_db',
-    ssl               : sslConfig,
-    connectionLimit   : parseInt(process.env.DB_CONNECTION_LIMIT || '10'),
-    waitForConnections: true,
-    queueLimit        : 0,
-    charset           : 'utf8mb4',
-    timezone          : '+00:00',
-    enableKeepAlive   : true,
-    keepAliveInitialDelay: 10000,
-  };
 }
 
-const pool = mysql.createPool(buildPoolConfig());
+// 2) Fill any missing pieces from Railway's individual vars or local defaults
+dbConfig.host     = dbConfig.host     || process.env.MYSQLHOST     || process.env.DB_HOST     || 'localhost';
+dbConfig.port     = dbConfig.port     || Number(process.env.MYSQLPORT || process.env.DB_PORT || 3306);
+dbConfig.user     = dbConfig.user     || process.env.MYSQLUSER     || process.env.DB_USER     || 'root';
+dbConfig.password = dbConfig.password || process.env.MYSQLPASSWORD || process.env.DB_PASSWORD || '';
+dbConfig.database = dbConfig.database || process.env.MYSQLDATABASE || process.env.DB_NAME     || 'mucosa_db';
+
+// 3) Log config (mask password)
+logger.info(`🔌 DB target: ${dbConfig.user}@${dbConfig.host}:${dbConfig.port}/${dbConfig.database} (password: ${dbConfig.password ? '***' : 'NOT SET'})`);
+
+const pool = mysql.createPool(dbConfig);
 
 // ─── Test & Initialize ─────────────────────────────────────────────────────
 async function initializeDatabase(retries = 5, delay = 3000) {

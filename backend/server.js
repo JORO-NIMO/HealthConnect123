@@ -11,6 +11,7 @@ const { Server }       = require('socket.io');
 const logger        = require('./utils/logger.util');
 const routes        = require('./routes/index');
 const { initializeDatabase } = require('./config/database');
+const { ensureSchema }       = require('./database/ensureSchema');
 const { runMigrations }      = require('./database/autoMigrate');
 const { errorHandler, notFound } = require('./middleware/error.middleware');
 const { auditMiddleware }        = require('./middleware/audit.middleware');
@@ -262,9 +263,10 @@ async function startServer() {
   // Now connect to DB in the background — server stays up even if DB is slow.
   try {
     await initializeDatabase();
+    await ensureSchema();
     await runMigrations();
     initCronJobs();
-    logger.info('✅ Database connected and cron jobs started');
+    logger.info('✅ Database connected, schema verified, cron jobs started');
   } catch (err) {
     logger.error('⚠️  Database initialisation failed — API is up but DB calls will fail:', err.message);
     // Do NOT exit — let Railway keep the container alive so it can reconnect
