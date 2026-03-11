@@ -18,23 +18,23 @@ async function analyzeSymptoms(context) {
     chronicConditions, allergies, duration, additionalNotes, region,
   });
 
+  // Build request options — HF free models don't support response_format
+  const requestOpts = {
+    model      : AI_CONFIG.model,
+    max_tokens : AI_CONFIG.maxTokens,
+    temperature: AI_CONFIG.temperature,
+    messages   : [
+      { role: 'system', content: MEDICAL_SYSTEM_PROMPT },
+      { role: 'user',   content: userPrompt },
+    ],
+  };
+
+  // Only add response_format for OpenAI (HF free tier doesn't support it)
+  if (AI_CONFIG.provider === 'openai') {
+    requestOpts.response_format = { type: 'json_object' };
+  }
+
   try {
-    // Build request options — HF free models don't support response_format
-    const requestOpts = {
-      model      : AI_CONFIG.model,
-      max_tokens : AI_CONFIG.maxTokens,
-      temperature: AI_CONFIG.temperature,
-      messages   : [
-        { role: 'system', content: MEDICAL_SYSTEM_PROMPT },
-        { role: 'user',   content: userPrompt },
-      ],
-    };
-
-    // Only add response_format for OpenAI (HF free tier doesn't support it)
-    if (AI_CONFIG.provider === 'openai') {
-      requestOpts.response_format = { type: 'json_object' };
-    }
-
     const response = await openai.chat.completions.create(requestOpts);
 
     const raw    = response.choices[0].message.content;
@@ -54,7 +54,18 @@ async function analyzeSymptoms(context) {
     logger.info(`AI analysis complete. Conditions: ${result.possibleConditions?.length || 0}. Urgency: ${result.urgencyLevel}`);
     return result;
   } catch (err) {
-    logger.error(`AI API error (${AI_CONFIG.provider}):`, err.message);
+    logger.error(`AI API error (${AI_CONFIG.provider}): [${err.status || err.code || 'unknown'}] ${err.message}`);
+    if (err.status === 503 || err.status === 429) {
+      logger.warn('HuggingFace model may be loading (cold start). Retrying once after 3s…');
+      try {
+        await new Promise(r => setTimeout(r, 3000));
+        const retry = await openai.chat.completions.create(requestOpts);
+        const retryRaw = retry.choices[0].message.content;
+        return extractJSON(retryRaw);
+      } catch (retryErr) {
+        logger.error(`AI retry also failed: ${retryErr.message}`);
+      }
+    }
     // Fallback response when AI is unavailable
     return getFallbackAnalysis(symptoms);
   }

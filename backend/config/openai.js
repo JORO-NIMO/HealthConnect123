@@ -8,7 +8,7 @@ if (AI_PROVIDER === 'openai') {
   // ── OpenAI (production) ──────────────────────────────────
   const apiKey = process.env.OPENAI_API_KEY;
   if (apiKey && !apiKey.startsWith('sk-placeholder')) {
-    client = new OpenAI({ apiKey });
+    client = new OpenAI({ apiKey, timeout: 25000, maxRetries: 1 });
     console.log('✅  AI Provider: OpenAI');
   } else {
     console.warn('⚠️  OPENAI_API_KEY not set or is placeholder — AI features disabled');
@@ -20,6 +20,8 @@ if (AI_PROVIDER === 'openai') {
     client = new OpenAI({
       baseURL: 'https://router.huggingface.co/v1/',
       apiKey : hfToken,
+      timeout: 25000,   // 25s — stay under Railway's 30s proxy timeout
+      maxRetries: 2,    // Retry on 5xx (HF cold starts)
     });
     console.log('✅  AI Provider: Hugging Face (free tier)');
   } else {

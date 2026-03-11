@@ -27,11 +27,18 @@ async function ensureSchema() {
 
     const sql = fs.readFileSync(filePath, 'utf8');
 
-    // Split on semicolons, filter out empty/comment-only statements
+    // Split on semicolons, strip leading comment lines from each chunk,
+    // then keep only chunks that contain actual SQL statements.
     const statements = sql
       .split(';')
-      .map(s => s.trim())
-      .filter(s => s.length > 0 && !s.startsWith('--'));
+      .map(s => {
+        // Strip leading blank lines and full-line comments (-- ...)
+        // This is critical because many SQL files have comment headers before
+        // each CREATE TABLE / ALTER TABLE statement. Without stripping these,
+        // the startsWith('--') filter would discard the entire chunk.
+        return s.replace(/^(\s*--[^\n]*\n|\s*\n)*/g, '').trim();
+      })
+      .filter(s => s.length > 0);
 
     let applied = 0;
     let skipped = 0;

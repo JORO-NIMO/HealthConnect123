@@ -52,7 +52,7 @@ function errorHandler(err, req, res, _next) {
     logger.error('Database schema error:', err.message);
     return res.status(500).json({
       success: false,
-      message: 'An internal database error occurred.',
+      message: 'An internal database error occurred. The system is initializing — please retry in a moment.',
     });
   }
 
