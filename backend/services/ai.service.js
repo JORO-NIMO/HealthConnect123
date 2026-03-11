@@ -307,4 +307,11 @@ async function recommendDoctorsForReport(analysisResult, availableDoctors, patie
   return recommendDoctors(symptoms, availableDoctors, patientContext);
 }
 
-module.exports = { analyzeSymptoms, generateFollowUpQuestions, recommendDoctors, recommendDoctorsForReport, getFallbackAnalysis };
+module.exports = {
+  analyzeSymptoms,
+  generateFollowUpQuestions,
+  recommendDoctors,
+  recommendDoctorsForReport,
+  getFallbackAnalysis,
+  rankDoctorsFallback,
+};

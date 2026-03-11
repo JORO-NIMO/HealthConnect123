@@ -25,8 +25,13 @@ exports.analyzeSymptoms = async (req, res, next) => {
       return sendError(res, 400, 'At least one symptom is required.');
     }
 
-    // Get patient profile for better context
-    const patient = await PatientModel.findByUserId(req.user.id);
+    // Get patient profile for better context (non-fatal if missing)
+    let patient = null;
+    try {
+      patient = await PatientModel.findByUserId(req.user.id);
+    } catch (patientErr) {
+      logger.warn(`Patient profile lookup failed for ${req.user.id}: ${patientErr.message}`);
+    }
 
     const context = {
       symptoms,
@@ -61,14 +66,23 @@ exports.analyzeSymptoms = async (req, res, next) => {
       };
     }
 
-    // Persist the report
-    const report = await SymptomReport.create({
-      patientId  : patient.id,
-      symptoms,
-      aiAnalysis : analysis,
-      urgencyLevel: analysis.urgencyLevel,
-      sessionId,
-    });
+    // Persist the report (non-blocking — never fail user response)
+    let report = null;
+    try {
+      if (patient?.id) {
+        report = await SymptomReport.create({
+          patientId  : patient.id,
+          symptoms,
+          aiAnalysis : analysis,
+          urgencyLevel: analysis.urgencyLevel,
+          sessionId,
+        });
+      } else {
+        logger.warn(`Skipping report persistence: no patient profile for user ${req.user.id}`);
+      }
+    } catch (persistErr) {
+      logger.warn(`Symptom report persistence failed (non-blocking): ${persistErr.message}`);
+    }
 
     logger.info(`AI analysis complete. Urgency: ${analysis.urgencyLevel} | Patient: ${req.user.id}`);
 
@@ -96,14 +110,21 @@ exports.analyzeSymptoms = async (req, res, next) => {
         longitude: patLng,
       };
 
-      // Use fast fallback ranking (no AI call) to avoid doubling request time
-      recommendedDoctors = await AIService.recommendDoctorsForReport(analysis, availableDoctors, patientContext);
+      // Fast ranking only (no second AI call) to stay well under Railway timeout
+      if (typeof AIService.rankDoctorsFallback === 'function') {
+        recommendedDoctors = AIService.rankDoctorsFallback(availableDoctors, patientContext);
+      } else {
+        // Defensive fallback
+        recommendedDoctors = availableDoctors.slice(0, 5);
+      }
 
       // Attach hospital info to recommended doctors
-      for (const doc of recommendedDoctors) {
-        const hospitals = await HospitalModel.getDoctorHospitals(doc.id);
-        doc.hospitals = hospitals.map(h => ({ id: h.id, name: h.name, city: h.city, type: h.type }));
-      }
+      await Promise.all(
+        recommendedDoctors.slice(0, 5).map(async (doc) => {
+          const hospitals = await HospitalModel.getDoctorHospitals(doc.id);
+          doc.hospitals = hospitals.map(h => ({ id: h.id, name: h.name, city: h.city, type: h.type }));
+        })
+      );
 
       logger.info(`Auto-recommended ${recommendedDoctors.length} doctors for patient ${req.user.id}`);
     } catch (recErr) {
@@ -111,7 +132,7 @@ exports.analyzeSymptoms = async (req, res, next) => {
     }
 
     return sendSuccess(res, 200, 'Symptom analysis complete.', {
-      reportId: report.id,
+      reportId: report?.id || null,
       analysis,
       recommendedDoctors,
     });
