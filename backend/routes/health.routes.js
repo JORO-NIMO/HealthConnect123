@@ -1,6 +1,7 @@
 const express = require('express');
 const router  = express.Router();
 const { query } = require('../config/database');
+const { openai, AI_CONFIG } = require('../config/openai');
 const { sendSuccess, sendError } = require('../utils/response.util');
 
 // ═══════════════════════════════════════════════════════════════════════════
@@ -60,16 +61,38 @@ router.get('/health/detailed', async (req, res) => {
     rss: `${Math.round(memUsage.rss / 1024 / 1024)}MB`,
   };
 
+  // AI service check
+  checks.checks.ai = {
+    status   : openai ? 'ok' : 'error',
+    provider : AI_CONFIG.provider,
+    model    : AI_CONFIG.model,
+    configured: !!openai,
+    reason   : openai ? 'AI client initialized' : `No valid token for provider "${AI_CONFIG.provider}"`,
+  };
+  if (!openai) checks.status = 'degraded';
+
   // Check if critical env vars are set
-  // Accept either individual DB_* vars OR the Railway-provided MYSQL_URL / DATABASE_URL
   const hasDbConfig = process.env.MYSQL_URL || process.env.DATABASE_URL ||
     (process.env.DB_HOST && process.env.DB_NAME);
-  const missingEnvVars = [];
-  if (!hasDbConfig) missingEnvVars.push('MYSQL_URL or DB_HOST+DB_NAME');
-  if (!process.env.JWT_SECRET) missingEnvVars.push('JWT_SECRET');
+  const envChecks = {
+    'MYSQL_URL or DATABASE_URL': !!(process.env.MYSQL_URL || process.env.DATABASE_URL),
+    'DB_HOST (fallback)'      : !!process.env.DB_HOST,
+    'JWT_SECRET'              : !!process.env.JWT_SECRET,
+    'JWT_REFRESH_SECRET'      : !!process.env.JWT_REFRESH_SECRET,
+    'ENCRYPTION_KEY'          : !!process.env.ENCRYPTION_KEY,
+    'HF_TOKEN'                : !!process.env.HF_TOKEN,
+    'OPENAI_API_KEY'          : !!process.env.OPENAI_API_KEY,
+    'AI_PROVIDER'             : process.env.AI_PROVIDER || '(defaults to huggingface)',
+    'NODE_ENV'                : process.env.NODE_ENV || '(not set)',
+  };
+  const missingCritical = [];
+  if (!hasDbConfig) missingCritical.push('MYSQL_URL or DB_HOST+DB_NAME');
+  if (!process.env.JWT_SECRET) missingCritical.push('JWT_SECRET');
+  if (!process.env.HF_TOKEN && !process.env.OPENAI_API_KEY) missingCritical.push('HF_TOKEN or OPENAI_API_KEY');
   checks.checks.environment = {
-    status: missingEnvVars.length ? 'warning' : 'ok',
-    missingVars: missingEnvVars,
+    status       : missingCritical.length ? 'error' : 'ok',
+    vars         : envChecks,
+    missingCritical,
   };
 
   const statusCode = checks.status === 'ok' ? 200 : 503;

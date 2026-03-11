@@ -28,8 +28,19 @@ function errorHandler(err, req, res, _next) {
     });
   }
 
-  // MySQL connection errors
-  if (err.code === 'ECONNREFUSED' || err.code === 'PROTOCOL_CONNECTION_LOST' || err.code === 'ER_CON_COUNT_ERROR') {
+  // MySQL connection errors (includes SSL handshake failures on Railway)
+  if (
+    err.code === 'ECONNREFUSED' ||
+    err.code === 'PROTOCOL_CONNECTION_LOST' ||
+    err.code === 'ER_CON_COUNT_ERROR' ||
+    err.code === 'ECONNRESET' ||
+    err.code === 'ER_ACCESS_DENIED_ERROR' ||
+    err.code === 'UNABLE_TO_VERIFY_LEAF_SIGNATURE' ||
+    err.code === 'CERT_HAS_EXPIRED' ||
+    err.message?.includes('SSL') ||
+    err.message?.includes('ETIMEDOUT')
+  ) {
+    logger.error(`Database connection error [${err.code}]:`, err.message);
     return res.status(503).json({
       success: false,
       message: 'Database temporarily unavailable. Please try again shortly.',
