@@ -3,17 +3,21 @@ const logger = require('../utils/logger.util');
 
 // ─── Connection Pool ────────────────────────────────────────────────────────
 // Railway MySQL plugin injects MYSQL_URL automatically once you add the plugin.
-// mysql2 requires the URL to be passed as a plain string, NOT as { uri: url }.
 const MYSQL_URI = process.env.MYSQL_URL || process.env.DATABASE_URL;
+const isProduction = process.env.NODE_ENV === 'production';
 
-const pool = MYSQL_URI
-  ? mysql.createPool(MYSQL_URI)
-  : mysql.createPool({
-      host              : process.env.DB_HOST     || 'localhost',
-      port              : parseInt(process.env.DB_PORT || '3306'),
-      user              : process.env.DB_USER     || 'root',
-      password          : process.env.DB_PASSWORD || '',
-      database          : process.env.DB_NAME     || 'mucosa_db',
+// Railway (and most cloud MySQL) requires SSL for external connections.
+// We enable it automatically in production or when using a connection URL.
+const sslConfig = isProduction || MYSQL_URI
+  ? { rejectUnauthorized: false }
+  : undefined;
+
+function buildPoolConfig() {
+  if (MYSQL_URI) {
+    // Parse the URL and merge SSL + pool settings
+    return {
+      uri               : MYSQL_URI,
+      ssl               : sslConfig,
       connectionLimit   : parseInt(process.env.DB_CONNECTION_LIMIT || '10'),
       waitForConnections: true,
       queueLimit        : 0,
@@ -21,7 +25,26 @@ const pool = MYSQL_URI
       timezone          : '+00:00',
       enableKeepAlive   : true,
       keepAliveInitialDelay: 10000,
-    });
+    };
+  }
+  return {
+    host              : process.env.DB_HOST     || 'localhost',
+    port              : parseInt(process.env.DB_PORT || '3306'),
+    user              : process.env.DB_USER     || 'root',
+    password          : process.env.DB_PASSWORD || '',
+    database          : process.env.DB_NAME     || 'mucosa_db',
+    ssl               : sslConfig,
+    connectionLimit   : parseInt(process.env.DB_CONNECTION_LIMIT || '10'),
+    waitForConnections: true,
+    queueLimit        : 0,
+    charset           : 'utf8mb4',
+    timezone          : '+00:00',
+    enableKeepAlive   : true,
+    keepAliveInitialDelay: 10000,
+  };
+}
+
+const pool = mysql.createPool(buildPoolConfig());
 
 // ─── Test & Initialize ─────────────────────────────────────────────────────
 async function initializeDatabase(retries = 5, delay = 3000) {

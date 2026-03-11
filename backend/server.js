@@ -20,12 +20,23 @@ const { initCronJobs }           = require('./services/cron.service');
 const app        = express();
 const httpServer = createServer(app);
 
+// ─── CORS Origin Helper ────────────────────────────────────────────────────
+// Dynamically allow the requesting origin so it works on localhost, Railway,
+// and custom domains without manual FRONTEND_URL configuration.
+function resolveCorsOrigin() {
+  const envUrl = process.env.FRONTEND_URL;
+  // If explicitly set to specific URLs (not wildcard), use those
+  if (envUrl && envUrl !== '*') {
+    return envUrl.split(',').map(u => u.trim());
+  }
+  // Otherwise, reflect the requesting origin (works with credentials)
+  return true;
+}
+
 // ─── Socket.IO for Real-Time Consultation ──────────────────────────────────
 const io = new Server(httpServer, {
   cors: {
-    origin: process.env.FRONTEND_URL 
-      ? process.env.FRONTEND_URL.split(',').map(url => url.trim())
-      : '*',
+    origin: resolveCorsOrigin(),
     methods: ['GET', 'POST'],
     credentials: true,
   },
@@ -48,12 +59,8 @@ app.use(helmet({
 }));
 
 // ─── CORS Configuration ───────────────────────────────────────────────────
-const corsOrigins = process.env.FRONTEND_URL 
-  ? process.env.FRONTEND_URL.split(',').map(url => url.trim())
-  : '*';
-
 app.use(cors({
-  origin: corsOrigins,
+  origin: resolveCorsOrigin(),
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With'],
@@ -206,6 +213,38 @@ io.on('connection', (socket) => {
 // ─── Start Server ──────────────────────────────────────────────────────────
 const PORT = process.env.PORT || 5000;
 
+// ─── Startup Diagnostics ───────────────────────────────────────────────────
+function logEnvDiagnostics() {
+  const vars = {
+    'NODE_ENV'       : process.env.NODE_ENV,
+    'PORT'           : process.env.PORT,
+    'MYSQL_URL'      : process.env.MYSQL_URL      ? '✅ SET' : '❌ NOT SET',
+    'DATABASE_URL'   : process.env.DATABASE_URL    ? '✅ SET' : '❌ NOT SET',
+    'DB_HOST'        : process.env.DB_HOST         || '(not set, defaults to localhost)',
+    'JWT_SECRET'     : process.env.JWT_SECRET      ? '✅ SET' : '❌ NOT SET — auth will fail!',
+    'JWT_REFRESH_SECRET': process.env.JWT_REFRESH_SECRET ? '✅ SET' : '❌ NOT SET',
+    'ENCRYPTION_KEY' : process.env.ENCRYPTION_KEY  ? '✅ SET' : '⚠️  NOT SET',
+    'AI_PROVIDER'    : process.env.AI_PROVIDER     || '(defaults to huggingface)',
+    'HF_TOKEN'       : process.env.HF_TOKEN        ? '✅ SET' : '❌ NOT SET — AI disabled',
+    'FRONTEND_URL'   : process.env.FRONTEND_URL    || '(auto-detect from request origin)',
+  };
+  logger.info('🔧 Environment Variable Diagnostics:');
+  for (const [key, val] of Object.entries(vars)) {
+    logger.info(`   ${key}: ${val}`);
+  }
+
+  // Warn about critical missing vars
+  if (!process.env.MYSQL_URL && !process.env.DATABASE_URL && !process.env.DB_HOST) {
+    logger.error('🚨 No database connection configured! Set MYSQL_URL (Railway plugin) or DB_HOST/DB_USER/DB_PASSWORD/DB_NAME');
+  }
+  if (!process.env.JWT_SECRET) {
+    logger.error('🚨 JWT_SECRET is not set — all authenticated API requests will fail with 401!');
+  }
+  if (!process.env.HF_TOKEN && !process.env.OPENAI_API_KEY) {
+    logger.error('🚨 No AI token configured — AI symptom analysis will be unavailable');
+  }
+}
+
 async function startServer() {
   // Bind to port FIRST — Railway health checks must get a response immediately.
   // DB init happens after, so a slow/misconfigured DB never causes a 502.
@@ -213,7 +252,8 @@ async function startServer() {
     httpServer.listen(PORT, '0.0.0.0', () => {
       logger.info(`🚀 HealthConnect API running on port ${PORT}`);
       logger.info(`🌍 Environment : ${process.env.NODE_ENV || 'development'}`);
-      logger.info(`📡 Frontend    : ${process.env.FRONTEND_URL || 'http://localhost:' + PORT}`);
+      logger.info(`📡 Frontend    : auto-detected from request origin`);
+      logEnvDiagnostics();
       resolve();
     });
     httpServer.on('error', reject);
