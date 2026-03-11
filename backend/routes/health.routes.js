@@ -157,3 +157,97 @@ router.get('/metrics', async (req, res) => {
 });
 
 module.exports = router;
+
+// ═══════════════════════════════════════════════════════════════════════════
+// DEPLOYMENT DIAGNOSTIC — visit /api/health/diagnose to see everything
+// ═══════════════════════════════════════════════════════════════════════════
+
+router.get('/health/diagnose', async (req, res) => {
+  const diag = { timestamp: new Date().toISOString(), checks: {} };
+
+  // 1) List all tables in the database
+  try {
+    const [tables] = await require('../config/database').pool.query('SHOW TABLES');
+    diag.checks.tables = {
+      status: 'ok',
+      count: tables.length,
+      names: tables.map(t => Object.values(t)[0]),
+    };
+  } catch (err) {
+    diag.checks.tables = { status: 'error', error: err.message };
+  }
+
+  // 2) Check users table
+  try {
+    const [users] = await require('../config/database').pool.query('SELECT COUNT(*) as count FROM users');
+    diag.checks.users = { status: 'ok', count: users[0].count };
+  } catch (err) {
+    diag.checks.users = { status: 'error', error: err.message };
+  }
+
+  // 3) Check patients table
+  try {
+    const [patients] = await require('../config/database').pool.query('SELECT COUNT(*) as count FROM patients');
+    diag.checks.patients = { status: 'ok', count: patients[0].count };
+  } catch (err) {
+    diag.checks.patients = { status: 'error', error: err.message };
+  }
+
+  // 4) Check appointments table
+  try {
+    const [appts] = await require('../config/database').pool.query('SELECT COUNT(*) as count FROM appointments');
+    diag.checks.appointments = { status: 'ok', count: appts[0].count };
+  } catch (err) {
+    diag.checks.appointments = { status: 'error', error: err.message };
+  }
+
+  // 5) Check symptom_reports table
+  try {
+    const [reports] = await require('../config/database').pool.query('SELECT COUNT(*) as count FROM symptom_reports');
+    diag.checks.symptomReports = { status: 'ok', count: reports[0].count };
+  } catch (err) {
+    diag.checks.symptomReports = { status: 'error', error: err.message };
+  }
+
+  // 6) Test JWT — parse auth header if present
+  const authHeader = req.headers.authorization;
+  if (authHeader && authHeader.startsWith('Bearer ')) {
+    try {
+      const jwt = require('jsonwebtoken');
+      const decoded = jwt.verify(authHeader.split(' ')[1], process.env.JWT_SECRET);
+      diag.checks.jwt = { status: 'ok', userId: decoded.userId, role: decoded.role };
+
+      // Check if user exists in DB
+      try {
+        const [user] = await require('../config/database').pool.query(
+          'SELECT id, email, role, is_active FROM users WHERE id = ?', [decoded.userId]
+        );
+        diag.checks.jwtUser = user.length
+          ? { status: 'ok', email: user[0].email, role: user[0].role, active: user[0].is_active }
+          : { status: 'error', error: 'User from JWT not found in database' };
+      } catch (err) {
+        diag.checks.jwtUser = { status: 'error', error: err.message };
+      }
+    } catch (err) {
+      diag.checks.jwt = { status: 'error', error: err.message };
+    }
+  } else {
+    diag.checks.jwt = { status: 'skipped', reason: 'No Authorization header — open browser dev tools, copy your token, and add header: Authorization: Bearer <token>' };
+  }
+
+  // 7) AI status
+  const { openai: aiClient, AI_CONFIG } = require('../config/openai');
+  diag.checks.ai = {
+    configured: !!aiClient,
+    provider: AI_CONFIG.provider,
+    model: AI_CONFIG.model,
+  };
+
+  // 8) Route test — confirm /api/v1 is mounted
+  diag.checks.apiRoutes = {
+    status: 'ok',
+    message: 'If you can see this, /api routes are working',
+  };
+
+  res.json(diag);
+});
