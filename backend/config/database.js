@@ -69,12 +69,16 @@ async function initializeDatabase(retries = 5, delay = 3000) {
 // ─── Query Helper ──────────────────────────────────────────────────────────
 /**
  * Execute a parameterized SQL query.
+ * Uses pool.query() (not pool.execute()) because mysql2's prepared-statement
+ * protocol rejects JS number types for LIMIT/OFFSET params with
+ * "Incorrect arguments to mysqld_stmt_execute".
+ * pool.query() handles all JS types correctly and is what Orion uses.
  * @param {string} sql - SQL string with ? placeholders
  * @param {Array}  params - Values for placeholders
  * @returns {Promise<Array>} rows result
  */
 async function query(sql, params = []) {
-  const [rows] = await pool.execute(sql, params);
+  const [rows] = await pool.query(sql, params);
   return rows;
 }
 
