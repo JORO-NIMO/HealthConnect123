@@ -3,14 +3,10 @@
  * Global constants and environment settings
  */
 
-// Determine API base URL - supports port forwarding and direct IP access
+// Determine API base URL dynamically from current origin
+// Works on localhost, Railway, or any deployment host
 function getApiBase() {
-  // If running on localhost, use same origin
-  if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
-    return `${window.location.protocol}//${window.location.host}/api/v1`;
-  }
-  // For remote access (port forwarding, IP address, etc), construct full URL
-  return `${window.location.protocol}//${window.location.host}/api/v1`;
+  return `${window.location.origin}/api/v1`;
 }
 
 const CONFIG = {
