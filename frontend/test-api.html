@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html><head><title>API Test</title>
+<style>body{font-family:monospace;background:#111;color:#0f0;padding:20px}pre{background:#222;padding:15px;border-radius:8px;overflow:auto;white-space:pre-wrap}button{background:#0f0;color:#000;border:none;padding:10px 20px;margin:5px;cursor:pointer;font-weight:bold;border-radius:5px}h3{color:#fff}</style>
+</head><body>
+<h2>HealthConnect API Diagnostic</h2>
+<div id="output"></div>
+
+<h3>1. Test raw fetch to /api/health</h3>
+<button onclick="testRaw('/api/health')">GET /api/health</button>
+<button onclick="testRaw('/api/health/detailed')">GET /api/health/detailed</button>
+
+<h3>2. Test API routes (no auth)</h3>
+<button onclick="testRaw('/api/v1/symptoms/list')">GET /api/v1/symptoms/list</button>
+
+<h3>3. Test authenticated endpoints</h3>
+<button onclick="testAuth('/api/v1/appointments/patient')">GET /api/v1/appointments/patient</button>
+<button onclick="testAuth('/api/v1/patients/stats')">GET /api/v1/patients/stats</button>
+<button onclick="testAuth('/api/v1/symptoms/history')">GET /api/v1/symptoms/history</button>
+
+<h3>4. Check stored tokens</h3>
+<button onclick="showTokens()">Show Tokens</button>
+<button onclick="clearSW()">Clear All Service Workers & Caches</button>
+
+<pre id="log"></pre>
+
+<script>
+const log = document.getElementById('log');
+function addLog(title, data) {
+  log.textContent += `\n=== ${title} ===\n${typeof data === 'string' ? data : JSON.stringify(data, null, 2)}\n`;
+  log.scrollTop = log.scrollHeight;
+}
+
+async function testRaw(url) {
+  addLog(`Fetching ${url}`, 'Sending...');
+  try {
+    const res = await fetch(url);
+    addLog(`Response ${url}`, `Status: ${res.status} ${res.statusText}\nContent-Type: ${res.headers.get('content-type')}`);
+    const text = await res.text();
+    try {
+      addLog('Parsed JSON', JSON.parse(text));
+    } catch {
+      addLog('Raw text (NOT JSON!)', text.substring(0, 500));
+    }
+  } catch (err) {
+    addLog('FETCH ERROR', err.message);
+  }
+}
+
+async function testAuth(url) {
+  const token = localStorage.getItem('healthconnect_access_token');
+  if (!token) {
+    addLog('ERROR', 'No access token in localStorage. Log in first, then come back here.');
+    return;
+  }
+  addLog(`Fetching ${url} (with auth)`, 'Sending...');
+  try {
+    const res = await fetch(url, {
+      headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' }
+    });
+    addLog(`Response ${url}`, `Status: ${res.status} ${res.statusText}\nContent-Type: ${res.headers.get('content-type')}`);
+    const text = await res.text();
+    try {
+      addLog('Parsed JSON', JSON.parse(text));
+    } catch {
+      addLog('Raw text (NOT JSON!)', text.substring(0, 1000));
+    }
+  } catch (err) {
+    addLog('FETCH ERROR', err.message);
+  }
+}
+
+function showTokens() {
+  addLog('LocalStorage Tokens', {
+    accessToken: localStorage.getItem('healthconnect_access_token') ? '✅ SET (' + localStorage.getItem('healthconnect_access_token').substring(0, 30) + '...)' : '❌ NOT SET',
+    refreshToken: localStorage.getItem('healthconnect_refresh_token') ? '✅ SET' : '❌ NOT SET',
+    user: localStorage.getItem('healthconnect_user') || '❌ NOT SET',
+  });
+}
+
+async function clearSW() {
+  if ('serviceWorker' in navigator) {
+    const regs = await navigator.serviceWorker.getRegistrations();
+    for (const r of regs) { await r.unregister(); }
+    addLog('Service Workers', `Unregistered ${regs.length} workers`);
+  }
+  const names = await caches.keys();
+  for (const n of names) { await caches.delete(n); }
+  addLog('Caches', `Deleted ${names.length} caches: ${names.join(', ')}`);
+  addLog('Done', 'All cleared! Reload the page.');
+}
+
+// Auto-run basic test
+testRaw('/api/health');
+</script>
+</body></html>

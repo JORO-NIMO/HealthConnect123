@@ -3,17 +3,29 @@
  * Add this script to every HTML page before </body>
  */
 
-// ─── Register Service Worker ──────────────────────────────────────────
+// ─── Service Worker: Unregister old ones and re-register ──────────────
+// Force-clear stale caches from previous deploys
 if ('serviceWorker' in navigator) {
-  window.addEventListener('load', () => {
-    navigator.serviceWorker.register('/sw.js', { scope: '/', updateViaCache: 'none' })
-      .then(reg => {
-        console.log('[PWA] Service worker registered:', reg.scope);
-        // Check for updates immediately and every 5 min
-        reg.update();
-        setInterval(() => reg.update(), 5 * 60 * 1000);
-      })
-      .catch(err => console.warn('[PWA] Service worker registration failed:', err));
+  window.addEventListener('load', async () => {
+    // Unregister ALL existing service workers to clear stale caches
+    const registrations = await navigator.serviceWorker.getRegistrations();
+    for (const reg of registrations) {
+      await reg.unregister();
+      console.log('[PWA] Unregistered old service worker');
+    }
+    // Clear ALL caches
+    const cacheNames = await caches.keys();
+    for (const name of cacheNames) {
+      await caches.delete(name);
+      console.log('[PWA] Deleted cache:', name);
+    }
+    // Re-register fresh
+    try {
+      const reg = await navigator.serviceWorker.register('/sw.js', { scope: '/', updateViaCache: 'none' });
+      console.log('[PWA] Fresh service worker registered:', reg.scope);
+    } catch (err) {
+      console.warn('[PWA] Service worker registration failed:', err);
+    }
   });
 }
 
