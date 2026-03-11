@@ -208,6 +208,7 @@ class HospitalModel {
   static async getTestResult(id) {
     return queryOne(
       `SELECT htr.*, h.name AS hospital_name,
+              u.first_name AS doctor_first_name, u.last_name AS doctor_last_name,
               CONCAT(u.first_name, ' ', u.last_name) AS doctor_name
        FROM hospital_test_results htr
        JOIN hospitals h ON h.id = htr.hospital_id
@@ -232,9 +233,10 @@ class HospitalModel {
     return this.getTestResult(id);
   }
 
-  static async getPatientTestResults(patientId, { hospitalId, status, limit = 20, offset = 0 } = {}) {
+  static async getPatientTestResults(patientId, { hospitalId, status, testType, limit = 20, offset = 0 } = {}) {
     let sql = `
       SELECT htr.*, h.name AS hospital_name,
+             u.first_name AS doctor_first_name, u.last_name AS doctor_last_name,
              CONCAT(u.first_name, ' ', u.last_name) AS doctor_name
       FROM hospital_test_results htr
       JOIN hospitals h ON h.id = htr.hospital_id
@@ -245,6 +247,7 @@ class HospitalModel {
     const params = [patientId];
     if (hospitalId) { sql += ' AND htr.hospital_id = ?'; params.push(hospitalId); }
     if (status)     { sql += ' AND htr.status = ?'; params.push(status); }
+    if (testType)   { sql += ' AND htr.test_type = ?'; params.push(testType); }
     sql += ' ORDER BY htr.created_at DESC LIMIT ? OFFSET ?';
     params.push(limit, offset);
     return query(sql, params);

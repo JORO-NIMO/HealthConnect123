@@ -33,7 +33,12 @@ const API = (() => {
 
     if (!res.ok) throw new Error('Refresh failed');
 
-    const data = await res.json();
+    let data;
+    try {
+      data = await res.json();
+    } catch (_) {
+      throw new Error('Refresh failed — invalid response');
+    }
     const tokens = data?.data?.tokens || data?.data || {};
 
     if (!tokens.accessToken) throw new Error('Refresh failed');
@@ -102,13 +107,27 @@ const API = (() => {
     const contentType = response.headers.get('content-type') || '';
 
     if (contentType.includes('application/json')) {
-      data = await response.json();
+      try {
+        data = await response.json();
+      } catch (_jsonErr) {
+        // Server said JSON but body isn't valid JSON
+        data = { message: `Server returned invalid JSON (HTTP ${response.status})` };
+      }
     } else {
-      data = { message: await response.text() };
+      const text = await response.text();
+      // Try parsing as JSON anyway (some proxies strip content-type)
+      try {
+        data = JSON.parse(text);
+      } catch (_) {
+        data = { message: text || `HTTP ${response.status}` };
+      }
     }
 
     if (!response.ok) {
-      const err = new Error(data.message || `HTTP ${response.status}`);
+      const msg = (typeof data.message === 'string' && data.message.length < 500)
+        ? data.message
+        : `Request failed (HTTP ${response.status})`;
+      const err = new Error(msg);
       err.status = response.status;
       err.errors = data.errors || null;
       err.data = data;

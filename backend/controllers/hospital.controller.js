@@ -308,9 +308,10 @@ exports.getMyTestResults = async (req, res, next) => {
     const patient = await PatientModel.findByUserId(req.user.id);
     if (!patient) return sendError(res, 404, 'Patient profile not found.');
 
-    const { hospitalId, status, limit = 20, offset = 0 } = req.query;
+    const { hospitalId, hospital_id, status, type, limit = 20, offset = 0 } = req.query;
     const results = await HospitalModel.getPatientTestResults(patient.id, {
-      hospitalId, status, limit: parseInt(limit), offset: parseInt(offset),
+      hospitalId: hospitalId || hospital_id, status, testType: type,
+      limit: parseInt(limit), offset: parseInt(offset),
     });
     return sendSuccess(res, 200, 'Test results retrieved.', { testResults: results });
   } catch (err) { next(err); }

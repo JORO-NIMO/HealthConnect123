@@ -222,7 +222,12 @@
       renderResults(currentReport);
       renderRecommendedDoctors(recommendedDoctors);
     } catch (err) {
-      renderError(err.message || 'Analysis failed. Please try again.');
+      var msg = err.message || 'Analysis failed. Please try again.';
+      // Make common proxy/network errors more user-friendly
+      if (msg.includes('Unexpected token') || msg.includes('not valid JSON')) {
+        msg = 'The AI service is temporarily unavailable. Please try again in a moment.';
+      }
+      renderError(msg);
     } finally {
       Utils.setLoading(analyzeBtn, false);
     }

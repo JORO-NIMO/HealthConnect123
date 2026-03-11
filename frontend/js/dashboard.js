@@ -83,12 +83,12 @@
   }
 
   function renderAppointmentCard(appt) {
-    const docName = appt.doctorName || 'Doctor';
+    const docName = `${appt.doctor_first_name || ''} ${appt.doctor_last_name || ''}`.trim() || 'Doctor';
     const spec    = appt.specialization || '';
-    const date    = Utils.formatDate(appt.scheduledAt || appt.appointmentDate);
-    const time    = Utils.formatTime(appt.scheduledAt || appt.appointmentDate);
+    const date    = Utils.formatDate(appt.appointment_date);
+    const time    = Utils.formatTime(appt.appointment_date);
     const badge   = Utils.statusBadge(appt.status);
-    const typeIcon = appt.consultationType === 'video' ? '📹' : appt.consultationType === 'chat' ? '💬' : '🏥';
+    const typeIcon = appt.type === 'video' ? '📹' : appt.type === 'chat' ? '💬' : '🏥';
 
     return `
       <div class="flex items-center justify-between p-4 rounded-xl transition" style="background:var(--surface2);border:1px solid var(--border)">
@@ -98,7 +98,7 @@
           </div>
           <div>
             <div class="font-semibold text-sm">Dr. ${Utils.escapeHtml(docName)}</div>
-            <div class="text-xs" style="color:var(--text3)">${Utils.escapeHtml(spec)} · ${typeIcon} ${Utils.capitalize(appt.consultationType || 'video')}</div>
+            <div class="text-xs" style="color:var(--text3)">${Utils.escapeHtml(spec)} · ${typeIcon} ${Utils.capitalize(appt.type || 'video')}</div>
           </div>
         </div>
         <div class="text-right flex flex-col items-end gap-1">
@@ -109,9 +109,9 @@
   }
 
   function renderReportCard(report) {
-    const badge   = Utils.urgencyBadge(report.urgencyLevel);
-    const syms    = (report.symptoms || []).slice(0, 3).map(s => Utils.escapeHtml(s)).join(', ');
-    const date    = Utils.timeAgo(report.createdAt);
+    const badge   = Utils.urgencyBadge(report.urgency_level || report.urgencyLevel);
+    const syms    = (report.symptoms || report.symptoms_raw || []).slice(0, 3).map(s => Utils.escapeHtml(s)).join(', ');
+    const date    = Utils.timeAgo(report.created_at || report.createdAt);
 
     return `
       <a href="/pages/patient/symptom-checker.html?reportId=${report.id}" class="flex items-center justify-between p-4 rounded-xl transition block" style="background:var(--surface2);border:1px solid var(--border)">

@@ -5,18 +5,40 @@ class HealthRecordModel {
   // ─── Create Record ────────────────────────────────────────────────────
   static async create({ patientId, recordType, title, description, providerName, facilityName, recordDate, icd10Code, severity, status, metadata, createdBy }) {
     const id = uuidv4();
-    await query(
-      `INSERT INTO health_records
-         (id, patient_id, record_type, title, description, provider_name, facility_name,
-          record_date, icd10_code, severity, status, metadata, created_by)
-       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
-      [
-        id, patientId, recordType, title, description || null,
-        providerName || null, facilityName || null, recordDate,
-        icd10Code || null, severity || null, status || 'active',
-        metadata ? JSON.stringify(metadata) : null, createdBy || null,
-      ]
-    );
+    // Use column names compatible with both old schema (icd_code, doctor_id) 
+    // and new schema (icd10_code, provider_name, facility_name, created_by)
+    // Try new columns first; if they don't exist, fall back to old ones
+    try {
+      await query(
+        `INSERT INTO health_records
+           (id, patient_id, record_type, title, description, provider_name, facility_name,
+            record_date, icd10_code, severity, status, metadata, created_by)
+         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+        [
+          id, patientId, recordType, title, description || null,
+          providerName || null, facilityName || null, recordDate,
+          icd10Code || null, severity || null, status || 'active',
+          metadata ? JSON.stringify(metadata) : null, createdBy || null,
+        ]
+      );
+    } catch (colErr) {
+      // Fallback for old schema without provider_name, facility_name, icd10_code, created_by
+      if (colErr.code === 'ER_BAD_FIELD_ERROR') {
+        await query(
+          `INSERT INTO health_records
+             (id, patient_id, record_type, title, description,
+              record_date, icd_code, severity, status, metadata, doctor_id)
+           VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+          [
+            id, patientId, recordType, title, description || null,
+            recordDate, icd10Code || null, severity || null, status || 'active',
+            metadata ? JSON.stringify(metadata) : null, createdBy || null,
+          ]
+        );
+      } else {
+        throw colErr;
+      }
+    }
     return this.findById(id);
   }
 
@@ -50,8 +72,7 @@ class HealthRecordModel {
   // ─── Get Timeline (all record types grouped by date) ─────────────────
   static async getTimeline(patientId, { limit = 100 } = {}) {
     const records = await query(
-      `SELECT id, record_type, title, description, provider_name, facility_name,
-              record_date, severity, status, created_at
+      `SELECT *
        FROM health_records
        WHERE patient_id = ?
        ORDER BY record_date DESC
@@ -83,7 +104,8 @@ class HealthRecordModel {
 
   // ─── Update ──────────────────────────────────────────────────────────
   static async update(id, patientId, fields) {
-    const allowed = ['title', 'description', 'provider_name', 'facility_name', 'record_date', 'icd10_code', 'severity', 'status', 'metadata'];
+    const allowed = ['title', 'description', 'record_date', 'severity', 'status', 'metadata',
+      'provider_name', 'facility_name', 'icd10_code', 'icd_code'];
     const updates = [];
     const params = [];
 
@@ -110,45 +132,95 @@ class HealthRecordModel {
   // ─── Access Control ──────────────────────────────────────────────────
   static async grantAccess({ recordId, grantedTo, grantedBy, accessLevel, expiresAt }) {
     const id = uuidv4();
-    await query(
-      `INSERT INTO health_record_access (id, record_id, granted_to, granted_by, access_level, expires_at)
-       VALUES (?, ?, ?, ?, ?, ?)`,
-      [id, recordId, grantedTo, grantedBy, accessLevel || 'view', expiresAt || null]
-    );
+    try {
+      await query(
+        `INSERT INTO health_record_access (id, record_id, granted_to, granted_by, access_level, expires_at)
+         VALUES (?, ?, ?, ?, ?, ?)`,
+        [id, recordId, grantedTo, grantedBy, accessLevel || 'view', expiresAt || null]
+      );
+    } catch (colErr) {
+      // Fallback for old schema (patient_id, doctor_id, permission)
+      if (colErr.code === 'ER_BAD_FIELD_ERROR') {
+        await query(
+          `INSERT INTO health_record_access (id, patient_id, doctor_id, permission, expires_at)
+           VALUES (?, ?, ?, ?, ?)`,
+          [id, grantedBy, grantedTo, accessLevel || 'view', expiresAt || null]
+        );
+      } else {
+        throw colErr;
+      }
+    }
     return { id, recordId, grantedTo, accessLevel };
   }
 
   static async revokeAccess(recordId, grantedTo) {
-    const result = await query(
+    // Try new schema first, then fall back to old schema
+    let result = await query(
       'DELETE FROM health_record_access WHERE record_id = ? AND granted_to = ?',
       [recordId, grantedTo]
-    );
+    ).catch(() => ({ affectedRows: 0 }));
+    if (!result.affectedRows) {
+      result = await query(
+        'DELETE FROM health_record_access WHERE patient_id = ? AND doctor_id = ?',
+        [recordId, grantedTo]
+      ).catch(() => ({ affectedRows: 0 }));
+    }
     return result.affectedRows > 0;
   }
 
   static async listAccessGrants(patientId) {
-    return query(
-      `SELECT hra.*, hr.title AS record_title, u.first_name, u.last_name, u.email
-       FROM health_record_access hra
-       JOIN health_records hr ON hr.id = hra.record_id
-       JOIN users u ON u.id = hra.granted_to
-       WHERE hr.patient_id = ?
-       ORDER BY hra.created_at DESC`,
-      [patientId]
-    );
+    // Try new schema first (record-level access)
+    try {
+      return await query(
+        `SELECT hra.*, hr.title AS record_title, u.first_name, u.last_name, u.email
+         FROM health_record_access hra
+         JOIN health_records hr ON hr.id = hra.record_id
+         JOIN users u ON u.id = hra.granted_to
+         WHERE hr.patient_id = ?
+         ORDER BY hra.created_at DESC`,
+        [patientId]
+      );
+    } catch {
+      // Fallback: old schema (patient-level access)
+      return query(
+        `SELECT hra.*, u.first_name, u.last_name, u.email,
+                hra.permission AS access_level, hra.granted_at AS created_at
+         FROM health_record_access hra
+         JOIN users u ON u.id = hra.doctor_id
+         WHERE hra.patient_id = ?
+         ORDER BY hra.granted_at DESC`,
+        [patientId]
+      );
+    }
   }
 
   // ─── Doctor: Get patient records they have access to ──────────────────
   static async listAccessibleRecords(doctorUserId, patientId) {
-    return query(
-      `SELECT hr.*
-       FROM health_records hr
-       JOIN health_record_access hra ON hra.record_id = hr.id
-       WHERE hr.patient_id = ? AND hra.granted_to = ?
-         AND (hra.expires_at IS NULL OR hra.expires_at > NOW())
-       ORDER BY hr.record_date DESC`,
-      [patientId, doctorUserId]
-    );
+    // Try new schema first (record-level access)
+    try {
+      return await query(
+        `SELECT hr.*
+         FROM health_records hr
+         JOIN health_record_access hra ON hra.record_id = hr.id
+         WHERE hr.patient_id = ? AND hra.granted_to = ?
+           AND (hra.expires_at IS NULL OR hra.expires_at > NOW())
+         ORDER BY hr.record_date DESC`,
+        [patientId, doctorUserId]
+      );
+    } catch {
+      // Fallback: old schema — doctor has access to ALL patient records if granted
+      const access = await query(
+        `SELECT 1 FROM health_record_access
+         WHERE patient_id = ? AND doctor_id = ?
+           AND (expires_at IS NULL OR expires_at > NOW())`,
+        [patientId, doctorUserId]
+      );
+      if (!access.length) return [];
+      return query(
+        'SELECT * FROM health_records WHERE patient_id = ? ORDER BY record_date DESC',
+        [patientId]
+      );
+    }
   }
 }
 

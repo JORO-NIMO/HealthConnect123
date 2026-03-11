@@ -193,10 +193,10 @@
     }
 
     container.innerHTML = filtered.map(appt => {
-      const docName = `${appt.doctorFirstName || ''} ${appt.doctorLastName || ''}`.trim() || 'Doctor';
-      const date = Utils.formatDate(appt.appointmentDate);
-      const time = Utils.formatTime(appt.appointmentDate);
-      const typeIcon = appt.consultationType === 'video' ? '📹' : appt.consultationType === 'chat' ? '💬' : '🏥';
+      const docName = `${appt.doctor_first_name || ''} ${appt.doctor_last_name || ''}`.trim() || 'Doctor';
+      const date = Utils.formatDate(appt.appointment_date);
+      const time = Utils.formatTime(appt.appointment_date);
+      const typeIcon = appt.type === 'video' ? '📹' : appt.type === 'chat' ? '💬' : '🏥';
       const canCancel = ['pending', 'confirmed'].includes(appt.status);
       const canJoin = appt.status === 'in_progress';
 
@@ -209,7 +209,7 @@
               </div>
               <div>
                 <div class="font-bold text-sm">Dr. ${Utils.escapeHtml(docName)}</div>
-                <div class="text-sm" style="color:var(--text3)">${Utils.escapeHtml(appt.specialization || '')} · ${typeIcon} ${Utils.capitalize(appt.consultationType || '')}</div>
+                <div class="text-sm" style="color:var(--text3)">${Utils.escapeHtml(appt.specialization || '')} · ${typeIcon} ${Utils.capitalize(appt.type || '')}</div>
               </div>
             </div>
             ${Utils.statusBadge(appt.status)}
@@ -217,7 +217,7 @@
           <div class="mt-3 flex flex-wrap gap-4 text-sm" style="color:var(--text2)">
             <span>📅 ${date}</span>
             <span>🕐 ${time}</span>
-            <span>💰 ${Utils.formatCurrency(appt.consultationFee, appt.currency || 'USD')}</span>
+            <span>💰 ${Utils.formatCurrency(appt.consultation_fee, appt.currency || 'USD')}</span>
           </div>
           ${appt.notes ? `<p class="mt-2 text-sm italic" style="color:var(--text3)">"${Utils.escapeHtml(Utils.truncate(appt.notes))}"</p>` : ''}
           ${canCancel || canJoin ? `

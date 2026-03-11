@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <title>Test Results — HealthConnect</title>
   <link rel="manifest" href="/manifest.json">
   <link rel="stylesheet" href="/css/main.css">
@@ -75,11 +75,10 @@
           </select>
           <select id="filter-type" onchange="loadTestResults()" class="px-3 py-2 text-sm rounded-xl" style="background:var(--surface2);border:1px solid var(--border);color:var(--text)">
             <option value="">All Types</option>
-            <option value="blood_test">Blood Test</option>
-            <option value="urine_test">Urine Test</option>
+            <option value="lab">Lab / Blood Test</option>
             <option value="imaging">Imaging</option>
             <option value="pathology">Pathology</option>
-            <option value="genetic">Genetic</option>
+            <option value="cardiology">Cardiology</option>
             <option value="other">Other</option>
           </select>
           <div class="flex-1"></div>
@@ -198,7 +197,7 @@
           completed: 'b-green', pending: 'b-yellow', in_progress: 'b-cyan', cancelled: 'b-red'
         };
         const typeIcons = {
-          blood_test: '🩸', urine_test: '🧫', imaging: '📷', pathology: '🔬', genetic: '🧬', other: '🧪'
+          lab: '🩸', imaging: '📷', pathology: '🔬', cardiology: '❤️', blood_test: '🩸', urine_test: '🧫', genetic: '🧬', other: '🧪'
         };
 
         return `
@@ -216,7 +215,7 @@
                   <h3 class="font-bold text-sm">${r.test_name}</h3>
                   <span class="badge ${statusColors[r.status] || 'b-cyan'} text-[11px]">${r.status?.replace(/_/g, ' ')}</span>
                   ${r.is_critical ? '<span class="badge b-red text-[11px]">⚠️ Critical</span>' : ''}
-                  ${!r.viewed_at && r.status === 'completed' ? '<span class="w-2 h-2 rounded-full bg-cyan-400 flex-shrink-0"></span>' : ''}
+                  ${!r.viewed_by_patient && r.status === 'completed' ? '<span class="w-2 h-2 rounded-full bg-cyan-400 flex-shrink-0"></span>' : ''}
                 </div>
                 <div class="flex items-center gap-3 mt-1.5 flex-wrap">
                   <span class="text-xs" style="color:var(--text3)">🏥 ${r.hospital_name || 'Unknown Hospital'}</span>
