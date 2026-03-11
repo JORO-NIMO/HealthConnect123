@@ -415,9 +415,15 @@
     });
   </script>
   <script>
-    // Register service worker
+    // Register service worker — force update check on every page load
     if ('serviceWorker' in navigator) {
-      navigator.serviceWorker.register('/sw.js').catch(console.warn);
+      navigator.serviceWorker.register('/sw.js', { updateViaCache: 'none' })
+        .then(reg => {
+          // Check for updates immediately and every 5 minutes
+          reg.update();
+          setInterval(() => reg.update(), 5 * 60 * 1000);
+        })
+        .catch(console.warn);
     }
   </script>
 </body>

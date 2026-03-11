@@ -6,11 +6,12 @@
 // ─── Register Service Worker ──────────────────────────────────────────
 if ('serviceWorker' in navigator) {
   window.addEventListener('load', () => {
-    navigator.serviceWorker.register('/sw.js', { scope: '/' })
+    navigator.serviceWorker.register('/sw.js', { scope: '/', updateViaCache: 'none' })
       .then(reg => {
         console.log('[PWA] Service worker registered:', reg.scope);
-        // Check for updates every 30 min
-        setInterval(() => reg.update(), 30 * 60 * 1000);
+        // Check for updates immediately and every 5 min
+        reg.update();
+        setInterval(() => reg.update(), 5 * 60 * 1000);
       })
       .catch(err => console.warn('[PWA] Service worker registration failed:', err));
   });

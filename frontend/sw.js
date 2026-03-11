@@ -4,7 +4,7 @@
  * Optimised for low-bandwidth African networks
  */
 
-const CACHE_VERSION = 'v1.3.0';
+const CACHE_VERSION = 'v2.0.0';
 const STATIC_CACHE  = `healthconnect-static-${CACHE_VERSION}`;
 const DYNAMIC_CACHE = `healthconnect-dynamic-${CACHE_VERSION}`;
 
@@ -90,7 +90,13 @@ self.addEventListener('fetch', event => {
     return;
   }
 
-  // Cache-first for static assets (JS, CSS, HTML pages)
+  // Network-first for HTML, JS, CSS — so code updates are always picked up
+  if (url.pathname.endsWith('.html') || url.pathname.endsWith('.js') || url.pathname.endsWith('.css') || url.pathname === '/') {
+    event.respondWith(networkFirst(request));
+    return;
+  }
+
+  // Cache-first only for images, fonts, and other truly static assets
   event.respondWith(cacheFirst(request));
 });
 

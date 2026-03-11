@@ -76,11 +76,21 @@ const FRONTEND_INDEX = path.join(FRONTEND_DIR, 'index.html');
 const hasFrontend    = fs.existsSync(FRONTEND_INDEX);
 
 if (hasFrontend) {
+  // Serve sw.js with aggressive no-cache so browsers always fetch the latest version
+  app.get('/sw.js', (req, res) => {
+    res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate');
+    res.setHeader('Pragma', 'no-cache');
+    res.setHeader('Expires', '0');
+    res.setHeader('Content-Type', 'application/javascript');
+    res.sendFile(path.join(FRONTEND_DIR, 'sw.js'));
+  });
+
   app.use(express.static(FRONTEND_DIR, {
     etag: false,
     setHeaders(res, filePath) {
       if (filePath.endsWith('.html') || filePath.endsWith('.js') || filePath.endsWith('.css')) {
         res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate');
+        res.setHeader('Pragma', 'no-cache');
       }
     },
   }));
