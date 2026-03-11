@@ -11,6 +11,7 @@ const { Server }       = require('socket.io');
 const logger        = require('./utils/logger.util');
 const routes        = require('./routes/index');
 const { initializeDatabase } = require('./config/database');
+const { runMigrations }      = require('./database/autoMigrate');
 const { errorHandler, notFound } = require('./middleware/error.middleware');
 const { auditMiddleware }        = require('./middleware/audit.middleware');
 const { initCronJobs }           = require('./services/cron.service');
@@ -211,6 +212,7 @@ async function startServer() {
   // Now connect to DB in the background — server stays up even if DB is slow.
   try {
     await initializeDatabase();
+    await runMigrations();
     initCronJobs();
     logger.info('✅ Database connected and cron jobs started');
   } catch (err) {
