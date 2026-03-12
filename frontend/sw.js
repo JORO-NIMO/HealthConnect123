@@ -4,7 +4,7 @@
  * Optimised for low-bandwidth African networks
  */
 
-const CACHE_VERSION = 'v3.0.0';
+const CACHE_VERSION = 'v3.0.1';
 const STATIC_CACHE  = `healthconnect-static-${CACHE_VERSION}`;
 const DYNAMIC_CACHE = `healthconnect-dynamic-${CACHE_VERSION}`;
 
@@ -37,6 +37,8 @@ const PRECACHE_ASSETS = [
   '/pages/doctor/consultation.html',
   '/pages/admin/dashboard.html',
   '/manifest.json',
+  '/images/logo.jpeg',
+  '/favicon.ico',
   // Tailwind from CDN will be cached dynamically on first load
 ];
 
@@ -155,8 +157,8 @@ self.addEventListener('push', event => {
   event.waitUntil(
     self.registration.showNotification(data.title || 'HealthConnect', {
       body:  data.body  || 'You have a new notification',
-      icon:  data.icon  || '/images/icon-192x192.png',
-      badge: data.badge || '/images/icon-72x72.png',
+      icon:  data.icon  || '/images/logo.jpeg',
+      badge: data.badge || '/images/logo.jpeg',
       data:  data.url   || '/',
       vibrate: [200, 100, 200],
     })

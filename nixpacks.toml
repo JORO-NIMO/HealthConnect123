@@ -3,7 +3,10 @@
 # regardless of root directory settings in the dashboard
 
 [phases.install]
-cmds = ["cd backend && npm install --production"]
+cmds = [
+	"mkdir -p frontend/images && if [ -f logo.jpeg ]; then cp -f logo.jpeg frontend/images/logo.jpeg; fi",
+	"cd backend && npm install --production"
+]
 
 [start]
 cmd = "node backend/server.js"

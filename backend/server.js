@@ -82,8 +82,37 @@ const fs = require('fs');
 const FRONTEND_DIR   = path.join(__dirname, '../frontend');
 const FRONTEND_INDEX = path.join(FRONTEND_DIR, 'index.html');
 const hasFrontend    = fs.existsSync(FRONTEND_INDEX);
+const ROOT_LOGO_PATH = path.join(__dirname, '../logo.jpeg');
+const FRONTEND_IMAGES_DIR = path.join(FRONTEND_DIR, 'images');
+const FRONTEND_LOGO_PATH = path.join(FRONTEND_IMAGES_DIR, 'logo.jpeg');
+
+function resolveLogoPath() {
+  if (fs.existsSync(FRONTEND_LOGO_PATH)) return FRONTEND_LOGO_PATH;
+  if (fs.existsSync(ROOT_LOGO_PATH)) return ROOT_LOGO_PATH;
+  return null;
+}
 
 if (hasFrontend) {
+  // Keep logo available from static frontend path across deploys
+  if (fs.existsSync(ROOT_LOGO_PATH) && !fs.existsSync(FRONTEND_LOGO_PATH)) {
+    try {
+      fs.mkdirSync(FRONTEND_IMAGES_DIR, { recursive: true });
+      fs.copyFileSync(ROOT_LOGO_PATH, FRONTEND_LOGO_PATH);
+      logger.info('✅ Synced logo.jpeg to frontend/images/logo.jpeg');
+    } catch (err) {
+      logger.warn(`⚠️  Could not sync logo.jpeg into frontend/images: ${err.message}`);
+    }
+  }
+
+  app.get(['/images/logo.jpeg', '/logo.jpeg', '/favicon.ico'], (req, res, next) => {
+    const logoPath = resolveLogoPath();
+    if (!logoPath) return next();
+
+    res.setHeader('Cache-Control', 'public, max-age=86400');
+    res.setHeader('Content-Type', 'image/jpeg');
+    return res.sendFile(logoPath);
+  });
+
   // Serve sw.js with aggressive no-cache so browsers always fetch the latest version
   app.get('/sw.js', (req, res) => {
     res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate');

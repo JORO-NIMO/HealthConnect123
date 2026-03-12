@@ -12,51 +12,15 @@
   "categories": ["health", "medical", "telemedicine"],
   "icons": [
     {
-      "src": "/images/icon-72x72.png",
-      "sizes": "72x72",
-      "type": "image/png",
+      "src": "/images/logo.jpeg",
+      "sizes": "any",
+      "type": "image/jpeg",
       "purpose": "any"
     },
     {
-      "src": "/images/icon-96x96.png",
-      "sizes": "96x96",
-      "type": "image/png",
-      "purpose": "any"
-    },
-    {
-      "src": "/images/icon-128x128.png",
-      "sizes": "128x128",
-      "type": "image/png",
-      "purpose": "any"
-    },
-    {
-      "src": "/images/icon-144x144.png",
-      "sizes": "144x144",
-      "type": "image/png",
-      "purpose": "any"
-    },
-    {
-      "src": "/images/icon-152x152.png",
-      "sizes": "152x152",
-      "type": "image/png",
-      "purpose": "any"
-    },
-    {
-      "src": "/images/icon-192x192.png",
-      "sizes": "192x192",
-      "type": "image/png",
-      "purpose": "any maskable"
-    },
-    {
-      "src": "/images/icon-384x384.png",
-      "sizes": "384x384",
-      "type": "image/png",
-      "purpose": "any"
-    },
-    {
-      "src": "/images/icon-512x512.png",
-      "sizes": "512x512",
-      "type": "image/png",
+      "src": "/images/logo.jpeg",
+      "sizes": "any",
+      "type": "image/jpeg",
       "purpose": "any maskable"
     }
   ],
@@ -66,14 +30,14 @@
       "short_name": "Check Symptoms",
       "description": "Analyse your symptoms with AI",
       "url": "/pages/patient/symptom-checker.html",
-      "icons": [{ "src": "/images/icon-96x96.png", "sizes": "96x96" }]
+      "icons": [{ "src": "/images/logo.jpeg", "sizes": "any", "type": "image/jpeg" }]
     },
     {
       "name": "Book Appointment",
       "short_name": "Book Doctor",
       "description": "Find and book a verified doctor",
       "url": "/pages/patient/appointments.html",
-      "icons": [{ "src": "/images/icon-96x96.png", "sizes": "96x96" }]
+      "icons": [{ "src": "/images/logo.jpeg", "sizes": "any", "type": "image/jpeg" }]
     }
   ],
   "screenshots": [

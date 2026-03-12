@@ -5,20 +5,75 @@
 (async () => {
   Auth.requireRole('patient');
 
+  function parseJsonSafe(value, fallback = null) {
+    if (value == null) return fallback;
+    if (typeof value === 'object') return value;
+    if (typeof value !== 'string') return fallback;
+    try { return JSON.parse(value); } catch { return fallback; }
+  }
+
+  function normalizeReport(raw = {}) {
+    return {
+      id: raw.id,
+      symptoms: parseJsonSafe(raw.symptoms_raw, raw.symptoms || []),
+      urgencyLevel: (raw.urgencyLevel || raw.urgency_level || 'low').toLowerCase(),
+      createdAt: raw.createdAt || raw.created_at || null,
+      aiAnalysis: parseJsonSafe(raw.ai_analysis, raw.aiAnalysis || {}),
+    };
+  }
+
+  function normalizePrescription(raw = {}) {
+    const first = raw.doctor_first_name || '';
+    const last  = raw.doctor_last_name || '';
+    return {
+      id: raw.id,
+      diagnosis: raw.diagnosis,
+      status: raw.status || 'active',
+      createdAt: raw.createdAt || raw.created_at || null,
+      doctorName: raw.doctorName || `${first} ${last}`.trim(),
+      notes: raw.notes,
+      items: raw.items || raw.medications || [],
+    };
+  }
+
+  function confidencePercent(condition = {}) {
+    const score = condition.confidence ?? condition.confidenceScore ?? condition.confidence_score;
+    if (typeof score === 'number') return Math.round(score <= 1 ? score * 100 : score);
+
+    const probability = String(condition.probability || '').toLowerCase();
+    if (probability === 'high') return 85;
+    if (probability === 'medium') return 60;
+    if (probability === 'low') return 35;
+    return 0;
+  }
+
   // ─── Tab Navigation ───────────────────────────────────────────────────
   const tabs = ['symptom-reports', 'prescriptions', 'profile'];
   window.currentHistoryTab = 'symptom-reports';
 
+  function activateTab(tab) {
+    if (!tabs.includes(tab)) return;
+    window.currentHistoryTab = tab;
+
+    document.querySelectorAll('.tab-btn').forEach(b => {
+      b.classList.remove('active', 'text-primary', 'border-b-2', 'border-primary', 'font-semibold');
+      if (b.dataset.tab === tab) {
+        b.classList.add('active', 'text-primary', 'border-b-2', 'border-primary', 'font-semibold');
+      }
+    });
+
+    tabs.forEach(t => document.getElementById(`tab-${t}`)?.classList.toggle('hidden', t !== tab));
+  }
+
   document.querySelectorAll('.tab-btn').forEach(btn => {
     btn.addEventListener('click', () => {
-      document.querySelectorAll('.tab-btn').forEach(b => {
-        b.classList.remove('active', 'text-primary', 'border-b-2', 'border-primary', 'font-semibold');
-      });
-      btn.classList.add('active', 'text-primary', 'border-b-2', 'border-primary', 'font-semibold');
-      const tab = btn.dataset.tab;
-      tabs.forEach(t => document.getElementById(`tab-${t}`)?.classList.toggle('hidden', t !== tab));
+      activateTab(btn.dataset.tab);
     });
   });
+
+  // Optional deep link: /pages/patient/medical-history.html?tab=profile
+  const initialTab = new URLSearchParams(window.location.search).get('tab');
+  if (initialTab) activateTab(initialTab);
 
   // ─── Load Symptom Reports ─────────────────────────────────────────────
   async function loadReports() {
@@ -26,7 +81,7 @@
     if (!container) return;
     try {
       const res = await API.get('/symptoms/history?limit=50');
-      const reports = res.data?.reports || [];
+      const reports = (res.data?.reports || []).map(normalizeReport);
       if (!reports.length) {
         container.innerHTML = Utils.emptyState('🔍', 'No symptom checks yet', 'Use the AI Symptom Checker to analyse your symptoms');
         return;
@@ -34,7 +89,7 @@
       container.innerHTML = reports.map(r => {
         const syms = (r.symptoms || []).slice(0, 4).map(s => Utils.escapeHtml(s)).join(', ');
         return `
-          <div onclick="openReportModal(${r.id})"
+          <div onclick='openReportModal(${JSON.stringify(r.id)})'
             class="rounded-[18px] p-5 cursor-pointer transition" style="background:var(--surface2);border:1px solid var(--border)">
             <div class="flex items-center justify-between">
               <div>
@@ -57,7 +112,7 @@
     body.innerHTML = '<div class="text-center py-8" style="color:var(--text3)">Loading…</div>';
     try {
       const res = await API.get(`/symptoms/report/${id}`);
-      const report = res.data?.report;
+      const report = normalizeReport(res.data?.report || {});
       const analysis = report.aiAnalysis || {};
       const urgency  = CONFIG.URGENCY[report.urgencyLevel] || CONFIG.URGENCY.low;
 
@@ -81,7 +136,7 @@
           <div>
             <div class="text-xs font-medium mb-2" style="color:var(--text3)">POSSIBLE CONDITIONS</div>
             <div class="space-y-2">${(analysis.possibleConditions || []).map(c => {
-              const pct = Math.round((c.confidence || 0) * 100);
+              const pct = confidencePercent(c);
               return `<div class="flex justify-between items-center text-sm">
                 <span>${Utils.escapeHtml(c.name)}</span>
                 <span class="text-xs font-bold" style="color:var(--text3)">${pct}%</span>
@@ -103,13 +158,13 @@
     if (!container) return;
     try {
       const res = await API.get('/patients/prescriptions');
-      const rxList = res.data?.prescriptions || [];
+      const rxList = (res.data?.prescriptions || []).map(normalizePrescription);
       if (!rxList.length) {
         container.innerHTML = Utils.emptyState('💊', 'No prescriptions yet');
         return;
       }
       container.innerHTML = rxList.map(rx => `
-        <div onclick="openRxModal(${rx.id})"
+        <div onclick='openRxModal(${JSON.stringify(rx.id)})'
           class="rounded-[18px] p-5 cursor-pointer transition" style="background:var(--surface2);border:1px solid var(--border)">
           <div class="flex items-center justify-between">
             <div>
@@ -134,7 +189,7 @@
     body.innerHTML = '<div class="text-center py-8" style="color:var(--text3)">Loading…</div>';
     try {
       const res = await API.get(`/patients/prescriptions`);
-      const rx  = (res.data?.prescriptions || []).find(p => p.id === id);
+      const rx  = (res.data?.prescriptions || []).map(normalizePrescription).find(p => p.id === id);
       if (!rx) throw new Error('Not found');
 
       body.innerHTML = `
@@ -150,7 +205,7 @@
             <div class="space-y-2">
               ${(rx.items || []).map(item => `
                 <div class="rounded-xl p-3" style="background:var(--bg2);border:1px solid var(--border)">
-                  <div class="font-semibold text-sm">${Utils.escapeHtml(item.medicationName || '')}</div>
+                  <div class="font-semibold text-sm">${Utils.escapeHtml(item.medicationName || item.medication_name || '')}</div>
                   <div class="text-xs mt-1" style="color:var(--text3)">
                     ${item.dosage ? `Dosage: ${Utils.escapeHtml(item.dosage)}` : ''}
                     ${item.frequency ? ` · ${Utils.escapeHtml(item.frequency)}` : ''}
@@ -158,6 +213,7 @@
                   </div>
                   ${item.instructions ? `<div class="text-xs mt-1" style="color:var(--text3)">${Utils.escapeHtml(item.instructions)}</div>` : ''}
                 </div>`).join('')}
+              ${(rx.items || []).length ? '' : `<div class="text-xs" style="color:var(--text3)">Medication details are not available in this summary view yet.</div>`}
             </div>
           </div>
           ${rx.notes ? `<div><div class="text-xs font-medium mb-1" style="color:var(--text3)">NOTES</div><p class="text-sm" style="color:var(--text2)">${Utils.escapeHtml(rx.notes)}</p></div>` : ''}
@@ -234,16 +290,16 @@
   // ─── Health Profile ───────────────────────────────────────────────────
   async function loadHealthProfile() {
     try {
-      const res = await API.get('/patients/medical-history');
-      const history = res.data?.medicalHistory || {};
-      Utils.setFieldValue('blood-type', history.bloodType);
-      Utils.setFieldValue('weight', history.weight);
-      Utils.setFieldValue('height', history.height);
-      Utils.setFieldValue('date-of-birth', history.dateOfBirth?.split('T')[0]);
-      Utils.setFieldValue('chronic-conditions', history.chronicConditions);
-      Utils.setFieldValue('allergies', history.allergies);
-      Utils.setFieldValue('current-medications', history.currentMedications);
-      Utils.setFieldValue('surgical-history', history.surgicalHistory);
+      const res = await API.get('/patients/profile');
+      const profile = res.data?.patient || {};
+      Utils.setFieldValue('blood-type', profile.blood_type);
+      Utils.setFieldValue('weight', profile.weight_kg);
+      Utils.setFieldValue('height', profile.height_cm);
+      Utils.setFieldValue('date-of-birth', profile.date_of_birth?.split('T')[0]);
+      Utils.setFieldValue('chronic-conditions', profile.chronic_conditions);
+      Utils.setFieldValue('allergies', profile.allergies);
+      Utils.setFieldValue('current-medications', profile.current_medications);
+      Utils.setFieldValue('surgical-history', profile.surgical_history);
     } catch { /* Pre-fill silently ignored */ }
   }
 
@@ -253,14 +309,14 @@
     Utils.hideAlert('profile-alert');
     try {
       await API.put('/patients/profile', {
-        bloodType:          document.getElementById('blood-type').value || undefined,
-        weight:             document.getElementById('weight').value || undefined,
-        height:             document.getElementById('height').value || undefined,
-        dateOfBirth:        document.getElementById('date-of-birth').value || undefined,
-        chronicConditions:  document.getElementById('chronic-conditions').value.trim() || undefined,
-        allergies:          document.getElementById('allergies').value.trim() || undefined,
-        currentMedications: document.getElementById('current-medications').value.trim() || undefined,
-        surgicalHistory:    document.getElementById('surgical-history').value.trim() || undefined,
+        blood_type:          document.getElementById('blood-type').value || undefined,
+        weight_kg:           document.getElementById('weight').value || undefined,
+        height_cm:           document.getElementById('height').value || undefined,
+        date_of_birth:       document.getElementById('date-of-birth').value || undefined,
+        chronic_conditions:  document.getElementById('chronic-conditions').value.trim() || undefined,
+        allergies:           document.getElementById('allergies').value.trim() || undefined,
+        current_medications: document.getElementById('current-medications').value.trim() || undefined,
+        surgical_history:    document.getElementById('surgical-history').value.trim() || undefined,
       });
       Utils.showAlert('profile-alert', 'Health profile saved!', 'success');
     } catch (err) {

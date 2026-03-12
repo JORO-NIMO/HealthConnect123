@@ -66,3 +66,50 @@ Object.freeze(CONFIG);
 Object.freeze(CONFIG.STORAGE);
 Object.freeze(CONFIG.ROLES);
 Object.freeze(CONFIG.DASHBOARDS);
+
+// ─── Global Brand Logo Wiring ─────────────────────────────────────────
+(function initGlobalBranding() {
+  const LOGO_URL = '/images/logo.jpeg';
+
+  function ensureFavicon() {
+    let icon = document.querySelector('link[rel="icon"]');
+    if (!icon) {
+      icon = document.createElement('link');
+      icon.rel = 'icon';
+      document.head.appendChild(icon);
+    }
+    icon.type = 'image/jpeg';
+    icon.href = LOGO_URL;
+  }
+
+  function updateBrandMarks() {
+    const anchors = document.querySelectorAll('a[href="/"], a[href="/index.html"]');
+    anchors.forEach((a) => {
+      if (!/HealthConnect/i.test(a.textContent || '')) return;
+
+      const iconWrap = Array.from(a.children).find((el) =>
+        (el.textContent || '').trim() === '🏥' && !el.querySelector('img')
+      );
+
+      if (!iconWrap) return;
+
+      iconWrap.textContent = '';
+      const img = document.createElement('img');
+      img.src = LOGO_URL;
+      img.alt = 'HealthConnect logo';
+      img.className = 'hc-logo-img';
+      iconWrap.appendChild(img);
+    });
+  }
+
+  function applyBranding() {
+    ensureFavicon();
+    updateBrandMarks();
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', applyBranding);
+  } else {
+    applyBranding();
+  }
+})();
