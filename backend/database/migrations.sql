@@ -72,6 +72,27 @@ CREATE TABLE IF NOT EXISTS medical_documents (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 
+-- ── 2b. Doctor Verification Documents ───────────────────────────────────
+CREATE TABLE IF NOT EXISTS doctor_verification_documents (
+  id            CHAR(36) PRIMARY KEY,
+  doctor_id     CHAR(36) NOT NULL,
+  uploaded_by   CHAR(36) NOT NULL,
+  document_type ENUM('license','hospital_id','id_card','certificate','other') NOT NULL DEFAULT 'other',
+  file_url      VARCHAR(500) NOT NULL,
+  file_name     VARCHAR(255) NOT NULL,
+  file_size     INT NOT NULL,
+  mime_type     VARCHAR(120) NOT NULL,
+  notes         TEXT DEFAULT NULL,
+  created_at    DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  updated_at    DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+
+  FOREIGN KEY (doctor_id) REFERENCES doctors(id) ON DELETE CASCADE,
+  FOREIGN KEY (uploaded_by) REFERENCES users(id) ON DELETE CASCADE,
+  INDEX idx_doc_ver_doctor (doctor_id),
+  INDEX idx_doc_ver_type (document_type)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+
 -- ── 3. In-App Notifications ──────────────────────────────────────────────
 CREATE TABLE IF NOT EXISTS notifications (
   id          CHAR(36) PRIMARY KEY,

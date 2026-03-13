@@ -2,11 +2,14 @@ const { v4: uuidv4 } = require('uuid');
 const { query, queryOne } = require('../config/database');
 
 class DoctorModel {
-  static async create(userId) {
+  static async create(userId, fields = {}) {
     const id = uuidv4();
+    const specialization = fields.specialization || null;
+    const licenseNumber = fields.licenseNumber || fields.license_number || null;
     await query(
-      `INSERT INTO doctors (id, user_id, verification_status, created_at) VALUES (?, ?, 'pending', NOW())`,
-      [id, userId]
+      `INSERT INTO doctors (id, user_id, specialization, license_number, verification_status, created_at)
+       VALUES (?, ?, ?, ?, 'pending', NOW())`,
+      [id, userId, specialization, licenseNumber]
     );
     return this.findByUserId(userId);
   }

@@ -3,6 +3,7 @@ const UserModel    = require('../models/User.model');
 const DoctorModel  = require('../models/Doctor.model');
 const HospitalModel = require('../models/Hospital.model');
 const PaymentModel = require('../models/Payment.model');
+const DoctorVerificationDocumentModel = require('../models/DoctorVerificationDocument.model');
 const { sendSuccess, sendError } = require('../utils/response.util');
 const logger = require('../utils/logger.util');
 
@@ -64,6 +65,12 @@ exports.getPendingDoctors = async (req, res, next) => {
       WHERE d.verification_status = 'pending'
       ORDER BY d.created_at ASC
     `);
+
+    await Promise.all(doctors.map(async (doc) => {
+      const documents = await DoctorVerificationDocumentModel.listByDoctor(doc.id);
+      doc.verification_documents = documents;
+    }));
+
     return sendSuccess(res, 200, 'Pending doctors retrieved.', { doctors });
   } catch (err) { next(err); }
 };
@@ -75,6 +82,14 @@ exports.verifyDoctor = async (req, res, next) => {
     if (!['verified', 'rejected'].includes(status)) {
       return sendError(res, 400, 'Status must be "verified" or "rejected".');
     }
+
+    if (status === 'verified') {
+      const totalDocs = await DoctorVerificationDocumentModel.countByDoctor(req.params.id);
+      if (totalDocs < 1) {
+        return sendError(res, 400, 'Cannot approve doctor without verification documents.');
+      }
+    }
+
     await DoctorModel.setVerificationStatus(req.params.id, status, note);
     logger.info(`Admin ${req.user.id} ${status} doctor ${req.params.id}`);
     return sendSuccess(res, 200, `Doctor ${status} successfully.`);

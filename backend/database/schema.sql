@@ -116,6 +116,26 @@ CREATE TABLE IF NOT EXISTS doctors (
   INDEX idx_specialization      (specialization)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
+-- ─── Doctor Verification Documents ───────────────────────────────────────
+CREATE TABLE IF NOT EXISTS doctor_verification_documents (
+  id              VARCHAR(36)  NOT NULL PRIMARY KEY,
+  doctor_id       VARCHAR(36)  NOT NULL,
+  uploaded_by     VARCHAR(36)  NOT NULL,
+  document_type   ENUM('license','hospital_id','id_card','certificate','other') NOT NULL DEFAULT 'other',
+  file_url        VARCHAR(500) NOT NULL,
+  file_name       VARCHAR(255) NOT NULL,
+  file_size       INT          NOT NULL,
+  mime_type       VARCHAR(120) NOT NULL,
+  notes           TEXT         NULL,
+  created_at      DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  updated_at      DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  FOREIGN KEY (doctor_id) REFERENCES doctors(id) ON DELETE CASCADE,
+  FOREIGN KEY (uploaded_by) REFERENCES users(id) ON DELETE CASCADE,
+  INDEX idx_doctor_ver_docs_doctor (doctor_id),
+  INDEX idx_doctor_ver_docs_type   (document_type),
+  INDEX idx_doctor_ver_docs_created (created_at)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
 -- ─── Doctor Availability ──────────────────────────────────────────────────
 CREATE TABLE IF NOT EXISTS doctor_availability (
   id           VARCHAR(36) NOT NULL PRIMARY KEY,

@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Verification Pending — HealthConnect</title>
+  <link rel="manifest" href="/manifest.json">
+  <link rel="stylesheet" href="/css/main.css">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>tailwind.config={theme:{extend:{colors:{primary:{DEFAULT:'#22D3EE',dark:'#0891B2'},secondary:{DEFAULT:'#10B981'}},fontFamily:{sans:['Plus Jakarta Sans','Inter','system-ui','sans-serif'],serif:['Instrument Serif','Georgia','serif']}}}}</script>
+</head>
+<body class="min-h-screen flex items-center justify-center p-4" style="background:var(--bg);color:var(--text)">
+  <div class="w-full max-w-xl rounded-2xl p-6 sm:p-8 text-center" style="background:var(--surface2);border:1px solid rgba(34,211,238,.15)">
+    <div id="status-icon" class="text-5xl mb-3">⏳</div>
+    <h1 id="status-title" class="text-2xl font-bold font-serif mb-2">Account Under Review</h1>
+    <p id="status-message" class="text-sm leading-relaxed" style="color:var(--text3)">
+      Your professional account is pending verification. This usually takes 24–48 hours.
+    </p>
+
+    <div class="mt-5">
+      <span id="status-pill" class="badge b-yellow">Pending Verification</span>
+    </div>
+
+    <p id="status-note" class="text-xs mt-4 hidden" style="color:var(--text3)"></p>
+
+    <div id="doctor-documents-panel" class="hidden mt-6 text-left rounded-xl p-4" style="background:rgba(34,211,238,.04);border:1px solid rgba(34,211,238,.15)">
+      <h3 class="font-semibold mb-1">Doctor Verification Documents</h3>
+      <p class="text-xs mb-3" style="color:var(--text3)">Upload at least one supporting file (hospital ID, medical license, or other proof).</p>
+
+      <div class="grid grid-cols-1 sm:grid-cols-3 gap-2 mb-2">
+        <select id="doc-type" class="input-dark text-sm" style="padding:.6rem .8rem">
+          <option value="license">Medical License</option>
+          <option value="hospital_id">Hospital ID</option>
+          <option value="id_card">National ID</option>
+          <option value="certificate">Certificate</option>
+          <option value="other">Other</option>
+        </select>
+        <input id="doc-file" type="file" class="input-dark text-sm sm:col-span-2" style="padding:.45rem .65rem" accept=".pdf,.jpg,.jpeg,.png,.webp,.doc,.docx,image/*,application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document">
+      </div>
+
+      <div class="flex justify-end mb-3">
+        <button id="upload-doc-btn" class="btn-teal text-sm py-2 px-4 font-semibold">Upload Document</button>
+      </div>
+
+      <div id="doctor-docs-list" class="space-y-2"></div>
+    </div>
+
+    <div class="mt-7 grid grid-cols-1 sm:grid-cols-3 gap-2.5">
+      <button id="check-status-btn" class="btn-teal py-2.5 font-semibold text-sm">🔄 Check Status</button>
+      <a href="/" class="btn-out py-2.5 font-semibold text-sm text-center">← Back Home</a>
+      <button id="logout-btn" class="btn-out py-2.5 font-semibold text-sm" style="color:var(--red)">Sign Out</button>
+    </div>
+  </div>
+
+  <script src="/js/config.js"></script>
+  <script src="/js/api.js"></script>
+  <script src="/js/utils.js"></script>
+  <script src="/js/auth.js"></script>
+  <script>
+    (async () => {
+      const user = Auth.getUser();
+      if (!user || !Auth.getToken()) {
+        window.location.href = '/pages/auth/login.html';
+        return;
+      }
+
+      if (user.role === 'patient' || user.role === 'admin') {
+        Auth.redirectToDashboard(user.role);
+        return;
+      }
+
+      const docsPanel = document.getElementById('doctor-documents-panel');
+      if (user.role === 'doctor') docsPanel.classList.remove('hidden');
+
+      function renderStatus(status, note) {
+        const icon = document.getElementById('status-icon');
+        const title = document.getElementById('status-title');
+        const message = document.getElementById('status-message');
+        const pill = document.getElementById('status-pill');
+        const noteEl = document.getElementById('status-note');
+
+        if (status === 'verified') {
+          icon.textContent = '✅';
+          title.textContent = 'Verification Approved';
+          message.textContent = 'Great news — your account is now verified.';
+          pill.className = 'badge b-green';
+          pill.textContent = 'Verified';
+          noteEl.classList.add('hidden');
+          Auth.redirectToDashboard(user.role);
+          return;
+        }
+
+        if (status === 'rejected') {
+          icon.textContent = '❌';
+          title.textContent = 'Verification Declined';
+          message.textContent = 'Your verification was not approved. Please review the note and contact support if needed.';
+          pill.className = 'badge b-red';
+          pill.textContent = 'Rejected';
+          if (note) {
+            noteEl.textContent = 'Admin note: ' + note;
+            noteEl.classList.remove('hidden');
+          }
+          return;
+        }
+
+        icon.textContent = '⏳';
+        title.textContent = 'Account Under Review';
+        message.textContent = 'Your professional account is pending verification. This usually takes 24–48 hours.';
+        pill.className = 'badge b-yellow';
+        pill.textContent = 'Pending Verification';
+        noteEl.classList.add('hidden');
+      }
+
+      async function loadDoctorDocuments() {
+        if (user.role !== 'doctor') return;
+        const list = document.getElementById('doctor-docs-list');
+        list.innerHTML = '<p class="text-xs" style="color:var(--text3)">Loading documents…</p>';
+        try {
+          const res = await API.get('/doctors/me/verification-documents');
+          const docs = res.data?.documents || [];
+          if (!docs.length) {
+            list.innerHTML = '<p class="text-xs" style="color:var(--text3)">No documents uploaded yet.</p>';
+            return;
+          }
+
+          list.innerHTML = docs.map((d) => {
+            const uploadedAt = d.created_at ? Utils.formatDate(d.created_at) : '';
+            return `
+              <div class="rounded-lg px-3 py-2 flex items-center justify-between gap-2" style="background:var(--bg2);border:1px solid var(--border)">
+                <div class="min-w-0">
+                  <a href="${d.file_url}" target="_blank" class="text-sm font-medium hover:underline" style="color:var(--cyan)">${Utils.escapeHtml(d.file_name || 'Document')}</a>
+                  <div class="text-[11px]" style="color:var(--text3)">${Utils.escapeHtml((d.document_type || 'other').replace(/_/g, ' '))}${uploadedAt ? ' · ' + uploadedAt : ''}</div>
+                </div>
+                <button data-doc-id="${d.id}" class="doc-delete-btn text-xs px-2 py-1 rounded" style="background:rgba(239,68,68,.1);color:var(--red)">Remove</button>
+              </div>
+            `;
+          }).join('');
+
+          list.querySelectorAll('.doc-delete-btn').forEach((btn) => {
+            btn.addEventListener('click', async () => {
+              try {
+                await API.delete(`/doctors/me/verification-documents/${btn.dataset.docId}`);
+                Utils.toast('Document removed', 'info');
+                await loadDoctorDocuments();
+              } catch (err) {
+                Utils.toast(err.message || 'Failed to remove document', 'error');
+              }
+            });
+          });
+        } catch (err) {
+          list.innerHTML = `<p class="text-xs" style="color:var(--red)">${err.message || 'Could not load documents.'}</p>`;
+        }
+      }
+
+      renderStatus(user.verificationStatus || 'pending');
+
+      async function fetchVerificationStatus() {
+        const meRes = await API.get('/auth/me');
+        const me = meRes.data?.user || user;
+
+        let status = me.verificationStatus || 'pending';
+        let adminNote = null;
+
+        if (me.role === 'doctor') {
+          const dRes = await API.get('/doctors/me/profile');
+          status = dRes.data?.doctor?.verification_status || status;
+          adminNote = dRes.data?.doctor?.admin_note || null;
+        } else if (me.role === 'hospital_admin') {
+          const hRes = await API.get('/hospitals/my-hospital');
+          status = hRes.data?.hospital?.verification_status || status;
+          adminNote = hRes.data?.hospital?.admin_note || null;
+        }
+
+        me.verificationStatus = status;
+        Auth.saveUser(me);
+
+        renderStatus(status, adminNote);
+        return status;
+      }
+
+      document.getElementById('check-status-btn').addEventListener('click', async () => {
+        const btn = document.getElementById('check-status-btn');
+        Utils.setLoading(btn, true, 'Checking…');
+        try {
+          const status = await fetchVerificationStatus();
+          if (status === 'pending') {
+            Utils.toast('Still under review. Please check again later.', 'info');
+          }
+        } catch (err) {
+          Utils.toast(err.message || 'Could not check status.', 'error');
+        } finally {
+          Utils.setLoading(btn, false);
+        }
+      });
+
+      document.getElementById('upload-doc-btn')?.addEventListener('click', async () => {
+        const fileInput = document.getElementById('doc-file');
+        const typeInput = document.getElementById('doc-type');
+        const file = fileInput.files?.[0];
+        if (!file) {
+          Utils.toast('Please choose a document first.', 'warning');
+          return;
+        }
+
+        const form = new FormData();
+        form.append('file', file);
+        form.append('documentType', typeInput.value || 'other');
+
+        const btn = document.getElementById('upload-doc-btn');
+        Utils.setLoading(btn, true, 'Uploading…');
+        try {
+          await API.upload('/doctors/me/verification-documents', form);
+          fileInput.value = '';
+          Utils.toast('Document uploaded successfully.', 'success');
+          await loadDoctorDocuments();
+        } catch (err) {
+          Utils.toast(err.message || 'Upload failed', 'error');
+        } finally {
+          Utils.setLoading(btn, false);
+        }
+      });
+
+      document.getElementById('logout-btn').addEventListener('click', () => Auth.logout());
+      await loadDoctorDocuments();
+    })();
+  </script>
+</body>
+</html>

@@ -138,7 +138,7 @@
             <label class="block text-sm font-medium mb-1.5">Medical License Number</label>
             <input type="text" id="licenseNumber" placeholder="e.g. MD-KE-12345" class="input-dark">
           </div>
-          <p class="text-xs" style="color:var(--text3)">Your profile will be reviewed and verified by our admin team before activation.</p>
+          <p class="text-xs" style="color:var(--text3)">After account creation, upload at least one proof document (hospital ID, medical license, or similar) on the verification page for admin review.</p>
         </div>
 
         <div class="flex items-start gap-2">
@@ -200,6 +200,11 @@
         phone    : document.getElementById('phone').value || undefined,
         role,
       };
+
+      if (role === 'doctor') {
+        body.specialization = document.getElementById('specialization').value || undefined;
+        body.licenseNumber = document.getElementById('licenseNumber').value || undefined;
+      }
 
       const btn = document.getElementById('submit-btn');
       btn.disabled = true;

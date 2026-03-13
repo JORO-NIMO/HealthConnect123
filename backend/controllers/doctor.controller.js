@@ -5,6 +5,7 @@ const AppointmentModel  = require('../models/Appointment.model');
 const AIService         = require('../services/ai.service');
 const PatientModel      = require('../models/Patient.model');
 const HospitalModel     = require('../models/Hospital.model');
+const DoctorVerificationDocumentModel = require('../models/DoctorVerificationDocument.model');
 const { sendSuccess, sendError } = require('../utils/response.util');
 
 // ─── Get Doctor Profile ───────────────────────────────────────────────────
@@ -111,6 +112,59 @@ exports.getPrescriptions = async (req, res, next) => {
 
     const prescriptions = await PrescriptionModel.listByDoctor(doctor.id);
     return sendSuccess(res, 200, 'Prescriptions retrieved.', { prescriptions });
+  } catch (err) { next(err); }
+};
+
+// ─── Doctor Verification Documents ────────────────────────────────────────
+exports.uploadVerificationDocument = async (req, res, next) => {
+  try {
+    const doctor = await DoctorModel.findByUserId(req.user.id);
+    if (!doctor) return sendError(res, 404, 'Doctor profile not found.');
+    if (!req.file) return sendError(res, 400, 'No file provided.');
+
+    const { documentType, notes } = req.body;
+    const document = await DoctorVerificationDocumentModel.create({
+      doctorId: doctor.id,
+      uploadedBy: req.user.id,
+      documentType,
+      fileUrl: `/uploads/doctor-verification/${req.file.filename}`,
+      fileName: req.file.originalname,
+      fileSize: req.file.size,
+      mimeType: req.file.mimetype,
+      notes,
+    });
+
+    return sendSuccess(res, 201, 'Verification document uploaded.', { document });
+  } catch (err) { next(err); }
+};
+
+exports.listVerificationDocuments = async (req, res, next) => {
+  try {
+    const doctor = await DoctorModel.findByUserId(req.user.id);
+    if (!doctor) return sendError(res, 404, 'Doctor profile not found.');
+
+    const documents = await DoctorVerificationDocumentModel.listByDoctor(doctor.id);
+    return sendSuccess(res, 200, 'Verification documents retrieved.', { documents });
+  } catch (err) { next(err); }
+};
+
+exports.deleteVerificationDocument = async (req, res, next) => {
+  try {
+    const doctor = await DoctorModel.findByUserId(req.user.id);
+    if (!doctor) return sendError(res, 404, 'Doctor profile not found.');
+
+    const existing = await DoctorVerificationDocumentModel.findById(req.params.docId);
+    if (!existing || existing.doctor_id !== doctor.id) {
+      return sendError(res, 404, 'Document not found.');
+    }
+
+    const fs = require('fs');
+    const path = require('path');
+    const filePath = path.join(__dirname, '../../frontend', existing.file_url);
+    if (fs.existsSync(filePath)) fs.unlinkSync(filePath);
+
+    await DoctorVerificationDocumentModel.deleteByIdForDoctor(req.params.docId, doctor.id);
+    return sendSuccess(res, 200, 'Verification document removed.');
   } catch (err) { next(err); }
 };
 

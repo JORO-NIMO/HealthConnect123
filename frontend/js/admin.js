@@ -177,13 +177,13 @@
         <div class="rounded-[18px] p-5" style="background:var(--surface2);border:1px solid var(--border)">
           <div class="flex items-start justify-between gap-4">
             <div class="flex items-center gap-3">
-              <div class="w-12 h-12 ${Utils.avatarColor(d.firstName)} rounded-xl flex items-center justify-center text-white font-bold flex-shrink-0">
-                ${Utils.initials(`${d.firstName || ''} ${d.lastName || ''}`)}
+              <div class="w-12 h-12 ${Utils.avatarColor(d.first_name || d.firstName || '')} rounded-xl flex items-center justify-center text-white font-bold flex-shrink-0">
+                ${Utils.initials(`${d.first_name || d.firstName || ''} ${d.last_name || d.lastName || ''}`)}
               </div>
               <div>
-                <div class="font-bold">Dr. ${Utils.escapeHtml(`${d.firstName || ''} ${d.lastName || ''}`)}</div>
-                <div class="text-sm" style="color:var(--text2)">${Utils.escapeHtml(d.specialization || '')} · Lic: ${Utils.escapeHtml(d.licenseNumber || '—')}</div>
-                <div class="text-xs" style="color:var(--text3)">Joined ${Utils.formatDate(d.createdAt)}</div>
+                <div class="font-bold">Dr. ${Utils.escapeHtml(`${d.first_name || d.firstName || ''} ${d.last_name || d.lastName || ''}`)}</div>
+                <div class="text-sm" style="color:var(--text2)">${Utils.escapeHtml(d.specialization || '')} · Lic: ${Utils.escapeHtml(d.license_number || d.licenseNumber || '—')}</div>
+                <div class="text-xs" style="color:var(--text3)">Joined ${Utils.formatDate(d.created_at || d.createdAt)}</div>
               </div>
             </div>
             <div class="flex gap-2">
@@ -196,6 +196,14 @@
                 ✕ Reject
               </button>
             </div>
+          </div>
+          <div class="mt-3 p-3 rounded-xl" style="background:var(--bg2);border:1px solid var(--border)">
+            <p class="text-xs font-semibold mb-2" style="color:var(--text2)">Verification Documents</p>
+            ${(d.verification_documents && d.verification_documents.length)
+              ? `<div class="space-y-1">${d.verification_documents.map(v =>
+                  `<a href="${v.file_url}" target="_blank" class="block text-xs hover:underline" style="color:var(--cyan)">• ${Utils.escapeHtml(v.file_name || 'Document')} <span style="color:var(--text3)">(${Utils.escapeHtml((v.document_type || 'other').replace(/_/g, ' '))})</span></a>`
+                ).join('')}</div>`
+              : `<p class="text-xs" style="color:var(--red)">No supporting documents uploaded.</p>`}
           </div>
         </div>
       `).join('');

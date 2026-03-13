@@ -244,13 +244,29 @@
 
     var analysis = report.aiAnalysis || report || {};
 
-    // Urgency banner
+    // Care guidance banner (calmer language)
     var urgencyLevel = (analysis.urgencyLevel || 'MEDIUM').toUpperCase();
     var urgencyMap = {
-      LOW:       { icon: '✅', color: '#34D399', bg: 'rgba(16,185,129,.08)',  border: 'rgba(16,185,129,.2)', label: 'Low'       },
-      MEDIUM:    { icon: '⚠️', color: '#FBBF24', bg: 'rgba(245,158,11,.08)', border: 'rgba(245,158,11,.2)', label: 'Medium'    },
-      HIGH:      { icon: '🔴', color: '#F87171', bg: 'rgba(239,68,68,.08)',  border: 'rgba(239,68,68,.2)',  label: 'High'      },
-      EMERGENCY: { icon: '🚨', color: '#EF4444', bg: 'rgba(239,68,68,.15)',  border: 'rgba(239,68,68,.3)',  label: 'Emergency' },
+      LOW: {
+        icon: '✅', color: '#34D399', bg: 'rgba(16,185,129,.08)', border: 'rgba(16,185,129,.2)',
+        label: 'Self-care likely okay',
+        helper: 'Monitor symptoms and use home care. Reach out to a doctor if things worsen.',
+      },
+      MEDIUM: {
+        icon: '🩺', color: '#FBBF24', bg: 'rgba(245,158,11,.08)', border: 'rgba(245,158,11,.2)',
+        label: 'Plan a doctor review soon',
+        helper: 'A routine consultation is recommended to be safe and get personalized treatment.',
+      },
+      HIGH: {
+        icon: '⏱️', color: '#F87171', bg: 'rgba(239,68,68,.08)', border: 'rgba(239,68,68,.2)',
+        label: 'Prompt medical care advised',
+        helper: 'Please seek in-person care today, especially if symptoms are getting worse.',
+      },
+      EMERGENCY: {
+        icon: '🚨', color: '#EF4444', bg: 'rgba(239,68,68,.15)', border: 'rgba(239,68,68,.3)',
+        label: 'Emergency care needed now',
+        helper: 'Go to the nearest emergency unit immediately or call local emergency services.',
+      },
     };
     var urg = urgencyMap[urgencyLevel] || urgencyMap.MEDIUM;
 
@@ -263,13 +279,18 @@
       var textEl  = document.getElementById('urgency-text');
       var reasonEl= document.getElementById('urgency-reason');
       if (iconEl)  iconEl.textContent  = urg.icon;
-      if (textEl)  { textEl.textContent = urg.label + ' Priority'; textEl.className = 'text-xl font-bold'; textEl.style.color = urg.color; }
-      if (reasonEl) reasonEl.textContent = analysis.urgencyReason || '';
+      if (textEl)  { textEl.textContent = urg.label; textEl.className = 'text-xl font-bold'; textEl.style.color = urg.color; }
+      if (reasonEl) {
+        var reason = analysis.urgencyReason ? analysis.urgencyReason + ' ' : '';
+        reasonEl.textContent = reason + urg.helper;
+      }
     }
 
     // Summary
     var summaryEl = document.getElementById('ai-summary');
-    if (summaryEl) summaryEl.textContent = analysis.summary || '';
+    if (summaryEl) {
+      summaryEl.textContent = analysis.summary || 'Based on what you shared, here are the most likely explanations and helpful next steps.';
+    }
 
     // Possible conditions
     var condList = document.getElementById('conditions-list');
@@ -279,19 +300,20 @@
         condList.innerHTML = conditions.map(function (c) {
           var pct = c.confidenceScore != null ? c.confidenceScore : Math.round((c.confidence || 0) * 100);
           var barColor = pct > 70 ? 'var(--red)' : pct > 40 ? 'var(--gold)' : 'var(--green)';
+          var confidenceWord = pct >= 75 ? 'Higher likelihood' : pct >= 45 ? 'Possible' : 'Less likely';
           return '<div class="condition-card">'
             + '<div class="flex justify-between items-center mb-1.5">'
             +   '<span class="font-semibold text-sm">' + esc(c.name) + '</span>'
-            +   '<span class="text-xs font-bold" style="color:var(--text3)">' + pct + '%</span>'
+            +   '<span class="text-[11px] font-semibold px-2 py-0.5 rounded-full" style="background:var(--surface1);color:var(--text3);border:1px solid var(--border)">' + confidenceWord + '</span>'
             + '</div>'
             + '<div class="pbar mb-2">'
             +   '<div class="pfill" style="width:' + pct + '%;background:' + barColor + '"></div>'
             + '</div>'
-            + '<p class="text-xs" style="color:var(--text3)">' + esc(c.description || '') + '</p>'
+            + '<p class="text-xs" style="color:var(--text3)">' + esc(c.description || 'This is one possible explanation for your symptom pattern.') + '</p>'
             + '</div>';
         }).join('');
       } else {
-        condList.innerHTML = '<p class="text-sm" style="color:var(--text3)">No specific conditions identified.</p>';
+        condList.innerHTML = '<p class="text-sm" style="color:var(--text3)">No clear pattern was identified. A clinician can help narrow this down.</p>';
       }
     }
 
@@ -299,6 +321,13 @@
     var actList = document.getElementById('actions-list');
     if (actList) {
       var actions = analysis.recommendedActions || [];
+      if (!actions.length) {
+        actions = [
+          'Rest, hydrate, and monitor symptoms for changes.',
+          'Book a consultation if symptoms persist or interfere with daily life.',
+          'Seek urgent care quickly if you develop severe warning signs.',
+        ];
+      }
       actList.innerHTML = actions.map(function (a) {
         return '<li class="flex gap-2 text-sm" style="color:var(--text2)"><span style="color:var(--cyan)" class="mt-0.5">•</span>' + esc(a) + '</li>';
       }).join('');
@@ -306,7 +335,9 @@
 
     // Disclaimer
     var discEl = document.getElementById('disclaimer');
-    if (discEl) discEl.textContent = analysis.disclaimer || 'This is for informational purposes only. Consult a healthcare professional.';
+    if (discEl) {
+      discEl.textContent = analysis.disclaimer || 'This is educational guidance, not a diagnosis. If you feel worse or worried at any point, contact a qualified healthcare professional.';
+    }
   }
 
   // ─── Render Recommended Doctors ──────────────────────────────────────

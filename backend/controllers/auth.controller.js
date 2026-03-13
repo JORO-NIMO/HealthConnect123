@@ -12,7 +12,7 @@ const logger = require('../utils/logger.util');
 // ─── Register ─────────────────────────────────────────────────────────────
 exports.register = async (req, res, next) => {
   try {
-    const { email, password, firstName, lastName, phone, role = 'patient' } = req.body;
+    const { email, password, firstName, lastName, phone, role = 'patient', specialization, licenseNumber } = req.body;
 
     // Only allow patient, doctor, and hospital_admin self-registration
     if (!['patient', 'doctor', 'hospital_admin'].includes(role)) {
@@ -26,7 +26,7 @@ exports.register = async (req, res, next) => {
 
     // Create role-specific profile
     if (role === 'patient') await PatientModel.create(user.id);
-    if (role === 'doctor')  await DoctorModel.create(user.id);
+    if (role === 'doctor')  await DoctorModel.create(user.id, { specialization, licenseNumber });
     // hospital_admin profile is created when they register their hospital via /api/v1/hospitals/register
 
     const tokens = generateTokens(user);

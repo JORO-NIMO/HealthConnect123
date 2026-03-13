@@ -3,6 +3,7 @@ const router  = express.Router();
 const ctrl    = require('../controllers/doctor.controller');
 const { authenticate } = require('../middleware/auth.middleware');
 const { authorize }    = require('../middleware/rbac.middleware');
+const { uploadDoctorVerificationDocument } = require('../middleware/upload.middleware');
 
 // Public routes (no wildcards that shadow /me routes)
 router.get('/',              ctrl.listDoctors);
@@ -18,6 +19,14 @@ router.put('/me/profile',       authenticate, authorize('doctor', 'admin'), ctrl
 router.get('/me/availability',  authenticate, authorize('doctor', 'admin'), ctrl.getAvailability);
 router.put('/me/availability',  authenticate, authorize('doctor'),          ctrl.setAvailability);
 router.get('/me/prescriptions', authenticate, authorize('doctor', 'admin'), ctrl.getPrescriptions);
+router.get('/me/verification-documents', authenticate, authorize('doctor', 'admin'), ctrl.listVerificationDocuments);
+router.post('/me/verification-documents', authenticate, authorize('doctor'), (req, res, next) => {
+	uploadDoctorVerificationDocument(req, res, (err) => {
+		if (err) return res.status(400).json({ success: false, message: err.message });
+		next();
+	});
+}, ctrl.uploadVerificationDocument);
+router.delete('/me/verification-documents/:docId', authenticate, authorize('doctor'), ctrl.deleteVerificationDocument);
 
 // Public wildcard routes (AFTER /me/* routes to avoid shadowing)
 router.get('/:id',              ctrl.getPublicProfile);

@@ -310,28 +310,37 @@
       <!-- Results -->
       <div id="results-content" class="hidden space-y-5">
 
-        <!-- Urgency Banner -->
+        <!-- Care Guidance Banner -->
         <div id="urgency-banner" class="rounded-[18px] p-5 text-center" style="border:1.5px solid var(--border)">
           <div class="text-3xl mb-2" id="urgency-icon">⚡</div>
-          <div class="text-xl font-bold" id="urgency-text">Urgency Level</div>
+          <div class="text-xl font-bold" id="urgency-text">Care Guidance</div>
           <div class="text-sm mt-1" id="urgency-reason" style="color:var(--text2)"></div>
+        </div>
+
+        <!-- Friendly interpretation helper -->
+        <div class="rounded-[18px] p-4" style="background:rgba(34,211,238,.06);border:1px solid rgba(34,211,238,.2)">
+          <p class="text-sm leading-relaxed" style="color:var(--text2)">
+            <span class="font-semibold" style="color:var(--cyan)">How to read this:</span>
+            These results are a support tool, not a diagnosis. We focus on practical next steps and when to seek care.
+          </p>
         </div>
 
         <!-- Summary -->
         <div class="rounded-[18px] p-5" style="background:var(--surface2);border:1px solid rgba(34,211,238,.1)">
-          <h3 class="font-bold mb-2 flex items-center gap-2">🤖 AI Summary</h3>
+          <h3 class="font-bold mb-2 flex items-center gap-2">🤖 What this may mean</h3>
           <p class="text-sm leading-relaxed" style="color:var(--text2)" id="ai-summary"></p>
         </div>
 
-        <!-- Possible conditions -->
+        <!-- Possible explanations -->
         <div class="rounded-[18px] p-5" style="background:var(--surface2);border:1px solid rgba(34,211,238,.1)">
-          <h3 class="font-bold mb-4">Possible Conditions</h3>
+          <h3 class="font-bold mb-4">Possible explanations</h3>
+          <p class="text-xs mb-3" style="color:var(--text3)">These are possibilities to discuss with a clinician, not confirmed diagnoses.</p>
           <div id="conditions-list" class="space-y-3"></div>
         </div>
 
         <!-- Recommended actions -->
         <div class="rounded-[18px] p-5" style="background:var(--surface2);border:1px solid rgba(34,211,238,.1)">
-          <h3 class="font-bold mb-3">Recommended Actions</h3>
+          <h3 class="font-bold mb-3">Next best steps</h3>
           <ul id="actions-list" class="space-y-2 text-sm" style="color:var(--text2)"></ul>
         </div>
 
