@@ -92,7 +92,7 @@ const Auth = (() => {
       }
     } finally {
       clearSession();
-      window.location.href = '/pages/auth/login.html';
+      window.location.href = '/';
     }
   }
 

@@ -35,14 +35,21 @@ class HospitalModel {
   }
 
   // ─── List ──────────────────────────────────────────────────────────────
-  static async list({ type, city, limit = 20, offset = 0, verifiedOnly = false, activeOnly = true } = {}) {
+  static async list({ type, city, state, country, q, limit = 20, offset = 0, verifiedOnly = false, activeOnly = true } = {}) {
     let sql = 'SELECT * FROM hospitals WHERE 1=1';
     const params = [];
 
     if (verifiedOnly) { sql += ` AND verification_status = 'verified'`; }
     if (activeOnly)   { sql += ' AND is_active = 1'; }
     if (type)         { sql += ' AND type = ?'; params.push(type); }
-    if (city)         { sql += ' AND city = ?'; params.push(city); }
+    if (city)         { sql += ' AND city LIKE ?'; params.push(`%${city}%`); }
+    if (state)        { sql += ' AND state LIKE ?'; params.push(`%${state}%`); }
+    if (country)      { sql += ' AND country LIKE ?'; params.push(`%${country}%`); }
+    if (q) {
+      sql += ' AND (name LIKE ? OR description LIKE ? OR city LIKE ? OR state LIKE ? OR country LIKE ? OR address LIKE ?)';
+      const like = `%${q}%`;
+      params.push(like, like, like, like, like, like);
+    }
 
     sql += ' ORDER BY rating DESC, name ASC LIMIT ? OFFSET ?';
     params.push(limit, offset);

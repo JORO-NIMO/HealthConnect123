@@ -151,6 +151,31 @@ const Utils = (() => {
     return `<tr>${Array(cols).fill('<td class="px-5 py-4"><div class="h-4 rounded animate-pulse" style="background:var(--border)"></div></td>').join('')}</tr>`;
   }
 
+  function skeletonLines(lines = [70, 45, 85]) {
+    return lines.map(w => `<div class="skeleton skeleton-line" style="width:${w}%"></div>`).join('');
+  }
+
+  function skeletonCards(count = 4, options = {}) {
+    const {
+      containerClass = 'space-y-3',
+      cardClass = 'rounded-xl p-4',
+      cardStyle = 'background:var(--surface2);border:1px solid var(--border)',
+      lines = [70, 45, 85],
+    } = options;
+
+    return `
+      <div class="${containerClass}">
+        ${Array.from({ length: count }).map(() => `
+          <div class="${cardClass}" style="${cardStyle}">
+            <div class="space-y-2">
+              ${skeletonLines(lines)}
+            </div>
+          </div>
+        `).join('')}
+      </div>
+    `;
+  }
+
   function emptyState(icon, title, subtitle = '') {
     return `
       <div class="text-center py-16" style="color:var(--text3)">
@@ -224,7 +249,7 @@ const Utils = (() => {
     formatDate, formatDateTime, formatTime, timeAgo, todayISO,
     formatCurrency,
     capitalize, initials, truncate, escapeHtml,
-    showAlert, hideAlert, toast, setLoading, skeletonRow, emptyState,
+    showAlert, hideAlert, toast, setLoading, skeletonRow, skeletonLines, skeletonCards, emptyState,
     statusBadge, urgencyBadge,
     getFormData, setFieldValue,
     renderPagination,

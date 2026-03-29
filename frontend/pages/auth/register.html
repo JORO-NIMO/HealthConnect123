@@ -19,6 +19,7 @@
 </head>
 <body class="min-h-screen flex" style="background:var(--bg);color:var(--text)">
 
+<body class="register-gradient-bg" style="color:var(--text)">
   <!-- Left panel -->
   <div class="hidden lg:flex lg:w-2/5 flex-col justify-between p-12 text-white relative overflow-hidden brand-logo-bg">
     <div class="absolute inset-0 opacity-[0.04]" style="background-image:radial-gradient(circle at 1px 1px,rgba(34,211,238,.4) 1px,transparent 0);background-size:32px 32px"></div>
@@ -40,7 +41,7 @@
 
   <!-- Right panel -->
   <div class="w-full lg:w-3/5 flex items-center justify-center p-4 sm:p-6 overflow-y-auto">
-    <div class="w-full max-w-lg py-8">
+    <div class="w-full max-w-lg py-8 register-card">
       <div class="lg:hidden text-center mb-6">
         <a href="/" class="inline-flex items-center gap-2 font-bold text-xl" style="color:var(--cyan)">
           <div class="w-8 h-8 rounded-[10px] bg-[#22D3EE] flex items-center justify-center text-white text-sm">🏥</div>
@@ -58,14 +59,17 @@
         <div class="grid grid-cols-3 gap-2 sm:gap-3">
           <label class="role-card">
             <input type="radio" name="role" value="patient" checked class="hidden">
+            <span class="role-icon">🧑‍🤝‍🧑</span>
             <div><div class="font-semibold">Patient</div><div class="text-xs" style="color:var(--text3)">Looking for care</div></div>
           </label>
           <label class="role-card">
             <input type="radio" name="role" value="doctor" class="hidden">
+            <span class="role-icon">🩺</span>
             <div><div class="font-semibold">Doctor</div><div class="text-xs" style="color:var(--text3)">Providing care</div></div>
           </label>
           <label class="role-card">
             <input type="radio" name="role" value="hospital_admin" class="hidden">
+            <span class="role-icon">🏥</span>
             <div><div class="font-semibold">Hospital</div><div class="text-xs" style="color:var(--text3)">Managing a facility</div></div>
           </label>
         </div>
@@ -85,27 +89,27 @@
 
       <form id="register-form" class="space-y-4">
         <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-          <div>
+          <div class="min-w-0 w-full">
             <label class="block text-sm font-medium mb-1.5">First Name</label>
-            <input type="text" id="firstName" required placeholder="John" class="input-dark">
+            <input type="text" id="firstName" required placeholder="John" class="register-input w-full">
           </div>
-          <div>
+          <div class="min-w-0 w-full">
             <label class="block text-sm font-medium mb-1.5">Last Name</label>
-            <input type="text" id="lastName" required placeholder="Doe" class="input-dark">
+            <input type="text" id="lastName" required placeholder="Doe" class="register-input w-full">
           </div>
         </div>
         <div>
           <label class="block text-sm font-medium mb-1.5">Email Address</label>
-          <input type="email" id="email" required placeholder="you@example.com" class="input-dark">
+          <input type="email" id="email" required placeholder="you@example.com" class="register-input w-full">
         </div>
         <div>
           <label class="block text-sm font-medium mb-1.5">Phone Number <span style="color:var(--text3)">(optional)</span></label>
-          <input type="tel" id="phone" placeholder="+254 7XX XXX XXX" class="input-dark">
+          <input type="tel" id="phone" placeholder="+254 7XX XXX XXX" class="register-input w-full">
         </div>
         <div>
           <label class="block text-sm font-medium mb-1.5">Password</label>
           <div class="relative">
-            <input type="password" id="password" required placeholder="Min. 8 characters" class="input-dark pr-12">
+            <input type="password" id="password" required placeholder="Min. 8 characters" class="register-input pr-12 w-full">
             <button type="button" id="toggle-pw" class="absolute right-3 top-1/2 -translate-y-1/2 text-lg" style="color:var(--text3)">👁</button>
           </div>
           <div class="flex gap-1 mt-2" id="pw-strength">
@@ -117,7 +121,7 @@
         </div>
         <div>
           <label class="block text-sm font-medium mb-1.5">Confirm Password</label>
-          <input type="password" id="confirmPassword" required placeholder="Repeat password" class="input-dark">
+          <input type="password" id="confirmPassword" required placeholder="Repeat password" class="register-input w-full">
         </div>
 
         <!-- Doctor extra fields -->
@@ -125,7 +129,7 @@
           <p class="text-sm font-semibold" style="color:var(--cyan)">📋 Doctor Information (required for verification)</p>
           <div>
             <label class="block text-sm font-medium mb-1.5">Medical Specialization</label>
-            <select id="specialization" class="input-dark">
+            <select id="specialization" class="register-input w-full">
               <option value="">Select specialization...</option>
               <option>General Medicine</option><option>Pediatrics</option><option>Cardiology</option>
               <option>Dermatology</option><option>Gynecology</option><option>Orthopedics</option>
@@ -136,18 +140,18 @@
           </div>
           <div>
             <label class="block text-sm font-medium mb-1.5">Medical License Number</label>
-            <input type="text" id="licenseNumber" placeholder="e.g. MD-KE-12345" class="input-dark">
+            <input type="text" id="licenseNumber" placeholder="e.g. MD-KE-12345" class="register-input w-full">
           </div>
           <p class="text-xs" style="color:var(--text3)">After account creation, upload at least one proof document (hospital ID, medical license, or similar) on the verification page for admin review.</p>
         </div>
 
         <div class="flex items-start gap-2">
-          <input type="checkbox" id="terms" required class="mt-1 rounded" style="accent-color:var(--cyan)">
+          <input type="checkbox" id="terms" required class="mt-1 rounded register-input" style="accent-color:var(--cyan);width:1.1em;height:1.1em;padding:0;">
           <label for="terms" class="text-sm" style="color:var(--text2)">
             I agree to the <a href="#" class="underline" style="color:var(--cyan)">Terms of Service</a> and <a href="#" class="underline" style="color:var(--cyan)">Privacy Policy</a>
           </label>
         </div>
-        <button type="submit" id="submit-btn" class="btn-teal w-full font-semibold py-3.5 disabled:opacity-50">
+        <button type="submit" id="submit-btn" class="register-btn w-full font-semibold py-3.5 disabled:opacity-50">
           Create Account →
         </button>
       </form>

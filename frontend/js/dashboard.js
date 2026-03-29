@@ -37,6 +37,26 @@
 
   async function loadDashboard() {
     try {
+      const apptList = document.getElementById('upcoming-appointments');
+      if (apptList) {
+        apptList.innerHTML = Utils.skeletonCards(3, {
+          containerClass: 'space-y-3',
+          cardClass: 'p-4 rounded-xl',
+          cardStyle: 'background:var(--surface2);border:1px solid var(--border)',
+          lines: [45, 30],
+        });
+      }
+
+      const sympList = document.getElementById('recent-reports');
+      if (sympList) {
+        sympList.innerHTML = Utils.skeletonCards(3, {
+          containerClass: 'space-y-3',
+          cardClass: 'p-4 rounded-xl',
+          cardStyle: 'background:var(--surface2);border:1px solid var(--border)',
+          lines: [60, 35],
+        });
+      }
+
       const [statsRes, apptRes, sympRes] = await Promise.allSettled([
         API.get('/patients/stats'),
         API.get('/appointments/patient?status=upcoming&limit=5'),
@@ -53,7 +73,6 @@
       }
 
       // Upcoming appointments
-      const apptList = document.getElementById('upcoming-appointments');
       if (apptList) {
         if (apptRes.status === 'fulfilled') {
           const items = apptRes.value.data?.appointments || [];
@@ -66,7 +85,6 @@
       }
 
       // Recent symptom reports
-      const sympList = document.getElementById('recent-reports');
       if (sympList) {
         if (sympRes.status === 'fulfilled') {
           const items = sympRes.value.data?.reports || [];

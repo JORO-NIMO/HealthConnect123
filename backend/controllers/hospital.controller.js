@@ -12,9 +12,16 @@ const logger = require('../utils/logger.util');
 // ─── List Hospitals ───────────────────────────────────────────────────────
 exports.listHospitals = async (req, res, next) => {
   try {
-    const { type, city, limit = 20, offset = 0 } = req.query;
+    const { type, city, state, country, q, limit = 20, offset = 0 } = req.query;
     const hospitals = await HospitalModel.list({
-      type, city, limit: parseInt(limit), offset: parseInt(offset), activeOnly: true,
+      type,
+      city,
+      state,
+      country,
+      q,
+      limit: parseInt(limit),
+      offset: parseInt(offset),
+      activeOnly: true,
     });
     return sendSuccess(res, 200, 'Hospitals retrieved.', { hospitals });
   } catch (err) { next(err); }

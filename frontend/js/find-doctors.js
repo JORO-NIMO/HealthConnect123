@@ -9,6 +9,63 @@
   let allDoctors = [];
   let symptoms = [];
   let specializations = [];
+  let patientLocation = { latitude: null, longitude: null, city: '', state: '', country: '' };
+
+  function updateLocationChip(text, tone = 'info') {
+    const chip = document.getElementById('location-chip');
+    if (!chip) return;
+    chip.textContent = text;
+
+    if (tone === 'ok') {
+      chip.style.background = 'rgba(16,185,129,.08)';
+      chip.style.borderColor = 'rgba(16,185,129,.2)';
+      chip.style.color = '#10B981';
+      return;
+    }
+
+    if (tone === 'warn') {
+      chip.style.background = 'rgba(245,158,11,.08)';
+      chip.style.borderColor = 'rgba(245,158,11,.2)';
+      chip.style.color = '#F59E0B';
+      return;
+    }
+
+    chip.style.background = 'rgba(34,211,238,.08)';
+    chip.style.borderColor = 'rgba(34,211,238,.15)';
+    chip.style.color = 'var(--cyan)';
+  }
+
+  async function loadPatientLocation() {
+    try {
+      const res = await API.get('/patients/profile');
+      const p = res.data?.patient || {};
+      patientLocation = {
+        latitude: p.latitude ? Number(p.latitude) : null,
+        longitude: p.longitude ? Number(p.longitude) : null,
+        city: p.city || '',
+        state: p.state || '',
+        country: p.country || '',
+      };
+
+      if (!document.getElementById('filter-city')?.value && p.city) {
+        document.getElementById('filter-city').value = p.city;
+      }
+      if (!document.getElementById('filter-state')?.value && p.state) {
+        document.getElementById('filter-state').value = p.state;
+      }
+      if (!document.getElementById('filter-country')?.value && p.country) {
+        document.getElementById('filter-country').value = p.country;
+      }
+
+      if (patientLocation.latitude && patientLocation.longitude) {
+        updateLocationChip(`Saved: ${p.city || 'your area'} (${patientLocation.latitude.toFixed(3)}, ${patientLocation.longitude.toFixed(3)})`, 'ok');
+      } else {
+        updateLocationChip('No saved coordinates. Add location in My Profile.', 'warn');
+      }
+    } catch {
+      updateLocationChip('Could not load saved location', 'warn');
+    }
+  }
 
   // ─── Mode Toggle ──────────────────────────────────────────────────────
   document.querySelectorAll('.tab-pill').forEach(btn => {
@@ -23,17 +80,50 @@
 
   // ─── Load & Render Doctors ────────────────────────────────────────────
   async function loadDoctors() {
+    const grid = document.getElementById('doctors-grid');
+    if (grid) {
+      grid.innerHTML = Utils.skeletonCards(6, {
+        containerClass: 'grid grid-cols-1 md:grid-cols-2 gap-4',
+        cardClass: 'doc-card',
+        cardStyle: 'background:var(--surface2);border:1px solid var(--border)',
+        lines: [55, 35, 70],
+      });
+    }
+
     try {
       const q = document.getElementById('search-input')?.value || '';
       const spec = document.getElementById('filter-spec')?.value || '';
-      const res = await API.get(`/doctors/search?q=${encodeURIComponent(q)}&specialization=${encodeURIComponent(spec)}&limit=40`);
+      const city = document.getElementById('filter-city')?.value || '';
+      const state = document.getElementById('filter-state')?.value || '';
+      const country = document.getElementById('filter-country')?.value || '';
+      const radiusKm = document.getElementById('filter-radius')?.value || '50';
+      const useSavedLocation = !!document.getElementById('use-saved-location')?.checked;
+
+      const params = new URLSearchParams({
+        q,
+        specialization: spec,
+        city,
+        state,
+        country,
+        limit: '40',
+      });
+
+      if (useSavedLocation && patientLocation.latitude && patientLocation.longitude) {
+        params.set('latitude', String(patientLocation.latitude));
+        params.set('longitude', String(patientLocation.longitude));
+        params.set('radiusKm', String(radiusKm || 50));
+      }
+
+      const res = await API.get(`/doctors/search?${params.toString()}`);
       allDoctors = res.data?.doctors || [];
       specializations = res.data?.specializations || [];
       populateSpecFilter();
       sortAndRender();
     } catch (err) {
-      document.getElementById('doctors-grid').innerHTML =
-        '<p class="col-span-full text-center py-8 text-sm" style="color:var(--text3)">Could not load doctors. Please try again.</p>';
+      if (grid) {
+        grid.innerHTML =
+          '<p class="col-span-full text-center py-8 text-sm" style="color:var(--text3)">Could not load doctors. Please try again.</p>';
+      }
     }
   }
 
@@ -101,6 +191,12 @@
               <span>${d.years_experience || 0} yrs exp</span>
             </div>
             <div class="mt-1">${availBadge}</div>
+            ${(d.city || d.state || d.country || d.distance_km != null) ? `
+              <div class="flex items-center gap-2 mt-1 text-[11px]" style="color:var(--text3)">
+                ${(d.city || d.state || d.country) ? `<span>📍 ${Utils.escapeHtml([d.city, d.state, d.country].filter(Boolean).join(', '))}</span>` : ''}
+                ${d.distance_km != null ? `<span style="color:var(--green)">· ${Number(d.distance_km).toFixed(1)} km</span>` : ''}
+              </div>
+            ` : ''}
           </div>
           <div class="text-right flex-shrink-0">
             <div class="text-sm font-bold" style="color:var(--cyan)">${Utils.formatCurrency(d.consultation_fee)}</div>
@@ -191,17 +287,28 @@
   window.getRecommendations = async function() {
     if (!symptoms.length) return;
     const list = document.getElementById('recommendations-list');
+    const hospitalsEl = document.getElementById('nearby-hospitals-recommend');
     const btn = document.getElementById('recommend-btn');
     btn.disabled = true;
     btn.textContent = '🔄 Analyzing...';
     list.innerHTML = '<div class="text-center py-8"><div class="text-3xl mb-3 animate-pulse">🤖</div><p class="text-sm" style="color:var(--text3)">AI is matching you with the best doctors...</p></div>';
+    if (hospitalsEl) hospitalsEl.innerHTML = '';
 
     try {
-      const res = await API.post('/doctors/recommend', { symptoms });
+      const radiusKm = Number(document.getElementById('filter-radius')?.value || 50);
+      const payload = { symptoms, radiusKm };
+      if (patientLocation.latitude && patientLocation.longitude) {
+        payload.latitude = patientLocation.latitude;
+        payload.longitude = patientLocation.longitude;
+      }
+
+      const res = await API.post('/doctors/recommend', payload);
       const docs = res.data?.doctors || [];
+      const nearbyHospitals = res.data?.nearbyHospitals || [];
 
       if (!docs.length) {
         list.innerHTML = '<p class="text-center py-8 text-sm" style="color:var(--text3)">No matching doctors found. Try different symptoms.</p>';
+        renderNearbyHospitals(nearbyHospitals);
         return;
       }
 
@@ -213,6 +320,8 @@
           ${docs.map(d => doctorCard(d, true)).join('')}
         </div>
       `;
+
+      renderNearbyHospitals(nearbyHospitals);
     } catch (err) {
       list.innerHTML = `<p class="text-center py-8 text-sm" style="color:var(--red)">Failed to get recommendations: ${err.message || 'Unknown error'}</p>`;
     } finally {
@@ -221,15 +330,74 @@
     }
   };
 
+  function renderNearbyHospitals(hospitals) {
+    const el = document.getElementById('nearby-hospitals-recommend');
+    if (!el) return;
+    if (!hospitals.length) {
+      el.innerHTML = '';
+      return;
+    }
+
+    el.innerHTML = `
+      <div class="rounded-xl p-4" style="background:var(--surface2);border:1px solid var(--border)">
+        <h4 class="font-semibold mb-3">🏥 Nearby Hospitals Within Reach</h4>
+        <div class="space-y-2">
+          ${hospitals.slice(0, 6).map(h => `
+            <div class="rounded-xl p-3" style="background:var(--bg2);border:1px solid var(--border)">
+              <div class="font-semibold text-sm">${Utils.escapeHtml(h.name || 'Hospital')}</div>
+              <div class="text-xs mt-1" style="color:var(--text3)">
+                ${Utils.escapeHtml([h.city, h.state, h.country].filter(Boolean).join(', ') || 'Location unavailable')}
+                ${h.distance_km != null ? ` · <span style="color:var(--green)">${Number(h.distance_km).toFixed(1)} km away</span>` : ''}
+              </div>
+            </div>
+          `).join('')}
+        </div>
+      </div>
+    `;
+  }
+
   // ─── Event Listeners ──────────────────────────────────────────────────
   let searchTimer;
   document.getElementById('search-input')?.addEventListener('input', function() {
     clearTimeout(searchTimer);
     searchTimer = setTimeout(loadDoctors, 300);
   });
+  ['filter-city', 'filter-state', 'filter-country'].forEach((id) => {
+    document.getElementById(id)?.addEventListener('input', function() {
+      clearTimeout(searchTimer);
+      searchTimer = setTimeout(loadDoctors, 300);
+    });
+  });
   document.getElementById('filter-spec')?.addEventListener('change', loadDoctors);
   document.getElementById('filter-sort')?.addEventListener('change', sortAndRender);
+  document.getElementById('filter-radius')?.addEventListener('change', loadDoctors);
+  document.getElementById('use-saved-location')?.addEventListener('change', loadDoctors);
+  document.getElementById('use-current-location')?.addEventListener('click', async () => {
+    if (!navigator.geolocation) {
+      updateLocationChip('Geolocation not supported on this device', 'warn');
+      return;
+    }
+
+    updateLocationChip('Detecting current location…');
+    try {
+      const pos = await new Promise((resolve, reject) => {
+        navigator.geolocation.getCurrentPosition(resolve, reject, {
+          timeout: 10000,
+          enableHighAccuracy: true,
+          maximumAge: 120000,
+        });
+      });
+
+      patientLocation.latitude = Number(pos.coords.latitude);
+      patientLocation.longitude = Number(pos.coords.longitude);
+      updateLocationChip(`Current: ${patientLocation.latitude.toFixed(3)}, ${patientLocation.longitude.toFixed(3)}`, 'ok');
+      await loadDoctors();
+    } catch {
+      updateLocationChip('Could not detect current location', 'warn');
+    }
+  });
 
   // ─── Init ─────────────────────────────────────────────────────────────
+  await loadPatientLocation();
   await loadDoctors();
 })();

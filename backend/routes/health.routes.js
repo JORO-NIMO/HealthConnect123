@@ -122,6 +122,39 @@ router.get('/health/live', (req, res) => {
 });
 
 // ═══════════════════════════════════════════════════════════════════════════
+// PUBLIC LANDING PAGE STATS
+// ═══════════════════════════════════════════════════════════════════════════
+
+router.get('/landing-stats', async (req, res) => {
+  try {
+    const [stats] = await query(`
+      SELECT
+        (SELECT COUNT(*) FROM patients) AS total_patients,
+        (
+          SELECT COUNT(*)
+          FROM doctors d
+          JOIN users u ON u.id = d.user_id
+          WHERE d.verification_status = 'verified'
+            AND u.is_active = 1
+        ) AS verified_doctors,
+        (
+          SELECT COUNT(*)
+          FROM hospitals h
+          WHERE h.is_active = 1
+        ) AS total_hospitals,
+        (
+          SELECT COALESCE(ROUND(AVG(r.rating), 1), 0)
+          FROM reviews r
+        ) AS average_rating
+    `);
+
+    return sendSuccess(res, 200, 'Landing statistics retrieved.', { stats });
+  } catch (error) {
+    return sendError(res, 500, 'Failed to retrieve landing statistics.');
+  }
+});
+
+// ═══════════════════════════════════════════════════════════════════════════
 // SYSTEM METRICS (admin only)
 // ═══════════════════════════════════════════════════════════════════════════
 

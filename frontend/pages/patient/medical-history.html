@@ -90,6 +90,45 @@
           <label class="block text-xs font-medium mb-1" style="color:var(--text3)">Surgical History</label>
           <textarea id="surgical-history" rows="2" placeholder="Any past surgeries..." class="input-dark resize-none"></textarea>
         </div>
+
+        <div class="rounded-[14px] p-4 space-y-4" style="background:var(--bg2);border:1px solid var(--border)">
+          <div class="flex items-center justify-between gap-3 flex-wrap">
+            <div>
+              <div class="text-xs font-semibold" style="color:var(--text3)">LOCATION (FOR DOCTOR & HOSPITAL MATCHING)</div>
+              <p class="text-xs mt-1" style="color:var(--text3)">Save your area so we can recommend nearby care faster.</p>
+            </div>
+            <button id="detect-profile-location-btn" type="button" class="btn-out text-xs font-semibold px-4 py-2">📍 Detect Current Location</button>
+          </div>
+
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div class="sm:col-span-2">
+              <label class="block text-xs font-medium mb-1" style="color:var(--text3)">Address</label>
+              <input type="text" id="profile-address" placeholder="Street, building, landmark" class="input-dark">
+            </div>
+            <div>
+              <label class="block text-xs font-medium mb-1" style="color:var(--text3)">City</label>
+              <input type="text" id="profile-city" placeholder="e.g. Kampala" class="input-dark">
+            </div>
+            <div>
+              <label class="block text-xs font-medium mb-1" style="color:var(--text3)">State / Region</label>
+              <input type="text" id="profile-state" placeholder="e.g. Central Region" class="input-dark">
+            </div>
+            <div>
+              <label class="block text-xs font-medium mb-1" style="color:var(--text3)">Country</label>
+              <input type="text" id="profile-country" placeholder="e.g. Uganda" class="input-dark">
+            </div>
+            <div>
+              <label class="block text-xs font-medium mb-1" style="color:var(--text3)">Latitude</label>
+              <input type="number" step="0.0000001" id="profile-latitude" placeholder="0.0000000" class="input-dark">
+            </div>
+            <div>
+              <label class="block text-xs font-medium mb-1" style="color:var(--text3)">Longitude</label>
+              <input type="number" step="0.0000001" id="profile-longitude" placeholder="0.0000000" class="input-dark">
+            </div>
+          </div>
+          <div id="profile-location-alert" class="hidden p-2 rounded-lg text-xs font-medium"></div>
+        </div>
+
         <!-- Avatar upload -->
         <div class="rounded-[14px] p-4" style="background:var(--bg2);border:1px solid var(--border)">
           <div class="text-xs font-semibold mb-3" style="color:var(--text3)">PROFILE PICTURE</div>

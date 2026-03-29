@@ -66,6 +66,19 @@
 
       <div class="p-4 sm:p-6 space-y-5">
 
+        <div class="rounded-[18px] p-4 sm:p-6" style="background:var(--surface2);border:1px solid rgba(34,211,238,.1)">
+          <div class="flex items-center justify-between flex-wrap gap-3 mb-4">
+            <h2 class="font-bold">Search Hospitals by Region</h2>
+            <span id="saved-location-chip" class="text-xs px-3 py-1.5 rounded-full" style="background:rgba(34,211,238,.08);border:1px solid rgba(34,211,238,.15);color:var(--cyan)">Checking saved location…</span>
+          </div>
+          <div class="grid grid-cols-1 sm:grid-cols-4 gap-3">
+            <input id="hospital-city-filter" type="text" placeholder="City" class="input-dark">
+            <input id="hospital-state-filter" type="text" placeholder="State / Region" class="input-dark">
+            <input id="hospital-country-filter" type="text" placeholder="Country" class="input-dark">
+            <button onclick="searchHospitalsByRegion()" class="btn-out text-sm font-semibold">🔎 Search Region</button>
+          </div>
+        </div>
+
         <!-- Browse nearby hospitals -->
         <div class="rounded-[18px] p-4 sm:p-6" style="background:linear-gradient(135deg,var(--cyan),#1A9090)">
           <div class="flex items-center justify-between flex-wrap gap-4">
@@ -114,6 +127,7 @@
   <script src="/js/notifications.js"></script>
   <script>
     Auth.requireRole('patient');
+    let savedLocation = { latitude: null, longitude: null, city: '', state: '', country: '' };
 
     function toggleSidebar() {
       document.getElementById('sidebar').classList.toggle('-translate-x-full');
@@ -126,12 +140,71 @@
     });
 
     async function loadMyHospitals() {
+      const el = document.getElementById('my-hospitals-list');
+      if (el) {
+        el.innerHTML = Utils.skeletonCards(3, {
+          containerClass: 'space-y-3',
+          cardClass: 'p-5 rounded-xl',
+          cardStyle: 'background:var(--bg2);border:1px solid var(--border)',
+          lines: [50, 35, 65],
+        });
+      }
+
       try {
         const res = await API.get('/hospitals/patient/my-hospitals');
         const hospitals = res.data.hospitals || [];
         renderMyHospitals(hospitals);
       } catch (err) {
         console.warn('Failed to load hospitals:', err);
+      }
+    }
+
+    function updateSavedLocationChip(text, tone = 'info') {
+      const chip = document.getElementById('saved-location-chip');
+      if (!chip) return;
+      chip.textContent = text;
+      if (tone === 'ok') {
+        chip.style.background = 'rgba(16,185,129,.08)';
+        chip.style.borderColor = 'rgba(16,185,129,.2)';
+        chip.style.color = '#10B981';
+        return;
+      }
+      if (tone === 'warn') {
+        chip.style.background = 'rgba(245,158,11,.08)';
+        chip.style.borderColor = 'rgba(245,158,11,.2)';
+        chip.style.color = '#F59E0B';
+        return;
+      }
+      chip.style.background = 'rgba(34,211,238,.08)';
+      chip.style.borderColor = 'rgba(34,211,238,.15)';
+      chip.style.color = 'var(--cyan)';
+    }
+
+    async function loadSavedLocation() {
+      try {
+        const res = await API.get('/patients/profile');
+        const p = res.data?.patient || {};
+        savedLocation = {
+          latitude: p.latitude ? Number(p.latitude) : null,
+          longitude: p.longitude ? Number(p.longitude) : null,
+          city: p.city || '',
+          state: p.state || '',
+          country: p.country || '',
+        };
+
+        if (p.city) document.getElementById('hospital-city-filter').value = p.city;
+        if (p.state) document.getElementById('hospital-state-filter').value = p.state;
+        if (p.country) document.getElementById('hospital-country-filter').value = p.country;
+
+        if (savedLocation.latitude && savedLocation.longitude) {
+          updateSavedLocationChip(`Saved location: ${p.city || 'your area'} (${savedLocation.latitude.toFixed(3)}, ${savedLocation.longitude.toFixed(3)})`, 'ok');
+        } else if (p.city || p.state || p.country) {
+          updateSavedLocationChip(`Saved region: ${[p.city, p.state, p.country].filter(Boolean).join(', ')}`, 'ok');
+        } else {
+          updateSavedLocationChip('No saved location. Set it in My Profile.', 'warn');
+        }
+      } catch {
+        updateSavedLocationChip('Could not load saved location', 'warn');
       }
     }
 
@@ -172,27 +245,53 @@
       const section = document.getElementById('nearby-section');
       const list = document.getElementById('nearby-hospitals-list');
       section.classList.remove('hidden');
-      list.innerHTML = '<div class="text-center py-8"><div class="loading-spinner mx-auto mb-3"></div><p class="text-sm" style="color:var(--text3)">Detecting your location...</p></div>';
+      list.innerHTML = Utils.skeletonCards(3, {
+        containerClass: 'space-y-3',
+        cardClass: 'p-5 rounded-xl',
+        cardStyle: 'background:var(--bg2);border:1px solid var(--border)',
+        lines: [55, 40, 70],
+      });
 
       try {
-        const pos = await new Promise((resolve, reject) => {
-          navigator.geolocation.getCurrentPosition(resolve, reject, { timeout: 10000 });
-        });
-        const { latitude, longitude } = pos.coords;
+        let latitude = null;
+        let longitude = null;
 
-        list.innerHTML = '<div class="text-center py-8"><div class="loading-spinner mx-auto mb-3"></div><p class="text-sm" style="color:var(--text3)">Searching for nearby hospitals...</p></div>';
+        try {
+          const pos = await new Promise((resolve, reject) => {
+            navigator.geolocation.getCurrentPosition(resolve, reject, { timeout: 10000 });
+          });
+          latitude = pos.coords.latitude;
+          longitude = pos.coords.longitude;
+        } catch (_) {
+          if (savedLocation.latitude && savedLocation.longitude) {
+            latitude = savedLocation.latitude;
+            longitude = savedLocation.longitude;
+            list.innerHTML = '<div class="text-center py-8"><div class="loading-spinner mx-auto mb-3"></div><p class="text-sm" style="color:var(--text3)">Using your saved profile location...</p></div>';
+          }
+        }
+
+        if (!latitude || !longitude) {
+          throw new Error('NO_LOCATION');
+        }
+
+        list.innerHTML = Utils.skeletonCards(4, {
+          containerClass: 'space-y-3',
+          cardClass: 'p-5 rounded-xl',
+          cardStyle: 'background:var(--bg2);border:1px solid var(--border)',
+          lines: [55, 40, 70],
+        });
 
         const res = await API.get(`/hospitals/nearby?latitude=${latitude}&longitude=${longitude}&radius=50`);
         const hospitals = res.data.hospitals || [];
         renderNearbyHospitals(hospitals);
       } catch (err) {
-        if (err.code) {
+        if (err.message === 'NO_LOCATION' || err.code) {
           // Geolocation error
           list.innerHTML = `
             <div class="text-center py-8" style="color:var(--text3)">
               <div class="text-4xl mb-3">📍</div>
               <p class="text-sm">Could not detect your location.</p>
-              <p class="text-xs mt-1">Please enable location access and try again.</p>
+              <p class="text-xs mt-1">Please save your location under My Profile or enable location access and try again.</p>
             </div>
           `;
         } else {
@@ -205,6 +304,47 @@
         }
       }
     }
+
+    async function searchHospitalsByRegion() {
+      const city = document.getElementById('hospital-city-filter')?.value?.trim() || '';
+      const state = document.getElementById('hospital-state-filter')?.value?.trim() || '';
+      const country = document.getElementById('hospital-country-filter')?.value?.trim() || '';
+      const section = document.getElementById('nearby-section');
+      const list = document.getElementById('nearby-hospitals-list');
+
+      if (!city && !state && !country) {
+        Utils?.toast ? Utils.toast('Enter city, state/region, or country to search.', 'warning') : null;
+        return;
+      }
+
+      section.classList.remove('hidden');
+      list.innerHTML = Utils.skeletonCards(4, {
+        containerClass: 'space-y-3',
+        cardClass: 'p-5 rounded-xl',
+        cardStyle: 'background:var(--bg2);border:1px solid var(--border)',
+        lines: [55, 40, 70],
+      });
+
+      try {
+        const params = new URLSearchParams({ limit: '50' });
+        if (city) params.set('city', city);
+        if (state) params.set('state', state);
+        if (country) params.set('country', country);
+
+        const res = await API.get(`/hospitals?${params.toString()}`);
+        const hospitals = res.data?.hospitals || [];
+        renderNearbyHospitals(hospitals);
+      } catch (err) {
+        list.innerHTML = `
+          <div class="text-center py-8" style="color:var(--text3)">
+            <div class="text-4xl mb-3">⚠️</div>
+            <p class="text-sm">${err.message || 'Failed to search hospitals by region'}</p>
+          </div>
+        `;
+      }
+    }
+
+    window.searchHospitalsByRegion = searchHospitalsByRegion;
 
     function renderNearbyHospitals(hospitals) {
       const el = document.getElementById('nearby-hospitals-list');
@@ -242,6 +382,7 @@
       `).join('');
     }
 
+    loadSavedLocation();
     loadMyHospitals();
   </script>
 </body>

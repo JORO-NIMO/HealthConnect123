@@ -1,3 +1,89 @@
+.register-gradient-bg {
+  min-height: 100vh;
+  background: linear-gradient(135deg, #1e293b 0%, #22d3ee 100%);
+  background-repeat: no-repeat;
+  background-attachment: fixed;
+  display: flex;
+  align-items: stretch;
+  justify-content: stretch;
+}
+
+.register-card {
+  background: rgba(23,35,58,0.98);
+  border-radius: 2.2rem;
+  box-shadow: 0 8px 40px 0 rgba(34,211,238,0.18), 0 1.5px 8px 0 rgba(16,185,129,0.10);
+  border: 2.5px solid #22d3ee33;
+  padding: 3rem 2.2rem;
+  position: relative;
+  z-index: 2;
+  transition: box-shadow 0.2s, background 0.2s;
+}
+
+.register-input {
+  background: #19243a;
+  border-radius: 1.2rem;
+  border: 2px solid #22d3ee55;
+  box-shadow: 0 2px 12px 0 rgba(34,211,238,0.08) inset;
+  color: #e4f2ff;
+  padding: 1.1rem 1.2rem;
+  font-size: 1.08rem;
+  outline: none;
+  transition: box-shadow 0.2s, border-color 0.2s, background 0.2s;
+}
+.register-input:focus {
+  border-color: #22d3ee;
+  background: #1e293b;
+  box-shadow: 0 0 0 4px #22d3ee33, 0 2px 12px 0 rgba(34,211,238,0.12) inset;
+}
+
+.register-btn {
+  background: linear-gradient(90deg, #22d3ee 60%, #0891b2 100%);
+  border-radius: 1.2rem;
+  border: none;
+  color: #fff;
+  font-weight: 700;
+  padding: 1.1rem 0;
+  font-size: 1.13rem;
+  letter-spacing: 0.01em;
+  box-shadow: 0 8px 32px 0 #22d3ee44;
+  transition: box-shadow 0.2s, background 0.2s, color 0.2s;
+}
+.register-btn:hover {
+  background: linear-gradient(90deg, #0891b2 0%, #22d3ee 100%);
+  color: #fff;
+  box-shadow: 0 12px 48px 0 #22d3ee66;
+}
+
+.role-card {
+  cursor: pointer;
+  border: 2.5px solid #22d3ee33;
+  border-radius: 1.2rem;
+  padding: 1.2rem 1rem;
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  background: rgba(23,35,58,0.92);
+  box-shadow: 0 2px 12px 0 rgba(34,211,238,0.08);
+  transition: all 0.2s;
+  position: relative;
+}
+.role-card:has(input:checked), .role-card.selected {
+  border-color: #22d3ee;
+  background: linear-gradient(90deg, #22d3ee22 0%, #0891b222 100%);
+  box-shadow: 0 4px 24px 0 #22d3ee33;
+}
+.role-card .role-icon {
+  font-size: 2rem;
+  border-radius: 0.8rem;
+  background: #22d3ee22;
+  color: #22d3ee;
+  width: 2.5rem;
+  height: 2.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-right: 0.5rem;
+}
 /* HealthConnect — Custom CSS
    Deep Navy · Vivid Cyan · Warm Gold — Premium Dark Theme
    Supplements Tailwind CDN with global styles, animations, and print rules
@@ -48,6 +134,14 @@
   --g-hero:     radial-gradient(ellipse at 20% 50%, rgba(34,211,238,.12) 0%, transparent 55%),
                 radial-gradient(ellipse at 80% 20%, rgba(245,158,11,.10) 0%, transparent 50%),
                 radial-gradient(ellipse at 55% 90%, rgba(139,92,246,.08) 0%, transparent 45%);
+  /* Neuromorphic additions */
+  --neu-bg: #10192B;
+  --neu-shadow-light: rgba(255,255,255,0.18);
+  --neu-shadow-dark: rgba(7,14,28,0.85);
+  --neu-surface: #17233A;
+  --neu-border: rgba(34,211,238,0.18);
+  --neu-shadow: 12px 12px 32px var(--neu-shadow-dark), -12px -12px 32px var(--neu-shadow-light);
+  --neu-inset: inset 4px 4px 16px var(--neu-shadow-dark), inset -4px -4px 16px var(--neu-shadow-light);
 }
 
 /* Force all children to respect viewport width */
@@ -58,6 +152,69 @@ pre, code { overflow-x: auto; max-width: 100%; word-wrap: break-word; }
 
 html {
   scroll-behavior: smooth;
+}
+
+/* Neuromorphic background for auth pages */
+/* Stronger neuromorphic background for auth pages */
+.neuromorphic-bg {
+  min-height: 100vh;
+  background: linear-gradient(135deg, #10192B 60%, #1e293b 100%);
+  background-image:
+    linear-gradient(135deg, rgba(34,211,238,0.10) 0%, transparent 100%),
+    var(--g-hero);
+  display: flex;
+  align-items: stretch;
+  justify-content: stretch;
+}
+
+/* Neuromorphic card/form container */
+.neuromorphic-card {
+  background: var(--neu-surface);
+  border-radius: 2rem;
+  box-shadow: var(--neu-shadow);
+  border: 2.5px solid var(--neu-border);
+  padding: 2.8rem 2.2rem;
+  transition: box-shadow 0.2s, background 0.2s;
+  position: relative;
+  z-index: 2;
+}
+
+/* Neuromorphic input */
+.neuromorphic-input {
+  background: #19243a;
+  border-radius: 1.2rem;
+  border: 2px solid var(--neu-border);
+  box-shadow: var(--neu-inset);
+  color: var(--text);
+  padding: 1rem 1.2rem;
+  font-size: 1.08rem;
+  outline: none;
+  transition: box-shadow 0.2s, border-color 0.2s, background 0.2s;
+}
+.neuromorphic-input:focus {
+  border-color: var(--cyan);
+  background: #1e293b;
+  box-shadow: 0 0 0 4px rgba(34,211,238,0.18), var(--neu-inset);
+}
+
+/* Neuromorphic button */
+.neuromorphic-btn {
+  background: linear-gradient(135deg, #17233A 80%, #22D3EE 120%);
+  border-radius: 1.2rem;
+  border: 2px solid var(--neu-border);
+  box-shadow: var(--neu-shadow);
+  color: #22D3EE;
+  font-weight: 700;
+  padding: 1.1rem 0;
+  font-size: 1.13rem;
+  letter-spacing: 0.01em;
+  transition: box-shadow 0.2s, background 0.2s, color 0.2s;
+}
+.neuromorphic-btn:hover {
+  background: linear-gradient(135deg, #22D3EE 60%, #0891B2 100%);
+  color: #fff;
+  box-shadow: 0 8px 40px var(--cyan2), var(--neu-shadow);
+}
   -webkit-tap-highlight-color: transparent;
   -webkit-text-size-adjust: 100%;
   -ms-text-size-adjust: 100%;
@@ -203,6 +360,27 @@ body {
 .dot-bounce:nth-child(1) { animation: bounce-dot 1.4s ease-in-out 0.0s infinite; }
 .dot-bounce:nth-child(2) { animation: bounce-dot 1.4s ease-in-out 0.22s infinite; }
 .dot-bounce:nth-child(3) { animation: bounce-dot 1.4s ease-in-out 0.44s infinite; }
+
+/* ── Skeleton Loading ──────────────────────────────────────────────── */
+.skeleton {
+  position: relative;
+  overflow: hidden;
+  background: rgba(228,242,255,.06);
+  border-radius: 10px;
+}
+
+.skeleton::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(90deg, transparent 0%, rgba(255,255,255,.08) 45%, transparent 100%);
+  transform: translateX(-100%);
+  animation: shimmer 1.3s ease-in-out infinite;
+}
+
+.skeleton-line { height: 12px; border-radius: 8px; }
+.skeleton-line.sm { height: 10px; }
+.skeleton-line.lg { height: 16px; }
 
 /* ══════════════════════════════════════════════════════════════════════
    COMPONENT STYLES

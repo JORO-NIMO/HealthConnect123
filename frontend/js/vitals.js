@@ -28,6 +28,8 @@ const chartDefaults = {
       ticks: { 
         color: 'rgba(228,242,255,.35)', 
         font: { size: window.innerWidth < 768 ? 9 : 10 },
+        autoSkip: true,
+        maxTicksLimit: window.innerWidth < 768 ? 5 : 8,
         maxRotation: 45,
         minRotation: 0,
       }, 
@@ -132,7 +134,6 @@ function isAbnormalSugar(v) { return v.blood_sugar > 200 || v.blood_sugar < 70; 
 
 // ─── Load Trends (Charts) ────────────────────────────────────────────────
 async function loadTrends() {
-  if (chartsLoaded) return; // Prevent duplicate loads
   chartsLoaded = true;
   
   const days = document.getElementById('bp-days')?.value || 30;

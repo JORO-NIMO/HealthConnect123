@@ -94,6 +94,22 @@
         </select>
       </div>
 
+      <div class="grid grid-cols-1 sm:grid-cols-4 gap-3 mb-4">
+        <input type="text" id="filter-city" placeholder="City" class="input-dark">
+        <input type="text" id="filter-state" placeholder="State / Region" class="input-dark">
+        <input type="text" id="filter-country" placeholder="Country" class="input-dark">
+        <input type="number" id="filter-radius" min="1" max="500" value="50" placeholder="Radius (km)" class="input-dark">
+      </div>
+
+      <div class="flex items-center gap-2 mb-6 flex-wrap">
+        <label class="inline-flex items-center gap-2 text-xs px-3 py-2 rounded-xl" style="background:var(--surface2);border:1px solid var(--border);color:var(--text2)">
+          <input id="use-saved-location" type="checkbox" checked>
+          Use my saved location
+        </label>
+        <button id="use-current-location" class="btn-out text-xs font-semibold px-3 py-2">📍 Use Current Location</button>
+        <span id="location-chip" class="text-xs px-3 py-2 rounded-xl" style="background:rgba(34,211,238,.08);border:1px solid rgba(34,211,238,.15);color:var(--cyan)">Location not loaded</span>
+      </div>
+
       <div id="doctors-grid" class="grid grid-cols-1 md:grid-cols-2 gap-4">
         <div class="col-span-full text-center py-16" style="color:var(--text3)">
           <div class="text-5xl mb-4">🔄</div>
@@ -107,6 +123,7 @@
       <div class="rounded-xl p-4 sm:p-6 mb-6" style="background:var(--surface2);border:1px solid var(--border)">
         <h3 class="font-semibold mb-1">🤖 Smart Doctor Match</h3>
         <p class="text-sm mb-4" style="color:var(--text3)">Describe your symptoms and our AI will recommend the best matching doctors for you.</p>
+        <p class="text-xs mb-4" style="color:var(--text3)">If location is saved, recommendations prioritize doctors and hospitals within your reach.</p>
         <div class="space-y-3">
           <div id="symptom-tags" class="flex flex-wrap gap-2 min-h-[40px]"></div>
           <div class="flex gap-2">
@@ -118,6 +135,7 @@
       </div>
 
       <div id="recommendations-list" class="space-y-4"></div>
+      <div id="nearby-hospitals-recommend" class="space-y-3 mt-4"></div>
     </div>
   </div>
     </main>

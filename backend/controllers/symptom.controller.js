@@ -89,6 +89,7 @@ exports.analyzeSymptoms = async (req, res, next) => {
     // ─── AUTO-RECOMMEND DOCTORS based on analysis + location ───────────
     // Uses fast DB-based ranking only (no second AI call) to stay within timeout.
     let recommendedDoctors = [];
+    let nearbyHospitals = [];
     try {
       const patLat = latitude  || patient?.latitude;
       const patLng = longitude || patient?.longitude;
@@ -126,6 +127,15 @@ exports.analyzeSymptoms = async (req, res, next) => {
         })
       );
 
+      if (patLat && patLng) {
+        nearbyHospitals = await HospitalModel.findNearby(
+          parseFloat(patLat),
+          parseFloat(patLng),
+          radius,
+          10
+        );
+      }
+
       logger.info(`Auto-recommended ${recommendedDoctors.length} doctors for patient ${req.user.id}`);
     } catch (recErr) {
       logger.warn('Doctor auto-recommendation failed (non-blocking):', recErr.message);
@@ -135,6 +145,7 @@ exports.analyzeSymptoms = async (req, res, next) => {
       reportId: report?.id || null,
       analysis,
       recommendedDoctors,
+      nearbyHospitals,
     });
   } catch (err) { next(err); }
 };

@@ -300,8 +300,43 @@
       Utils.setFieldValue('allergies', profile.allergies);
       Utils.setFieldValue('current-medications', profile.current_medications);
       Utils.setFieldValue('surgical-history', profile.surgical_history);
+      Utils.setFieldValue('profile-address', profile.address);
+      Utils.setFieldValue('profile-city', profile.city);
+      Utils.setFieldValue('profile-state', profile.state);
+      Utils.setFieldValue('profile-country', profile.country);
+      Utils.setFieldValue('profile-latitude', profile.latitude);
+      Utils.setFieldValue('profile-longitude', profile.longitude);
     } catch { /* Pre-fill silently ignored */ }
   }
+
+  document.getElementById('detect-profile-location-btn')?.addEventListener('click', async () => {
+    const btn = document.getElementById('detect-profile-location-btn');
+    Utils.hideAlert('profile-location-alert');
+
+    if (!navigator.geolocation) {
+      Utils.showAlert('profile-location-alert', 'Geolocation is not supported on this device.', 'error');
+      return;
+    }
+
+    Utils.setLoading(btn, true, 'Detecting…');
+    try {
+      const pos = await new Promise((resolve, reject) => {
+        navigator.geolocation.getCurrentPosition(resolve, reject, {
+          timeout: 10000,
+          enableHighAccuracy: true,
+          maximumAge: 120000,
+        });
+      });
+
+      Utils.setFieldValue('profile-latitude', pos.coords.latitude.toFixed(7));
+      Utils.setFieldValue('profile-longitude', pos.coords.longitude.toFixed(7));
+      Utils.showAlert('profile-location-alert', 'Location detected. Add city/region if needed, then save profile.', 'success');
+    } catch (err) {
+      Utils.showAlert('profile-location-alert', 'Could not detect location. Please allow location access or enter it manually.', 'error');
+    } finally {
+      Utils.setLoading(btn, false);
+    }
+  });
 
   document.getElementById('save-profile-btn')?.addEventListener('click', async () => {
     const btn = document.getElementById('save-profile-btn');
@@ -317,6 +352,12 @@
         allergies:           document.getElementById('allergies').value.trim() || undefined,
         current_medications: document.getElementById('current-medications').value.trim() || undefined,
         surgical_history:    document.getElementById('surgical-history').value.trim() || undefined,
+        address:             document.getElementById('profile-address').value.trim() || undefined,
+        city:                document.getElementById('profile-city').value.trim() || undefined,
+        state:               document.getElementById('profile-state').value.trim() || undefined,
+        country:             document.getElementById('profile-country').value.trim() || undefined,
+        latitude:            document.getElementById('profile-latitude').value || undefined,
+        longitude:           document.getElementById('profile-longitude').value || undefined,
       });
       Utils.showAlert('profile-alert', 'Health profile saved!', 'success');
     } catch (err) {

@@ -207,20 +207,53 @@ exports.recommend = async (req, res, next) => {
 
     const recommended = await AIService.recommendDoctors(symptoms, doctors, patientContext);
 
+    let nearbyHospitals = [];
+    if (patLat && patLng) {
+      nearbyHospitals = await HospitalModel.findNearby(
+        parseFloat(patLat),
+        parseFloat(patLng),
+        radius,
+        10
+      );
+    }
+
     // Enrich with hospital affiliation info
     for (const doc of recommended) {
       const hospitals = await HospitalModel.getDoctorHospitals(doc.id);
       doc.hospitals = hospitals.map(h => ({ id: h.id, name: h.name, city: h.city, type: h.type }));
     }
 
-    return sendSuccess(res, 200, 'Doctor recommendations generated.', { doctors: recommended });
+    return sendSuccess(res, 200, 'Doctor recommendations generated.', {
+      doctors: recommended,
+      nearbyHospitals,
+      searchContext: {
+        usedLocation: !!(patLat && patLng),
+        latitude: patLat || null,
+        longitude: patLng || null,
+        radiusKm: radius,
+      },
+    });
   } catch (err) { next(err); }
 };
 
 // ─── Search Doctors (enhanced with filters) ───────────────────────────────
 exports.searchDoctors = async (req, res, next) => {
   try {
-    const { q, specialization, minRating, maxFee, language, latitude, longitude, radiusKm, limit = 20, offset = 0 } = req.query;
+    const {
+      q,
+      specialization,
+      minRating,
+      maxFee,
+      language,
+      city,
+      state,
+      country,
+      latitude,
+      longitude,
+      radiusKm,
+      limit = 20,
+      offset = 0,
+    } = req.query;
     const { query: dbQuery } = require('../config/database');
 
     // If location provided, use distance-based search
@@ -253,6 +286,9 @@ exports.searchDoctors = async (req, res, next) => {
         params.push(like, like, like, like, like);
       }
       if (specialization) { sql += ' AND d.specialization = ?'; params.push(specialization); }
+      if (city)           { sql += ' AND d.city LIKE ?'; params.push(`%${city}%`); }
+      if (state)          { sql += ' AND d.state LIKE ?'; params.push(`%${state}%`); }
+      if (country)        { sql += ' AND d.country LIKE ?'; params.push(`%${country}%`); }
       if (minRating)      { sql += ' AND d.rating >= ?'; params.push(parseFloat(minRating)); }
       if (maxFee)         { sql += ' AND d.consultation_fee <= ?'; params.push(parseFloat(maxFee)); }
       if (language)       { sql += ' AND d.languages LIKE ?'; params.push(`%${language}%`); }
@@ -289,6 +325,9 @@ exports.searchDoctors = async (req, res, next) => {
       params.push(like, like, like, like, like);
     }
     if (specialization) { sql += ' AND d.specialization = ?'; params.push(specialization); }
+    if (city)           { sql += ' AND d.city LIKE ?'; params.push(`%${city}%`); }
+    if (state)          { sql += ' AND d.state LIKE ?'; params.push(`%${state}%`); }
+    if (country)        { sql += ' AND d.country LIKE ?'; params.push(`%${country}%`); }
     if (minRating)      { sql += ' AND d.rating >= ?'; params.push(parseFloat(minRating)); }
     if (maxFee)         { sql += ' AND d.consultation_fee <= ?'; params.push(parseFloat(maxFee)); }
     if (language)       { sql += ' AND d.languages LIKE ?'; params.push(`%${language}%`); }

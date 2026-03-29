@@ -163,19 +163,19 @@
   <section style="border-top:1px solid rgba(34,211,238,.1);border-bottom:1px solid rgba(34,211,238,.1);background:var(--surface)">
     <div class="max-w-5xl mx-auto px-4 sm:px-6 py-5 sm:py-7 grid grid-cols-2 sm:grid-cols-4 gap-4 sm:gap-6 text-center">
       <div>
-        <div class="font-serif text-3xl sm:text-4xl gradient-text">50K+</div>
+        <div id="stat-patients" class="font-serif text-3xl sm:text-4xl gradient-text">0</div>
         <div class="text-[13px] text-[#E4F2FF]/35 mt-1">Patients Served</div>
       </div>
       <div>
-        <div class="font-serif text-3xl sm:text-4xl gradient-text">1,200+</div>
+        <div id="stat-doctors" class="font-serif text-3xl sm:text-4xl gradient-text">0</div>
         <div class="text-[13px] text-[#E4F2FF]/35 mt-1">Verified Doctors</div>
       </div>
       <div>
-        <div class="font-serif text-3xl sm:text-4xl gradient-text">15</div>
-        <div class="text-[13px] text-[#E4F2FF]/35 mt-1">African Countries</div>
+        <div id="stat-hospitals" class="font-serif text-3xl sm:text-4xl gradient-text">0</div>
+        <div class="text-[13px] text-[#E4F2FF]/35 mt-1">Hospitals</div>
       </div>
       <div>
-        <div class="font-serif text-3xl sm:text-4xl gradient-text">4.9★</div>
+        <div id="stat-rating" class="font-serif text-3xl sm:text-4xl gradient-text">0.0★</div>
         <div class="text-[13px] text-[#E4F2FF]/35 mt-1">Average Rating</div>
       </div>
     </div>
@@ -425,6 +425,74 @@
         })
         .catch(console.warn);
     }
+  </script>
+  <script>
+    function formatWholeNumber(value) {
+      const num = Number(value);
+      if (!Number.isFinite(num) || num < 0) return '0';
+      return Math.round(num).toLocaleString();
+    }
+
+    function formatRating(value) {
+      const num = Number(value);
+      if (!Number.isFinite(num) || num < 0) return '0.0★';
+      return `${num.toFixed(1)}★`;
+    }
+
+    function animateCountUp(element, targetValue, formatter, duration = 1200) {
+      if (!element) return;
+
+      const target = Number(targetValue);
+      if (!Number.isFinite(target) || target < 0) {
+        element.textContent = formatter(0);
+        return;
+      }
+
+      const startTime = performance.now();
+
+      function easeOutCubic(t) {
+        return 1 - Math.pow(1 - t, 3);
+      }
+
+      function step(now) {
+        const elapsed = now - startTime;
+        const progress = Math.min(elapsed / duration, 1);
+        const eased = easeOutCubic(progress);
+        const currentValue = target * eased;
+
+        element.textContent = formatter(currentValue);
+
+        if (progress < 1) {
+          requestAnimationFrame(step);
+        }
+      }
+
+      requestAnimationFrame(step);
+    }
+
+    async function loadLandingStats() {
+      try {
+        const response = await fetch('/api/v1/landing-stats', { credentials: 'include' });
+        if (!response.ok) throw new Error('Failed to load stats');
+
+        const payload = await response.json();
+        const stats = payload?.data?.stats || {};
+
+        const patientsEl = document.getElementById('stat-patients');
+        const doctorsEl = document.getElementById('stat-doctors');
+        const hospitalsEl = document.getElementById('stat-hospitals');
+        const ratingEl = document.getElementById('stat-rating');
+
+        animateCountUp(patientsEl, stats.total_patients, formatWholeNumber, 1400);
+        animateCountUp(doctorsEl, stats.verified_doctors, formatWholeNumber, 1400);
+        animateCountUp(hospitalsEl, stats.total_hospitals, formatWholeNumber, 1400);
+        animateCountUp(ratingEl, stats.average_rating, formatRating, 1400);
+      } catch (error) {
+        console.warn('Could not load landing stats:', error);
+      }
+    }
+
+    loadLandingStats();
   </script>
 </body>
 </html>
