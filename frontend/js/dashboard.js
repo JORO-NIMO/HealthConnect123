@@ -33,6 +33,12 @@
     document.getElementById('sidebar-overlay').classList.toggle('hidden');
   };
 
+  // Sign out from patient dashboard
+  document.getElementById('logout-btn')?.addEventListener('click', (e) => {
+    e.preventDefault();
+    Auth.logout();
+  });
+
   // ── Load stats + upcoming appointments + recent reports in parallel ──
 
   async function loadDashboard() {
