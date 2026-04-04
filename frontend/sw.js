@@ -4,7 +4,7 @@
  * Optimised for low-bandwidth African networks
  */
 
-const CACHE_VERSION = 'v3.0.1';
+const CACHE_VERSION = 'v3.0.2';
 const STATIC_CACHE  = `healthconnect-static-${CACHE_VERSION}`;
 const DYNAMIC_CACHE = `healthconnect-dynamic-${CACHE_VERSION}`;
 
