@@ -85,11 +85,28 @@
     tbody.innerHTML = Utils.skeletonRow(5).repeat(5);
     try {
       const res = await API.get('/admin/users');
-      allUsers = res.data?.users || [];
+      allUsers = (res.data?.users || []).map(normalizeUser);
       renderUsers(allUsers);
     } catch {
       tbody.innerHTML = `<tr><td colspan="5" class="px-5 py-8 text-center" style="color:var(--text3)">Could not load users</td></tr>`;
     }
+  }
+
+  function normalizeUser(u) {
+    const firstName = u.firstName || u.first_name || '';
+    const lastName  = u.lastName || u.last_name || '';
+    const createdAt = u.createdAt || u.created_at;
+    const isActive = typeof u.isActive === 'boolean'
+      ? u.isActive
+      : (u.is_active === true || u.is_active === 1 || u.is_active === '1');
+
+    return {
+      ...u,
+      firstName,
+      lastName,
+      createdAt,
+      isActive,
+    };
   }
 
   window.filterUsers = function () {
