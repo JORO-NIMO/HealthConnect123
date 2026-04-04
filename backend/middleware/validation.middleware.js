@@ -65,7 +65,10 @@ const validateHospitalUpdate = [
 const validateTestResult = [
   body('patientId').notEmpty().withMessage('Patient ID is required'),
   body('testName').trim().notEmpty().withMessage('Test name is required'),
-  body('testType').optional().isIn(['blood', 'urine', 'imaging', 'biopsy', 'other']).withMessage('Invalid test type'),
+  body('testType').optional().isIn([
+    'blood', 'urine', 'imaging', 'biopsy', 'other',
+    'lab', 'pathology', 'cardiology', 'blood_test', 'urine_test', 'genetic',
+  ]).withMessage('Invalid test type'),
   body('isCritical').optional().isBoolean().withMessage('Is critical must be true/false'),
   validate,
 ];

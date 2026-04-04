@@ -5,6 +5,21 @@ const UserModel     = require('../models/User.model');
 const { sendSuccess, sendError } = require('../utils/response.util');
 const logger = require('../utils/logger.util');
 
+function normalizeTestType(input) {
+  const raw = String(input || '').trim().toLowerCase();
+  const map = {
+    blood: 'lab',
+    urine: 'lab',
+    biopsy: 'pathology',
+    blood_test: 'lab',
+    urine_test: 'lab',
+    genetic: 'lab',
+  };
+  if (map[raw]) return map[raw];
+  if (['lab', 'imaging', 'pathology', 'cardiology', 'other'].includes(raw)) return raw;
+  return 'lab';
+}
+
 // ═══════════════════════════════════════════════════════════════════════════
 // PUBLIC ROUTES
 // ═══════════════════════════════════════════════════════════════════════════
@@ -227,9 +242,11 @@ exports.createTestResult = async (req, res, next) => {
     const parsedIsCritical = isCritical === true || isCritical === 'true' || isCritical === 1 || isCritical === '1';
     const requestedStatus = status || ((resultSummary || fileUrl) ? 'completed' : 'ordered');
 
+    const normalizedTestType = normalizeTestType(testType);
+
     const testResult = await HospitalModel.createTestResult({
       hospitalId: hospital.id, patientId, doctorId,
-      testType, testName, description, results, resultSummary, notes, isCritical: parsedIsCritical,
+      testType: normalizedTestType, testName, description, results, resultSummary, notes, isCritical: parsedIsCritical,
       fileUrl,
       status: requestedStatus,
     });
@@ -273,6 +290,10 @@ exports.updateTestResult = async (req, res, next) => {
     }
 
     const fields = { ...req.body };
+    if (fields.test_type || fields.testType) {
+      fields.test_type = normalizeTestType(fields.test_type || fields.testType);
+      delete fields.testType;
+    }
     if (fields.status === 'completed' && !testResult.completed_at) {
       fields.completed_at = new Date();
     }
