@@ -333,7 +333,13 @@
       loadTestResults();
       loadHospital();
     } catch (err) {
-      Utils.toast(err.message || 'Failed to create test result', 'error');
+      // Show detailed backend validation errors if present
+      if (err.errors && Array.isArray(err.errors)) {
+        const details = err.errors.map(e => e.msg || e.message || JSON.stringify(e)).join('\n');
+        Utils.toast('Validation failed:\n' + details, 'error');
+      } else {
+        Utils.toast(err.message || 'Failed to create test result', 'error');
+      }
     }
   };
 

@@ -33,6 +33,7 @@
         </div>
         <div class="font-bold text-[15px]" id="user-name">Loading...</div>
         <div class="text-[11px] mt-0.5" style="color:var(--text3)">Patient</div>
+        <div class="text-[11px] mt-1" style="color:var(--text3)"><span style="font-weight:600">Patient ID:</span> <span id="patient-id" style="user-select:all">Loading…</span></div>
         <div class="mt-2"><span class="badge b-cyan text-[11px]">Active</span></div>
       </div>
 
@@ -244,86 +245,20 @@
   <script src="/js/notifications.js"></script>
   <script src="/js/dashboard.js"></script>
   <script>
-    Auth.requireRole('patient');
-
-    function toggleSidebar() {
-      document.getElementById('sidebar').classList.toggle('-translate-x-full');
-      document.getElementById('sidebar-overlay').classList.toggle('hidden');
-    }
-
-    document.getElementById('logout-btn').addEventListener('click', (e) => {
-      e.preventDefault();
-      Auth.logout();
-    });
-
-    async function loadDashboard() {
-      const user = Auth.getUser();
-      if (user) {
-        document.getElementById('user-name').textContent = user.firstName + ' ' + user.lastName;
-        document.getElementById('avatar-initials').textContent = (user.firstName?.[0] || '') + (user.lastName?.[0] || '');
-        document.getElementById('greeting').textContent = `Good ${getTimeOfDay()}, ${user.firstName}!`;
-      }
-
+    // Display patient ID in sidebar
+    (async function showPatientId() {
       try {
-        const [statsRes, apptsRes, reportsRes] = await Promise.all([
-          API.get('/patients/stats'),
-          API.get('/appointments/patient?limit=3&status=confirmed,pending'),
-          API.get('/symptoms/history?limit=3'),
-        ]);
-
-        const stats = statsRes.data.stats;
-        document.getElementById('stat-appointments').textContent  = stats.total_appointments  || 0;
-        document.getElementById('stat-checks').textContent        = stats.total_symptom_reports || 0;
-        document.getElementById('stat-prescriptions').textContent = stats.total_prescriptions  || 0;
-        document.getElementById('stat-consultations').textContent = stats.total_consultations  || 0;
-
-        renderAppointments(apptsRes.data.appointments);
-        renderReports(reportsRes.data.reports);
-      } catch (err) {
-        console.warn('Dashboard load error:', err);
+        const res = await API.get('/patients/profile');
+        const patient = res.data?.patient;
+        if (patient && patient.id) {
+          document.getElementById('patient-id').textContent = patient.id;
+        } else {
+          document.getElementById('patient-id').textContent = 'Unavailable';
+        }
+      } catch (e) {
+        document.getElementById('patient-id').textContent = 'Unavailable';
       }
-    }
-
-    function renderAppointments(appointments) {
-      const el = document.getElementById('upcoming-appointments');
-      if (!appointments?.length) return;
-      el.innerHTML = appointments.map(a => `
-        <div class="flex items-center gap-3.5 p-4 rounded-xl" style="background:var(--bg2);border:1px solid var(--border)">
-          <div class="w-12 h-12 rounded-xl flex flex-col items-center justify-center text-xs font-bold" style="background:rgba(34,211,238,.1);color:var(--cyan)">
-            <span>${new Date(a.appointment_date).toLocaleDateString('en', {day:'numeric'})}</span>
-            <span>${new Date(a.appointment_date).toLocaleDateString('en', {month:'short'})}</span>
-          </div>
-          <div class="flex-1">
-            <div class="font-semibold text-sm">Dr. ${a.doctor_first_name} ${a.doctor_last_name}</div>
-            <div class="text-xs" style="color:var(--text3)">${a.specialization} · ${a.appointment_time?.slice(0,5)} · ${a.type}</div>
-          </div>
-          <span class="badge ${a.status === 'confirmed' ? 'b-green' : 'b-yellow'} text-[11px]">${a.status}</span>
-        </div>
-      `).join('');
-    }
-
-    function renderReports(reports) {
-      const el = document.getElementById('recent-reports');
-      if (!reports?.length) return;
-      const urgencyBadge = { LOW: 'b-green', MEDIUM: 'b-yellow', HIGH: 'b-gold', EMERGENCY: 'b-red' };
-      el.innerHTML = reports.map(r => `
-        <div class="flex items-center gap-3.5 p-4 rounded-xl cursor-pointer transition-all" style="background:var(--bg2);border:1px solid var(--border)" onmouseover="this.style.borderColor='rgba(34,211,238,.3)'" onmouseout="this.style.borderColor='rgba(34,211,238,.1)'" onclick="window.location='/pages/patient/symptom-checker.html?reportId=${r.id}'">
-          <span class="text-xl">🤖</span>
-          <div class="flex-1">
-            <div class="font-semibold text-sm">${Array.isArray(r.symptoms_raw) ? r.symptoms_raw.slice(0,2).join(', ') : 'Symptoms check'}</div>
-            <div class="text-xs" style="color:var(--text3)">${new Date(r.created_at).toLocaleDateString()} · ${r.condition_count || 0} conditions identified</div>
-          </div>
-          <span class="badge ${urgencyBadge[r.urgency_level] || 'b-cyan'} text-[11px]">${r.urgency_level}</span>
-        </div>
-      `).join('');
-    }
-
-    function getTimeOfDay() {
-      const h = new Date().getHours();
-      return h < 12 ? 'morning' : h < 18 ? 'afternoon' : 'evening';
-    }
-
-    loadDashboard();
+    })();
   </script>
 </body>
 </html>
