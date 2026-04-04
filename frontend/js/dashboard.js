@@ -72,10 +72,10 @@
       // Stats cards
       if (statsRes.status === 'fulfilled') {
         const s = statsRes.value.data || {};
-        _setText('stat-appointments', s.totalAppointments ?? '0');
-        _setText('stat-symptom-checks', s.totalSymptomChecks ?? '0');
-        _setText('stat-prescriptions', s.totalPrescriptions ?? '0');
-        _setText('stat-consultations', s.totalConsultations ?? '0');
+        _setText('stat-appointments', s.totalAppointments ?? s.total_appointments ?? '0');
+        _setText('stat-checks', s.totalSymptomChecks ?? s.total_symptom_reports ?? '0');
+        _setText('stat-prescriptions', s.totalPrescriptions ?? s.total_prescriptions ?? '0');
+        _setText('stat-consultations', s.totalConsultations ?? s.total_consultations ?? '0');
       }
 
       // Upcoming appointments
