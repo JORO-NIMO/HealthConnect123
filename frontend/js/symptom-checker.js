@@ -198,12 +198,12 @@
     // Try to get patient's location for nearby doctor recommendations
     let locationData = {};
     try {
-      const pos = await new Promise((resolve, reject) => {
-        if (navigator.geolocation) {
-          navigator.geolocation.getCurrentPosition(resolve, reject, { timeout: 5000, enableHighAccuracy: false });
-        } else { reject(new Error('No geolocation')); }
+      const loc = await Utils.getCurrentLocation({
+        timeout: 7000,
+        enableHighAccuracy: false,
+        maximumAge: 180000,
       });
-      locationData = { latitude: pos.coords.latitude, longitude: pos.coords.longitude, radiusKm: 50 };
+      locationData = { latitude: loc.latitude, longitude: loc.longitude, radiusKm: 50 };
     } catch (e) { /* Location unavailable — that's fine, we'll still recommend */ }
 
     var payload = {

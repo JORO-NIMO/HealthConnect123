@@ -313,26 +313,19 @@
     const btn = document.getElementById('detect-profile-location-btn');
     Utils.hideAlert('profile-location-alert');
 
-    if (!navigator.geolocation) {
-      Utils.showAlert('profile-location-alert', 'Geolocation is not supported on this device.', 'error');
-      return;
-    }
-
     Utils.setLoading(btn, true, 'Detecting…');
     try {
-      const pos = await new Promise((resolve, reject) => {
-        navigator.geolocation.getCurrentPosition(resolve, reject, {
-          timeout: 10000,
-          enableHighAccuracy: true,
-          maximumAge: 120000,
-        });
+      const loc = await Utils.getCurrentLocation({
+        timeout: 12000,
+        enableHighAccuracy: true,
+        maximumAge: 120000,
       });
 
-      Utils.setFieldValue('profile-latitude', pos.coords.latitude.toFixed(7));
-      Utils.setFieldValue('profile-longitude', pos.coords.longitude.toFixed(7));
+      Utils.setFieldValue('profile-latitude', loc.latitude.toFixed(7));
+      Utils.setFieldValue('profile-longitude', loc.longitude.toFixed(7));
       Utils.showAlert('profile-location-alert', 'Location detected. Add city/region if needed, then save profile.', 'success');
     } catch (err) {
-      Utils.showAlert('profile-location-alert', 'Could not detect location. Please allow location access or enter it manually.', 'error');
+      Utils.showAlert('profile-location-alert', Utils.geolocationErrorMessage(err) + ' You can still enter location manually.', 'error');
     } finally {
       Utils.setLoading(btn, false);
     }

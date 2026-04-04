@@ -272,10 +272,8 @@
 
       let location = {};
       try {
-        const pos = await new Promise((resolve, reject) => {
-          navigator.geolocation.getCurrentPosition(resolve, reject, { timeout: 10000 });
-        });
-        location = { latitude: pos.coords.latitude, longitude: pos.coords.longitude };
+        const loc = await Utils.getCurrentLocation({ timeout: 12000, enableHighAccuracy: true, maximumAge: 120000 });
+        location = { latitude: loc.latitude, longitude: loc.longitude };
       } catch (e) { /* Location unavailable — continue without it */ }
 
       try {

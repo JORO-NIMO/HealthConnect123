@@ -373,27 +373,24 @@
   document.getElementById('filter-radius')?.addEventListener('change', loadDoctors);
   document.getElementById('use-saved-location')?.addEventListener('change', loadDoctors);
   document.getElementById('use-current-location')?.addEventListener('click', async () => {
-    if (!navigator.geolocation) {
-      updateLocationChip('Geolocation not supported on this device', 'warn');
-      return;
-    }
-
     updateLocationChip('Detecting current location…');
     try {
-      const pos = await new Promise((resolve, reject) => {
-        navigator.geolocation.getCurrentPosition(resolve, reject, {
-          timeout: 10000,
-          enableHighAccuracy: true,
-          maximumAge: 120000,
-        });
+      const loc = await Utils.getCurrentLocation({
+        timeout: 12000,
+        enableHighAccuracy: true,
+        maximumAge: 120000,
       });
 
-      patientLocation.latitude = Number(pos.coords.latitude);
-      patientLocation.longitude = Number(pos.coords.longitude);
+      patientLocation.latitude = loc.latitude;
+      patientLocation.longitude = loc.longitude;
       updateLocationChip(`Current: ${patientLocation.latitude.toFixed(3)}, ${patientLocation.longitude.toFixed(3)}`, 'ok');
       await loadDoctors();
-    } catch {
-      updateLocationChip('Could not detect current location', 'warn');
+    } catch (err) {
+      if (patientLocation.latitude && patientLocation.longitude) {
+        updateLocationChip('Using saved location. ' + Utils.geolocationErrorMessage(err), 'warn');
+      } else {
+        updateLocationChip(Utils.geolocationErrorMessage(err), 'warn');
+      }
     }
   });
 

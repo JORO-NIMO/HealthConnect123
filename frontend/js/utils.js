@@ -245,6 +245,102 @@ const Utils = (() => {
     return new URLSearchParams(window.location.search).get(key);
   }
 
+  // ─── Location Helpers ───────────────────────────────────────────────
+
+  function geolocationErrorMessage(err) {
+    if (err?.code === 'UNSUPPORTED') {
+      return 'Geolocation is not supported on this device.';
+    }
+    if (err?.code === 'INSECURE_CONTEXT') {
+      return 'Location requires HTTPS (or localhost). Open the app over a secure connection.';
+    }
+    if (err?.code === 'PERMISSION_DENIED' || err?.code === 1) {
+      return 'Location permission was denied. Enable location access in your browser settings.';
+    }
+    if (err?.code === 'POSITION_UNAVAILABLE' || err?.code === 2) {
+      return 'Location is currently unavailable. Turn on GPS/network location and try again.';
+    }
+    if (err?.code === 'TIMEOUT' || err?.code === 3) {
+      return 'Location request timed out. Try again with better signal.';
+    }
+    return 'Could not detect current location.';
+  }
+
+  async function getCurrentLocation(options = {}) {
+    const {
+      enableHighAccuracy = true,
+      timeout = 12000,
+      maximumAge = 120000,
+      retryWithLowAccuracy = true,
+    } = options;
+
+    if (!navigator?.geolocation) {
+      const err = new Error('Geolocation not supported');
+      err.code = 'UNSUPPORTED';
+      throw err;
+    }
+
+    const isLocalhost = ['localhost', '127.0.0.1', '::1'].includes(window.location.hostname);
+    if (!window.isSecureContext && !isLocalhost) {
+      const err = new Error('Insecure context');
+      err.code = 'INSECURE_CONTEXT';
+      throw err;
+    }
+
+    // If permission is already denied, fail fast with a clearer message.
+    try {
+      if (navigator.permissions?.query) {
+        const perm = await navigator.permissions.query({ name: 'geolocation' });
+        if (perm?.state === 'denied') {
+          const err = new Error('Permission denied');
+          err.code = 'PERMISSION_DENIED';
+          throw err;
+        }
+      }
+    } catch (permErr) {
+      if (permErr?.code === 'PERMISSION_DENIED') throw permErr;
+      // Ignore unsupported permissions API errors and continue.
+    }
+
+    const readPosition = (opts) => new Promise((resolve, reject) => {
+      navigator.geolocation.getCurrentPosition(resolve, reject, opts);
+    });
+
+    try {
+      const pos = await readPosition({ enableHighAccuracy, timeout, maximumAge });
+      return {
+        latitude: Number(pos.coords.latitude),
+        longitude: Number(pos.coords.longitude),
+        accuracy: Number(pos.coords.accuracy || 0),
+        raw: pos,
+      };
+    } catch (err) {
+      const geolocationCodes = {
+        1: 'PERMISSION_DENIED',
+        2: 'POSITION_UNAVAILABLE',
+        3: 'TIMEOUT',
+      };
+
+      if (retryWithLowAccuracy && enableHighAccuracy && err?.code === 3) {
+        const pos = await readPosition({
+          enableHighAccuracy: false,
+          timeout: timeout + 4000,
+          maximumAge,
+        });
+        return {
+          latitude: Number(pos.coords.latitude),
+          longitude: Number(pos.coords.longitude),
+          accuracy: Number(pos.coords.accuracy || 0),
+          raw: pos,
+        };
+      }
+
+      const wrapped = new Error(err?.message || 'Location detection failed');
+      wrapped.code = geolocationCodes[err?.code] || err?.code || 'UNKNOWN';
+      throw wrapped;
+    }
+  }
+
   return {
     formatDate, formatDateTime, formatTime, timeAgo, todayISO,
     formatCurrency,
@@ -255,5 +351,7 @@ const Utils = (() => {
     renderPagination,
     avatarColor,
     getParam,
+    geolocationErrorMessage,
+    getCurrentLocation,
   };
 })();

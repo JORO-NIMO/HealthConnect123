@@ -255,14 +255,14 @@
       try {
         let latitude = null;
         let longitude = null;
+        let detectionError = null;
 
         try {
-          const pos = await new Promise((resolve, reject) => {
-            navigator.geolocation.getCurrentPosition(resolve, reject, { timeout: 10000 });
-          });
-          latitude = pos.coords.latitude;
-          longitude = pos.coords.longitude;
-        } catch (_) {
+          const loc = await Utils.getCurrentLocation({ timeout: 12000, enableHighAccuracy: true, maximumAge: 120000 });
+          latitude = loc.latitude;
+          longitude = loc.longitude;
+        } catch (err) {
+          detectionError = err;
           if (savedLocation.latitude && savedLocation.longitude) {
             latitude = savedLocation.latitude;
             longitude = savedLocation.longitude;
@@ -290,7 +290,7 @@
           list.innerHTML = `
             <div class="text-center py-8" style="color:var(--text3)">
               <div class="text-4xl mb-3">📍</div>
-              <p class="text-sm">Could not detect your location.</p>
+              <p class="text-sm">${Utils.escapeHtml(Utils.geolocationErrorMessage(detectionError || err))}</p>
               <p class="text-xs mt-1">Please save your location under My Profile or enable location access and try again.</p>
             </div>
           `;

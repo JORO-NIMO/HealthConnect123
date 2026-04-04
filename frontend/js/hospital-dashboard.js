@@ -421,24 +421,20 @@
   });
 
   // ─── Location Detection ──────────────────────────────────────────────
-  window.detectHospitalLocation = function () {
-    if (!navigator.geolocation) return Utils.toast('Geolocation not supported', 'warning');
+  window.detectHospitalLocation = async function () {
     const statusEl = document.getElementById('h-location-status');
     statusEl.textContent = '📡 Detecting...';
-    navigator.geolocation.getCurrentPosition(
-      pos => {
-        document.getElementById('h-lat').value = pos.coords.latitude;
-        document.getElementById('h-lng').value = pos.coords.longitude;
-        statusEl.textContent = '✅ Location detected!';
-        statusEl.style.color = 'var(--green)';
-      },
-      err => {
-        statusEl.textContent = '❌ Location failed';
-        statusEl.style.color = 'var(--red)';
-        Utils.toast('Could not detect location: ' + err.message, 'error');
-      },
-      { enableHighAccuracy: true, timeout: 10000 }
-    );
+    try {
+      const loc = await Utils.getCurrentLocation({ timeout: 12000, enableHighAccuracy: true, maximumAge: 120000 });
+      document.getElementById('h-lat').value = loc.latitude;
+      document.getElementById('h-lng').value = loc.longitude;
+      statusEl.textContent = '✅ Location detected!';
+      statusEl.style.color = 'var(--green)';
+    } catch (err) {
+      statusEl.textContent = '❌ Location failed';
+      statusEl.style.color = 'var(--red)';
+      Utils.toast(Utils.geolocationErrorMessage(err), 'error');
+    }
   };
 
   // ─── Helpers ──────────────────────────────────────────────────────────
