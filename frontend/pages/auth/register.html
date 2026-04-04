@@ -13,35 +13,37 @@
     .input-dark::placeholder{color:var(--text3)}
     .input-dark:focus{border-color:var(--cyan);box-shadow:0 0 0 3px rgba(34,211,238,.12)}
     select.input-dark{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%2394A3B8' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 1rem center}
-    .role-card{cursor:pointer;border:1.5px solid var(--border);border-radius:.85rem;padding:1rem;display:flex;align-items:center;gap:.75rem;transition:all .2s;background:var(--bg2)}
-    .role-card:has(input:checked){border-color:var(--cyan);background:rgba(34,211,238,.06)}
+    .register-role-grid{display:grid;grid-template-columns:1fr;gap:.65rem}
+    .register-role-card{cursor:pointer;border:1.5px solid var(--border);border-radius:.85rem;padding:.85rem .9rem;display:flex;align-items:center;gap:.75rem;transition:all .2s;background:var(--bg2);min-height:72px}
+    .register-role-card:has(input:checked){border-color:var(--cyan);background:rgba(34,211,238,.06)}
+    .register-role-card .role-icon{width:2.2rem;height:2.2rem;border-radius:.7rem;background:rgba(34,211,238,.14);display:flex;align-items:center;justify-content:center;flex-shrink:0}
+    @media (min-width:640px){.register-role-grid{grid-template-columns:repeat(3,minmax(0,1fr))}}
   </style>
 </head>
-<body class="min-h-screen flex" style="background:var(--bg);color:var(--text)">
-
 <body class="register-gradient-bg" style="color:var(--text)">
+  <div class="w-full max-w-[1360px] mx-auto min-h-screen flex">
   <!-- Left panel -->
-  <div class="hidden lg:flex lg:w-2/5 flex-col justify-between p-12 text-white relative overflow-hidden brand-logo-bg">
+  <div class="hidden lg:flex lg:w-[42%] xl:w-[40%] flex-col justify-between p-10 xl:p-12 text-white relative overflow-hidden brand-logo-bg rounded-r-[28px]">
     <div class="absolute inset-0 opacity-[0.04]" style="background-image:radial-gradient(circle at 1px 1px,rgba(34,211,238,.4) 1px,transparent 0);background-size:32px 32px"></div>
     <a href="/" class="relative flex items-center gap-2 font-bold text-xl">
       <div class="w-8 h-8 rounded-[10px] bg-[#22D3EE] flex items-center justify-center text-sm">🏥</div>
       <span class="font-serif">HealthConnect</span>
     </a>
-    <div class="relative">
-      <h1 class="text-3xl font-bold font-serif leading-tight mb-4">Join Africa's leading<br>telemedicine platform</h1>
-      <ul class="space-y-3 text-white/70">
-        <li class="flex gap-2"><span style="color:var(--cyan)" class="font-bold">✓</span>Free AI symptom analysis</li>
-        <li class="flex gap-2"><span style="color:var(--cyan)" class="font-bold">✓</span>Book verified doctors instantly</li>
-        <li class="flex gap-2"><span style="color:var(--cyan)" class="font-bold">✓</span>Secure electronic prescriptions</li>
-        <li class="flex gap-2"><span style="color:var(--cyan)" class="font-bold">✓</span>Your health records, always safe</li>
+    <div class="relative max-w-md">
+      <h1 class="text-3xl font-bold font-serif leading-tight mb-5">Join Africa's leading<br>telemedicine platform</h1>
+      <ul class="space-y-3.5 text-white/75 leading-relaxed">
+        <li class="flex items-start gap-2.5"><span style="color:var(--cyan)" class="font-bold">✓</span>Free AI symptom analysis</li>
+        <li class="flex items-start gap-2.5"><span style="color:var(--cyan)" class="font-bold">✓</span>Book verified doctors instantly</li>
+        <li class="flex items-start gap-2.5"><span style="color:var(--cyan)" class="font-bold">✓</span>Secure electronic prescriptions</li>
+        <li class="flex items-start gap-2.5"><span style="color:var(--cyan)" class="font-bold">✓</span>Your health records, always safe</li>
       </ul>
     </div>
     <p class="relative text-white/30 text-sm">© 2026 HealthConnect</p>
   </div>
 
   <!-- Right panel -->
-  <div class="w-full lg:w-3/5 flex items-center justify-center p-4 sm:p-6 overflow-y-auto">
-    <div class="w-full max-w-lg py-8 register-card">
+  <div class="w-full lg:w-[58%] xl:w-[60%] flex items-center justify-center lg:justify-start p-4 sm:p-6 lg:px-10 xl:px-14 overflow-y-auto">
+    <div class="w-full max-w-xl py-8 lg:py-10 register-card">
       <div class="lg:hidden text-center mb-6">
         <a href="/" class="inline-flex items-center gap-2 font-bold text-xl" style="color:var(--cyan)">
           <div class="w-8 h-8 rounded-[10px] bg-[#22D3EE] flex items-center justify-center text-white text-sm">🏥</div>
@@ -56,18 +58,18 @@
       <!-- Role selector -->
       <div class="mb-6">
         <label class="block text-sm font-medium mb-2">I am a...</label>
-        <div class="grid grid-cols-3 gap-2 sm:gap-3">
-          <label class="role-card">
+        <div class="register-role-grid">
+          <label class="register-role-card">
             <input type="radio" name="role" value="patient" checked class="hidden">
             <span class="role-icon">🧑‍🤝‍🧑</span>
             <div><div class="font-semibold">Patient</div><div class="text-xs" style="color:var(--text3)">Looking for care</div></div>
           </label>
-          <label class="role-card">
+          <label class="register-role-card">
             <input type="radio" name="role" value="doctor" class="hidden">
             <span class="role-icon">🩺</span>
             <div><div class="font-semibold">Doctor</div><div class="text-xs" style="color:var(--text3)">Providing care</div></div>
           </label>
-          <label class="role-card">
+          <label class="register-role-card">
             <input type="radio" name="role" value="hospital_admin" class="hidden">
             <span class="role-icon">🏥</span>
             <div><div class="font-semibold">Hospital</div><div class="text-xs" style="color:var(--text3)">Managing a facility</div></div>
@@ -145,6 +147,39 @@
           <p class="text-xs" style="color:var(--text3)">After account creation, upload at least one proof document (hospital ID, medical license, or similar) on the verification page for admin review.</p>
         </div>
 
+        <!-- Hospital extra fields -->
+        <div id="hospital-fields" class="hidden space-y-4 p-4 rounded-xl" style="background:rgba(16,185,129,.05);border:1px solid rgba(16,185,129,.2)">
+          <p class="text-sm font-semibold" style="color:#34D399">🏥 Hospital Information</p>
+          <div>
+            <label class="block text-sm font-medium mb-1.5">Hospital Name</label>
+            <input type="text" id="hospitalName" placeholder="e.g. Nairobi City Hospital" class="register-input w-full">
+          </div>
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div>
+              <label class="block text-sm font-medium mb-1.5">Hospital Number</label>
+              <input type="text" id="hospitalRegistrationNumber" placeholder="e.g. HC-REG-2026-001" class="register-input w-full">
+            </div>
+            <div>
+              <label class="block text-sm font-medium mb-1.5">Hospital Phone</label>
+              <input type="tel" id="hospitalPhone" placeholder="e.g. +254 700 000 000" class="register-input w-full">
+            </div>
+          </div>
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div>
+              <label class="block text-sm font-medium mb-1.5">Hospital Email <span style="color:var(--text3)">(optional)</span></label>
+              <input type="email" id="hospitalEmail" placeholder="hospital@example.com" class="register-input w-full">
+            </div>
+            <div>
+              <label class="block text-sm font-medium mb-1.5">City <span style="color:var(--text3)">(optional)</span></label>
+              <input type="text" id="hospitalCity" placeholder="e.g. Nairobi" class="register-input w-full">
+            </div>
+          </div>
+          <div>
+            <label class="block text-sm font-medium mb-1.5">Address <span style="color:var(--text3)">(optional)</span></label>
+            <input type="text" id="hospitalAddress" placeholder="Street, area, landmark" class="register-input w-full">
+          </div>
+        </div>
+
         <div class="flex items-start gap-2">
           <input type="checkbox" id="terms" required class="mt-1 rounded register-input" style="accent-color:var(--cyan);width:1.1em;height:1.1em;padding:0;">
           <label for="terms" class="text-sm" style="color:var(--text2)">
@@ -157,18 +192,26 @@
       </form>
     </div>
   </div>
+  </div>
 
   <script src="/js/config.js"></script>
   <script src="/js/api.js"></script>
   <script src="/js/utils.js"></script>
   <script src="/js/auth.js"></script>
   <script>
-    // Role selector visual feedback
-    document.querySelectorAll('input[name="role"]').forEach(radio => {
-      radio.addEventListener('change', (e) => {
-        document.getElementById('doctor-fields').classList.toggle('hidden', e.target.value !== 'doctor');
-      });
+    // Role-specific fields
+    const roleRadios = document.querySelectorAll('input[name="role"]');
+    function toggleRoleFields(role) {
+      const showDoctor = role === 'doctor';
+      const showHospital = role === 'hospital_admin';
+      document.getElementById('doctor-fields').classList.toggle('hidden', !showDoctor);
+      document.getElementById('hospital-fields').classList.toggle('hidden', !showHospital);
+      document.getElementById('hospitalName').required = showHospital;
+    }
+    roleRadios.forEach(radio => {
+      radio.addEventListener('change', (e) => toggleRoleFields(e.target.value));
     });
+    toggleRoleFields(document.querySelector('input[name="role"]:checked')?.value || 'patient');
 
     // Toggle password
     document.getElementById('toggle-pw').addEventListener('click', () => {
@@ -210,12 +253,35 @@
         body.licenseNumber = document.getElementById('licenseNumber').value || undefined;
       }
 
+      let hospitalPayload = null;
+      if (role === 'hospital_admin') {
+        const hospitalName = document.getElementById('hospitalName').value.trim();
+        if (!hospitalName) return showAlert('Hospital name is required for hospital account registration.', 'error');
+
+        hospitalPayload = {
+          name: hospitalName,
+          registrationNumber: document.getElementById('hospitalRegistrationNumber').value.trim() || undefined,
+          phone: document.getElementById('hospitalPhone').value.trim() || undefined,
+          email: document.getElementById('hospitalEmail').value.trim() || undefined,
+          city: document.getElementById('hospitalCity').value.trim() || undefined,
+          address: document.getElementById('hospitalAddress').value.trim() || undefined,
+        };
+      }
+
       const btn = document.getElementById('submit-btn');
       btn.disabled = true;
       btn.textContent = 'Creating account...';
       try {
         const res = await API.post('/auth/register', body);
         Auth.saveSession(res.data.tokens, res.data.user);
+
+        if (role === 'hospital_admin' && hospitalPayload) {
+          try {
+            await API.post('/hospitals/register', hospitalPayload);
+          } catch (hospitalErr) {
+            console.warn('Hospital profile setup failed after account creation:', hospitalErr);
+          }
+        }
 
         // Doctors and hospital_admin need admin verification
         if (role === 'doctor' || role === 'hospital_admin') {
