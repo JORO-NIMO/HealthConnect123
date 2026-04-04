@@ -340,7 +340,8 @@
     const list = document.getElementById('test-patient-search-results');
     list.innerHTML = '<div class="text-xs px-3 py-2" style="color:var(--text3)">Loading patients...</div>';
     try {
-      const res = await API.get('/hospitals/me/patients?status=active&limit=200');
+      // Keep within backend pagination validator max limit (100)
+      const res = await API.get('/hospitals/me/patients?status=active&limit=100');
       const raw = res.data?.patients || [];
       hospitalPatientsCache = raw.map((p) => ({
         id: p.patient_id || p.id,
@@ -352,8 +353,28 @@
       renderPatientSearchResults('');
     } catch (err) {
       hospitalPatientsCache = [];
-      list.innerHTML = '<div class="text-xs px-3 py-2" style="color:var(--red)">Could not load hospital patients. Register patient first.</div>';
+      const msg = err?.message || 'Could not load hospital patients.';
+      list.innerHTML = `<div class="text-xs px-3 py-2" style="color:var(--red)">${esc(msg)}</div>`;
     }
+  }
+
+  function patientMatchScore(patient, q) {
+    if (!q) return 1;
+    const fullName = `${patient.firstName} ${patient.lastName}`.trim().toLowerCase();
+    const id = String(patient.id || '').toLowerCase();
+    const file = String(patient.hospitalNumber || '').toLowerCase();
+    const email = String(patient.email || '').toLowerCase();
+
+    if (fullName.startsWith(q)) return 120;
+    if (fullName.includes(' ' + q)) return 110;
+    if (id.startsWith(q)) return 105;
+    if (file.startsWith(q)) return 95;
+    if (email.startsWith(q)) return 85;
+    if (fullName.includes(q)) return 80;
+    if (id.includes(q)) return 70;
+    if (file.includes(q)) return 60;
+    if (email.includes(q)) return 50;
+    return -1;
   }
 
   function renderPatientSearchResults(query) {
@@ -365,14 +386,15 @@
 
     const q = (query || '').trim().toLowerCase();
     const filtered = hospitalPatientsCache
-      .filter(p => {
-        if (!q) return true;
-        const fullName = `${p.firstName} ${p.lastName}`.toLowerCase();
-        return fullName.includes(q)
-          || String(p.id).toLowerCase().includes(q)
-          || (p.hospitalNumber || '').toLowerCase().includes(q)
-          || (p.email || '').toLowerCase().includes(q);
+      .map(p => ({ p, score: patientMatchScore(p, q) }))
+      .filter(row => row.score >= 0)
+      .sort((a, b) => {
+        if (b.score !== a.score) return b.score - a.score;
+        const aName = `${a.p.firstName} ${a.p.lastName}`.trim().toLowerCase();
+        const bName = `${b.p.firstName} ${b.p.lastName}`.trim().toLowerCase();
+        return aName.localeCompare(bName);
       })
+      .map(row => row.p)
       .slice(0, 12);
 
     if (!filtered.length) {
@@ -410,6 +432,14 @@
     document.getElementById('test-patient-id').value = '';
     document.getElementById('test-selected-patient').classList.add('hidden');
     patientSearchDebounce = setTimeout(() => renderPatientSearchResults(query), 180);
+  });
+
+  document.getElementById('test-patient-search')?.addEventListener('focus', function () {
+    if (!hospitalPatientsCache.length) {
+      loadPatientsForTestSelection();
+      return;
+    }
+    renderPatientSearchResults(this.value || '');
   });
 
   window.submitTestResult = async function () {
