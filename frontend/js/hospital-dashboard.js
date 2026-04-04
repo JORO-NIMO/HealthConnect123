@@ -17,6 +17,8 @@
   let hospital = null;
   let stats = {};
   let selectedDoctorId = null;
+  let hospitalPatientsCache = [];
+  let selectedTestPatientId = null;
 
   // ─── Init ─────────────────────────────────────────────────────────────
   document.getElementById('today-date').textContent = new Date().toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
@@ -311,23 +313,132 @@
 
   window.showCreateTestModal = function () {
     document.getElementById('create-test-modal').classList.remove('hidden');
+    resetTestResultForm();
+    loadPatientsForTestSelection();
   };
 
+  function resetTestResultForm() {
+    selectedTestPatientId = null;
+    document.getElementById('test-patient-id').value = '';
+    document.getElementById('test-patient-search').value = '';
+    document.getElementById('test-patient-search-results').innerHTML = '';
+    document.getElementById('test-selected-patient').classList.add('hidden');
+    document.getElementById('test-name').value = '';
+    document.getElementById('test-type').value = 'blood';
+    document.getElementById('test-description').value = '';
+    document.getElementById('test-summary').value = '';
+    document.getElementById('test-status').value = 'completed';
+    document.getElementById('test-critical').checked = false;
+    document.getElementById('test-file').value = '';
+  }
+
+  async function loadPatientsForTestSelection(force = false) {
+    if (hospitalPatientsCache.length && !force) {
+      renderPatientSearchResults('');
+      return;
+    }
+    const list = document.getElementById('test-patient-search-results');
+    list.innerHTML = '<div class="text-xs px-3 py-2" style="color:var(--text3)">Loading patients...</div>';
+    try {
+      const res = await API.get('/hospitals/me/patients?status=active&limit=200');
+      const raw = res.data?.patients || [];
+      hospitalPatientsCache = raw.map((p) => ({
+        id: p.patient_id || p.id,
+        firstName: p.first_name || p.firstName || '',
+        lastName: p.last_name || p.lastName || '',
+        hospitalNumber: p.hospital_number || '',
+        email: p.email || '',
+      })).filter(p => !!p.id);
+      renderPatientSearchResults('');
+    } catch (err) {
+      hospitalPatientsCache = [];
+      list.innerHTML = '<div class="text-xs px-3 py-2" style="color:var(--red)">Could not load hospital patients. Register patient first.</div>';
+    }
+  }
+
+  function renderPatientSearchResults(query) {
+    const list = document.getElementById('test-patient-search-results');
+    if (!hospitalPatientsCache.length) {
+      list.innerHTML = '<div class="text-xs px-3 py-2" style="color:var(--text3)">No active hospital patients found.</div>';
+      return;
+    }
+
+    const q = (query || '').trim().toLowerCase();
+    const filtered = hospitalPatientsCache
+      .filter(p => {
+        if (!q) return true;
+        const fullName = `${p.firstName} ${p.lastName}`.toLowerCase();
+        return fullName.includes(q)
+          || String(p.id).toLowerCase().includes(q)
+          || (p.hospitalNumber || '').toLowerCase().includes(q)
+          || (p.email || '').toLowerCase().includes(q);
+      })
+      .slice(0, 12);
+
+    if (!filtered.length) {
+      list.innerHTML = '<div class="text-xs px-3 py-2" style="color:var(--text3)">No patient match found.</div>';
+      return;
+    }
+
+    list.innerHTML = filtered.map(p => `
+      <button type="button" class="w-full text-left p-2 rounded-lg hover:opacity-80 transition text-sm"
+              style="background:var(--surface1);border:1px solid var(--border)"
+              onclick="selectTestPatientForResult('${esc(p.id)}')">
+        <div class="font-medium">${esc(`${p.firstName} ${p.lastName}`.trim() || 'Unnamed Patient')}</div>
+        <div class="text-xs" style="color:var(--text3)">ID: ${esc(String(p.id))}${p.hospitalNumber ? ` · File: ${esc(p.hospitalNumber)}` : ''}</div>
+      </button>
+    `).join('');
+  }
+
+  window.selectTestPatientForResult = function (patientId) {
+    const patient = hospitalPatientsCache.find(p => String(p.id) === String(patientId));
+    if (!patient) return;
+    selectedTestPatientId = patient.id;
+    document.getElementById('test-patient-id').value = String(patient.id);
+    document.getElementById('test-patient-search').value = `${patient.firstName} ${patient.lastName}`.trim() || String(patient.id);
+    document.getElementById('test-patient-search-results').innerHTML = '';
+    const selected = document.getElementById('test-selected-patient');
+    selected.classList.remove('hidden');
+    selected.textContent = `Selected: ${(patient.firstName + ' ' + patient.lastName).trim() || 'Patient'} (ID: ${patient.id}${patient.hospitalNumber ? ` · File: ${patient.hospitalNumber}` : ''})`;
+  };
+
+  let patientSearchDebounce;
+  document.getElementById('test-patient-search')?.addEventListener('input', function () {
+    clearTimeout(patientSearchDebounce);
+    const query = this.value;
+    selectedTestPatientId = null;
+    document.getElementById('test-patient-id').value = '';
+    document.getElementById('test-selected-patient').classList.add('hidden');
+    patientSearchDebounce = setTimeout(() => renderPatientSearchResults(query), 180);
+  });
+
   window.submitTestResult = async function () {
-    const patientId = document.getElementById('test-patient-id').value.trim();
+    const patientId = document.getElementById('test-patient-id').value.trim() || String(selectedTestPatientId || '').trim();
     const testName = document.getElementById('test-name').value.trim();
     if (!patientId || !testName) return Utils.toast('Patient ID and test name are required', 'warning');
 
+    const file = document.getElementById('test-file').files?.[0];
+    const payload = {
+      patientId,
+      testName,
+      testType: document.getElementById('test-type').value,
+      description: document.getElementById('test-description').value.trim(),
+      resultSummary: document.getElementById('test-summary').value.trim(),
+      status: document.getElementById('test-status').value,
+      isCritical: document.getElementById('test-critical').checked,
+    };
+
     try {
-      await API.post('/hospitals/me/test-results', {
-        patientId,
-        testName,
-        testType: document.getElementById('test-type').value,
-        description: document.getElementById('test-description').value.trim(),
-        resultSummary: document.getElementById('test-summary').value.trim(),
-        status: document.getElementById('test-status').value,
-        isCritical: document.getElementById('test-critical').checked,
-      });
+      if (file) {
+        const formData = new FormData();
+        Object.entries(payload).forEach(([k, v]) => {
+          if (v !== '' && v !== undefined && v !== null) formData.append(k, typeof v === 'boolean' ? String(v) : v);
+        });
+        formData.append('file', file);
+        await API.upload('/hospitals/me/test-results', formData);
+      } else {
+        await API.post('/hospitals/me/test-results', payload);
+      }
       Utils.toast('Test result created and patient notified!', 'success');
       closeModal('create-test-modal');
       loadTestResults();

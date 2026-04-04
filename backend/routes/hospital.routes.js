@@ -3,6 +3,7 @@ const router  = express.Router();
 const ctrl    = require('../controllers/hospital.controller');
 const { authenticate } = require('../middleware/auth.middleware');
 const { authorize }    = require('../middleware/rbac.middleware');
+const { uploadTestResultAttachment } = require('../middleware/upload.middleware');
 const {
   validateHospitalCreate,
   validateHospitalUpdate,
@@ -41,7 +42,12 @@ router.get('/me/patients',                           authorize('hospital_admin',
 router.delete('/me/patients/:patientId',             authorize('hospital_admin', 'admin'), validateUUID,             ctrl.removePatient);
 
 // Test results management
-router.post('/me/test-results',                      authorize('hospital_admin', 'admin'), validateTestResult,       ctrl.createTestResult);
+router.post('/me/test-results',                      authorize('hospital_admin', 'admin'), (req, res, next) => {
+  uploadTestResultAttachment(req, res, (err) => {
+    if (err) return res.status(400).json({ success: false, message: err.message });
+    next();
+  });
+}, validateTestResult,       ctrl.createTestResult);
 router.put('/me/test-results/:id',                   authorize('hospital_admin', 'admin'), validateUUID,             ctrl.updateTestResult);
 router.get('/me/test-results',                       authorize('hospital_admin', 'admin'), validatePagination,       ctrl.listTestResults);
 

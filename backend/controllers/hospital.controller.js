@@ -215,13 +215,23 @@ exports.createTestResult = async (req, res, next) => {
     const hospital = await HospitalModel.findByAdminUserId(req.user.id);
     if (!hospital) return sendError(res, 404, 'No hospital found for your account.');
 
-    const { patientId, doctorId, testType, testName, description, results, resultSummary, notes, isCritical } = req.body;
+    const { patientId, doctorId, testType, testName, description, results, resultSummary, notes, isCritical, status } = req.body;
     if (!patientId || !testName) return sendError(res, 400, 'Patient ID and test name are required.');
+
+    const linked = await HospitalModel.isPatientLinked(hospital.id, patientId);
+    if (!linked) {
+      return sendError(res, 400, 'Selected patient is not linked to this hospital. Register the patient first.');
+    }
+
+    const fileUrl = req.file ? `/uploads/test-results/${req.file.filename}` : null;
+    const parsedIsCritical = isCritical === true || isCritical === 'true' || isCritical === 1 || isCritical === '1';
+    const requestedStatus = status || ((resultSummary || fileUrl) ? 'completed' : 'ordered');
 
     const testResult = await HospitalModel.createTestResult({
       hospitalId: hospital.id, patientId, doctorId,
-      testType, testName, description, results, resultSummary, notes, isCritical,
-      status: 'ordered',
+      testType, testName, description, results, resultSummary, notes, isCritical: parsedIsCritical,
+      fileUrl,
+      status: requestedStatus,
     });
 
     // Notify patient (via Socket.IO if available)
@@ -229,11 +239,19 @@ exports.createTestResult = async (req, res, next) => {
     if (io) {
       const patient = await PatientModel.findById(patientId);
       if (patient) {
+        const isCompleted = requestedStatus === 'completed';
+        const realtimeEvent = isCompleted ? 'test_result_ready' : 'test_result';
         io.to(`user:${patient.user_id}`).emit('notification', {
-          type: 'test_result',
-          title: 'New Test Order',
-          message: `${hospital.name} has ordered a ${testName} test for you.`,
+          type: isCompleted ? 'test_result_ready' : 'test_result',
+          title: isCompleted ? 'Test Results Ready' : 'New Test Order',
+          message: isCompleted
+            ? `${hospital.name} has uploaded your ${testName} result.`
+            : `${hospital.name} has ordered a ${testName} test for you.`,
           data: { testResultId: testResult.id },
+        });
+        io.to(`user:${patient.user_id}`).emit(realtimeEvent, {
+          testResultId: testResult.id,
+          status: requestedStatus,
         });
       }
     }
@@ -271,6 +289,10 @@ exports.updateTestResult = async (req, res, next) => {
             title: 'Test Results Ready',
             message: `Your ${testResult.test_name} results from ${hospital.name} are ready.`,
             data: { testResultId: testResult.id },
+          });
+          io.to(`user:${patient.user_id}`).emit('test_result_ready', {
+            testResultId: testResult.id,
+            status: 'completed',
           });
         }
       }

@@ -194,6 +194,17 @@ class HospitalModel {
     );
   }
 
+  static async isPatientLinked(hospitalId, patientId) {
+    const row = await queryOne(
+      `SELECT id
+       FROM hospital_patients
+       WHERE hospital_id = ? AND patient_id = ? AND status = 'active'
+       LIMIT 1`,
+      [hospitalId, patientId]
+    );
+    return !!row;
+  }
+
   // ─── Test Results ──────────────────────────────────────────────────────
   static async createTestResult(data) {
     const id = uuidv4();

@@ -288,8 +288,11 @@
       <h3 class="font-bold text-lg mb-4">🧪 Create Test Result</h3>
       <div class="space-y-3">
         <div>
-          <label class="text-xs font-semibold block mb-1" style="color:var(--text3)">Patient ID *</label>
-          <input type="text" id="test-patient-id" placeholder="Patient system ID" class="w-full px-3 py-2 rounded-lg text-sm" style="background:var(--surface1);border:1px solid var(--border);color:var(--text1)" required>
+          <label class="text-xs font-semibold block mb-1" style="color:var(--text3)">Patient (search by name or ID) *</label>
+          <input type="text" id="test-patient-search" placeholder="Type patient name or ID..." class="w-full px-3 py-2 rounded-lg text-sm" style="background:var(--surface1);border:1px solid var(--border);color:var(--text1)">
+          <div id="test-patient-search-results" class="mt-2 max-h-44 overflow-y-auto space-y-1"></div>
+          <div id="test-selected-patient" class="hidden mt-2 text-xs px-3 py-2 rounded-lg" style="background:rgba(34,211,238,.08);border:1px solid rgba(34,211,238,.18);color:var(--cyan)"></div>
+          <input type="hidden" id="test-patient-id" required>
         </div>
         <div>
           <label class="text-xs font-semibold block mb-1" style="color:var(--text3)">Test Name *</label>
@@ -298,10 +301,10 @@
         <div>
           <label class="text-xs font-semibold block mb-1" style="color:var(--text3)">Test Type</label>
           <select id="test-type" class="w-full px-3 py-2 rounded-lg text-sm" style="background:var(--surface1);border:1px solid var(--border);color:var(--text1)">
-            <option value="lab">Lab Test</option>
+            <option value="blood">Blood / Lab Test</option>
+            <option value="urine">Urine Test</option>
             <option value="imaging">Imaging (X-Ray, CT, MRI)</option>
-            <option value="pathology">Pathology</option>
-            <option value="cardiology">Cardiology (ECG, Echo)</option>
+            <option value="biopsy">Pathology / Biopsy</option>
             <option value="other">Other</option>
           </select>
         </div>
@@ -312,6 +315,11 @@
         <div>
           <label class="text-xs font-semibold block mb-1" style="color:var(--text3)">Result Summary</label>
           <textarea id="test-summary" rows="3" placeholder="Enter test results..." class="w-full px-3 py-2 rounded-lg text-sm" style="background:var(--surface1);border:1px solid var(--border);color:var(--text1)"></textarea>
+        </div>
+        <div>
+          <label class="text-xs font-semibold block mb-1" style="color:var(--text3)">Result File / Image <span style="color:var(--text3)">(optional)</span></label>
+          <input type="file" id="test-file" accept="image/*,.pdf,.doc,.docx" class="w-full px-3 py-2 rounded-lg text-sm" style="background:var(--surface1);border:1px solid var(--border);color:var(--text1)">
+          <p class="text-[11px] mt-1" style="color:var(--text3)">Upload scanned results, radiology images, or lab report files (max 10 MB).</p>
         </div>
         <div>
           <label class="text-xs font-semibold block mb-1" style="color:var(--text3)">Status</label>
