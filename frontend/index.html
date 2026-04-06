@@ -381,9 +381,9 @@
         <div>
           <div class="font-semibold text-sm mb-4">Legal</div>
           <div class="space-y-2.5 text-sm text-[#E4F2FF]/50">
-            <div><a href="#" class="hover:text-[#22D3EE] transition-colors">Privacy Policy</a></div>
-            <div><a href="#" class="hover:text-[#22D3EE] transition-colors">Terms of Service</a></div>
-            <div><a href="#" class="hover:text-[#22D3EE] transition-colors">Medical Disclaimer</a></div>
+            <div><a href="/pages/legal/privacy-policy.html" class="hover:text-[#22D3EE] transition-colors">Privacy Policy</a></div>
+            <div><a href="/pages/legal/terms-and-conditions.html" class="hover:text-[#22D3EE] transition-colors">Terms of Service</a></div>
+            <div><a href="/pages/legal/medical-disclaimer.html" class="hover:text-[#22D3EE] transition-colors">Medical Disclaimer</a></div>
           </div>
         </div>
       </div>
@@ -472,7 +472,7 @@
 
     async function loadLandingStats() {
       try {
-        const response = await fetch('/api/v1/landing-stats', { credentials: 'include' });
+        const response = await fetch('/api/v1/landing-stats');
         if (!response.ok) throw new Error('Failed to load stats');
 
         const payload = await response.json();

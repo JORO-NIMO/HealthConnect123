@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <meta name="description" content="HealthConnect medical disclaimer for informational content, telemedicine limitations, and emergency guidance.">
+  <title>Medical Disclaimer - HealthConnect</title>
+  <link rel="manifest" href="/manifest.json">
+  <link rel="stylesheet" href="/css/main.css">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    .legal-shell {
+      background: var(--bg);
+      background-image: var(--g-hero);
+      min-height: 100vh;
+      color: var(--text);
+    }
+    .legal-card {
+      background: rgba(14, 27, 48, 0.92);
+      border: 1px solid var(--border2);
+      border-radius: 1.25rem;
+      box-shadow: 0 16px 50px rgba(0, 0, 0, 0.28);
+    }
+    .legal-nav-link {
+      color: var(--text2);
+      transition: color .2s;
+    }
+    .legal-nav-link:hover,
+    .legal-nav-link.active {
+      color: var(--cyan);
+    }
+  </style>
+</head>
+<body class="legal-shell">
+  <header class="sticky top-0 z-20" style="background:rgba(7,14,28,.85);backdrop-filter:blur(14px);border-bottom:1px solid var(--border)">
+    <div class="max-w-6xl mx-auto px-4 sm:px-6 py-4 flex items-center justify-between gap-4">
+      <a href="/" class="flex items-center gap-2.5 font-bold text-xl">
+        <div class="w-9 h-9 rounded-[10px] bg-[#22D3EE] flex items-center justify-center text-sm">HC</div>
+        <span class="font-serif">HealthConnect</span>
+      </a>
+      <nav class="flex items-center gap-4 text-sm font-medium">
+        <a class="legal-nav-link" href="/pages/legal/privacy-policy.html">Privacy Policy</a>
+        <a class="legal-nav-link" href="/pages/legal/terms-and-conditions.html">Terms</a>
+        <a class="legal-nav-link active" href="/pages/legal/medical-disclaimer.html">Medical Disclaimer</a>
+      </nav>
+    </div>
+  </header>
+
+  <main class="max-w-4xl mx-auto px-4 sm:px-6 py-10 sm:py-14">
+    <section class="legal-card p-6 sm:p-8 lg:p-10">
+      <p class="text-xs sm:text-sm mb-2" style="color:var(--cyan)">Legal</p>
+      <h1 class="font-serif text-3xl sm:text-4xl leading-tight mb-3">Medical Disclaimer</h1>
+      <p class="text-sm sm:text-base mb-6" style="color:var(--text2)">Last updated: April 6, 2026</p>
+
+      <div class="space-y-5" style="color:var(--text2);line-height:1.75">
+        <p>HealthConnect provides digital health tools, telemedicine workflows, and AI-assisted informational support. Content and AI outputs on this platform are provided for informational purposes only and are not, by themselves, medical diagnoses or treatment plans.</p>
+        <p>Medical decisions should always be made by qualified healthcare professionals after appropriate clinical evaluation. Do not delay or disregard professional medical advice based on information from this platform.</p>
+        <p>If you think you may have a medical emergency, call your local emergency number immediately or seek urgent in-person medical care. HealthConnect is not an emergency response dispatch substitute in all situations.</p>
+        <p>Provider availability, response times, and treatment outcomes may vary. HealthConnect does not guarantee specific medical outcomes.</p>
+        <p>By using HealthConnect, you acknowledge that:</p>
+        <ul class="list-disc pl-5 space-y-2">
+          <li>you understand the limits of telemedicine and remote triage;</li>
+          <li>you will provide accurate health information to the best of your knowledge;</li>
+          <li>you remain responsible for following up with in-person care when clinically appropriate.</li>
+        </ul>
+        <p>For legal terms on service use, see our <a href="/pages/legal/terms-and-conditions.html" class="underline" style="color:var(--cyan)">Terms and Conditions</a>. For data handling practices, see our <a href="/pages/legal/privacy-policy.html" class="underline" style="color:var(--cyan)">Privacy Policy</a>.</p>
+      </div>
+    </section>
+  </main>
+</body>
+</html>
