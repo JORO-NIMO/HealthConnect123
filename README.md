@@ -22,6 +22,17 @@
 
 ---
 
+## 📚 Pitch Documentation
+
+For role-specific pitch narratives and technical architecture detail, use:
+
+- [README_PATIENT.md](README_PATIENT.md) — Patient capabilities and journeys
+- [README_DOCTOR.md](README_DOCTOR.md) — Doctor workflows and platform tools
+- [README_HOSPITAL.md](README_HOSPITAL.md) — Hospital operations and emergency queue behavior
+- [README_TECHNICAL.md](README_TECHNICAL.md) — Full technical architecture, scaling, AI, PWA/SW, CDN, and system complexity
+
+---
+
 ## 🌍 Overview
 
 HealthConnect is a full-stack AI-powered telemedicine platform designed for:
