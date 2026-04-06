@@ -270,6 +270,10 @@
       btn.disabled = true;
       btn.textContent = '📡 Sending SOS...';
 
+      const idempotencyKey = (window.crypto && typeof window.crypto.randomUUID === 'function')
+        ? window.crypto.randomUUID()
+        : `sos-${Date.now()}-${Math.random().toString(16).slice(2)}`;
+
       let location = {};
       try {
         const loc = await Utils.getCurrentLocation({ timeout: 12000, enableHighAccuracy: true, maximumAge: 120000 });
@@ -277,7 +281,9 @@
       } catch (e) { /* Location unavailable — continue without it */ }
 
       try {
-        await API.post('/emergency/sos', { ...location, symptoms: [] });
+        await API.post('/emergency/sos', { ...location, symptoms: [] }, {
+          headers: { 'X-Idempotency-Key': idempotencyKey },
+        });
         document.getElementById('sos-status').classList.remove('hidden');
         Utils.toast('🚨 Emergency SOS sent!', 'success', 5000);
         await loadSOSHistory();

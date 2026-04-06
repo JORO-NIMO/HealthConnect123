@@ -132,6 +132,27 @@ const validateVitals = [
 ];
 
 // ═══════════════════════════════════════════════════════════════════════════
+// EMERGENCY VALIDATIONS
+// ═══════════════════════════════════════════════════════════════════════════
+
+const validateSOS = [
+  body('latitude').optional().isFloat({ min: -90, max: 90 }).withMessage('Latitude must be between -90 and 90'),
+  body('longitude').optional().isFloat({ min: -180, max: 180 }).withMessage('Longitude must be between -180 and 180'),
+  body('address').optional().isString().isLength({ max: 500 }).withMessage('Address too long (max 500 characters)'),
+  body('symptoms').optional().isArray({ max: 20 }).withMessage('Symptoms must be an array (max 20)'),
+  body('symptoms.*').optional().isString().trim().isLength({ min: 1, max: 120 }).withMessage('Each symptom must be 1-120 characters'),
+  body().custom((value) => {
+    const hasLat = value.latitude !== undefined && value.latitude !== null && value.latitude !== '';
+    const hasLng = value.longitude !== undefined && value.longitude !== null && value.longitude !== '';
+    if (hasLat !== hasLng) {
+      throw new Error('Latitude and longitude must be provided together');
+    }
+    return true;
+  }),
+  validate,
+];
+
+// ═══════════════════════════════════════════════════════════════════════════
 // CONSULTATION VALIDATIONS
 // ═══════════════════════════════════════════════════════════════════════════
 
@@ -219,6 +240,9 @@ module.exports = {
   
   // Vitals
   validateVitals,
+
+  // Emergency
+  validateSOS,
   
   // Consultation
   validateConsultationCreate,

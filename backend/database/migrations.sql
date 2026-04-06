@@ -140,6 +140,7 @@ CREATE TABLE IF NOT EXISTS emergency_sos_logs (
   address     TEXT          DEFAULT NULL,
   symptoms    JSON          DEFAULT NULL,
   vitals_snapshot JSON      DEFAULT NULL COMMENT 'Latest vital signs at time of SOS',
+  idempotency_key VARCHAR(128) DEFAULT NULL,
   status      ENUM('triggered','acknowledged','responded','resolved','false_alarm')
                 NOT NULL DEFAULT 'triggered',
   notes       TEXT          DEFAULT NULL,
@@ -150,9 +151,29 @@ CREATE TABLE IF NOT EXISTS emergency_sos_logs (
 
   FOREIGN KEY (patient_id) REFERENCES patients(id) ON DELETE CASCADE,
   FOREIGN KEY (responded_by) REFERENCES users(id),
+  UNIQUE KEY uq_sos_patient_idem (patient_id, idempotency_key),
   INDEX idx_sos_patient (patient_id),
   INDEX idx_sos_status (status),
   INDEX idx_sos_created (created_at)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+
+-- ── 5b. Emergency SOS Dispatch Targets ────────────────────────────────
+CREATE TABLE IF NOT EXISTS emergency_sos_dispatch_targets (
+  sos_id        CHAR(36) NOT NULL,
+  hospital_id   CHAR(36) NOT NULL,
+  status        ENUM('pending','claimed','stand_down') NOT NULL DEFAULT 'pending',
+  claimed_by    CHAR(36) NULL,
+  claimed_at    DATETIME NULL,
+  dispatched_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  created_at    DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  updated_at    DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  PRIMARY KEY (sos_id, hospital_id),
+  FOREIGN KEY (sos_id) REFERENCES emergency_sos_logs(id) ON DELETE CASCADE,
+  FOREIGN KEY (hospital_id) REFERENCES hospitals(id) ON DELETE CASCADE,
+  FOREIGN KEY (claimed_by) REFERENCES users(id) ON DELETE SET NULL,
+  INDEX idx_dispatch_hospital_status (hospital_id, status),
+  INDEX idx_dispatch_created (created_at)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 

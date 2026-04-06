@@ -16,8 +16,9 @@ async function safeExec(sql, label) {
     logger.info(`  ✔ ${label}`);
   } catch (err) {
     // ER_DUP_FIELDNAME (1060) = column already exists  → safe to ignore
+    // ER_DUP_KEYNAME (1061) = key already exists        → safe to ignore
     // ER_CANT_DROP_FIELD_OR_KEY (1091) = column/key doesn't exist → safe
-    if (err.errno === 1060 || err.errno === 1091) {
+    if (err.errno === 1060 || err.errno === 1061 || err.errno === 1091) {
       logger.info(`  ⏭ ${label} (already applied)`);
     } else {
       logger.warn(`  ⚠ ${label} — ${err.message}`);
@@ -85,6 +86,37 @@ async function runMigrations() {
   await safeExec(
     `ALTER TABLE hospital_test_results MODIFY COLUMN test_type ENUM('lab','imaging','pathology','cardiology','blood_test','urine_test','genetic','other') NOT NULL DEFAULT 'lab'`,
     'hospital_test_results: expand test_type ENUM'
+  );
+
+  // ── 4. emergency_sos_logs: idempotency support ──────────────────────
+  await safeExec(
+    `ALTER TABLE emergency_sos_logs ADD COLUMN idempotency_key VARCHAR(128) NULL AFTER vitals_snapshot`,
+    'emergency_sos_logs.idempotency_key'
+  );
+  await safeExec(
+    `ALTER TABLE emergency_sos_logs ADD UNIQUE KEY uq_sos_patient_idem (patient_id, idempotency_key)`,
+    'emergency_sos_logs.uq_sos_patient_idem'
+  );
+
+  // ── 5. emergency_sos_dispatch_targets: hospital queue state ──────────
+  await safeExec(
+    `CREATE TABLE IF NOT EXISTS emergency_sos_dispatch_targets (
+      sos_id        VARCHAR(36) NOT NULL,
+      hospital_id   VARCHAR(36) NOT NULL,
+      status        ENUM('pending','claimed','stand_down') NOT NULL DEFAULT 'pending',
+      claimed_by    VARCHAR(36) NULL,
+      claimed_at    DATETIME NULL,
+      dispatched_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+      created_at    DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+      updated_at    DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+      PRIMARY KEY (sos_id, hospital_id),
+      FOREIGN KEY (sos_id) REFERENCES emergency_sos_logs(id) ON DELETE CASCADE,
+      FOREIGN KEY (hospital_id) REFERENCES hospitals(id) ON DELETE CASCADE,
+      FOREIGN KEY (claimed_by) REFERENCES users(id) ON DELETE SET NULL,
+      INDEX idx_dispatch_hospital_status (hospital_id, status),
+      INDEX idx_dispatch_created (created_at)
+    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci`,
+    'emergency_sos_dispatch_targets table'
   );
 
   logger.info('✅ Auto-migrations complete');

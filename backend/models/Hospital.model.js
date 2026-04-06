@@ -57,7 +57,9 @@ class HospitalModel {
   }
 
   // ─── Search nearby by coordinates ───────────────────────────────────────
-  static async findNearby(latitude, longitude, radiusKm = 50, limit = 20) {
+  static async findNearby(latitude, longitude, radiusKm = 50, limit = 20, options = {}) {
+    const { emergencyOnly = false, verifiedOnly = false } = options;
+
     // Haversine formula for distance in km
     const sql = `
       SELECT *, (
@@ -71,6 +73,8 @@ class HospitalModel {
       WHERE latitude IS NOT NULL
         AND longitude IS NOT NULL
         AND is_active = 1
+        ${emergencyOnly ? 'AND emergency_available = 1' : ''}
+        ${verifiedOnly ? `AND verification_status = 'verified'` : ''}
       HAVING distance_km <= ?
       ORDER BY distance_km ASC
       LIMIT ?
@@ -188,10 +192,66 @@ class HospitalModel {
       `SELECT h.*, hp.hospital_number, hp.status AS link_status, hp.registered_at, hp.last_visit
        FROM hospital_patients hp
        JOIN hospitals h ON h.id = hp.hospital_id
-       WHERE hp.patient_id = ? AND hp.status = 'active'
+       WHERE hp.patient_id = ?
+         AND hp.status = 'active'
+         AND h.is_active = 1
        ORDER BY h.name`,
       [patientId]
     );
+  }
+
+  // ─── Emergency SOS responder resolution ───────────────────────────────
+  static async getResponderUsersByHospitalIds(hospitalIds = []) {
+    if (!hospitalIds.length) return [];
+
+    const placeholders = hospitalIds.map(() => '?').join(', ');
+
+    return query(
+      `
+      SELECT h.id AS hospital_id, h.name AS hospital_name, h.admin_user_id AS user_id, 'hospital_admin' AS responder_role
+      FROM hospitals h
+      JOIN users u ON u.id = h.admin_user_id
+      WHERE h.id IN (${placeholders})
+        AND h.admin_user_id IS NOT NULL
+        AND u.is_active = 1
+
+      UNION ALL
+
+      SELECT h.id AS hospital_id, h.name AS hospital_name, d.user_id AS user_id, 'doctor' AS responder_role
+      FROM hospital_doctors hd
+      JOIN hospitals h ON h.id = hd.hospital_id
+      JOIN doctors d ON d.id = hd.doctor_id
+      JOIN users u ON u.id = d.user_id
+      WHERE hd.hospital_id IN (${placeholders})
+        AND hd.status = 'active'
+        AND u.is_active = 1
+      `,
+      [...hospitalIds, ...hospitalIds]
+    );
+  }
+
+  static async getHospitalIdsByResponderUser(userId) {
+    const rows = await query(
+      `
+      SELECT h.id AS hospital_id
+      FROM hospitals h
+      WHERE h.admin_user_id = ?
+        AND h.is_active = 1
+
+      UNION
+
+      SELECT hd.hospital_id
+      FROM hospital_doctors hd
+      JOIN doctors d ON d.id = hd.doctor_id
+      JOIN hospitals h ON h.id = hd.hospital_id
+      WHERE d.user_id = ?
+        AND hd.status = 'active'
+        AND h.is_active = 1
+      `,
+      [userId, userId]
+    );
+
+    return rows.map(r => r.hospital_id).filter(Boolean);
   }
 
   static async isPatientLinked(hospitalId, patientId) {
