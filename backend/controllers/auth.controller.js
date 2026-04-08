@@ -19,6 +19,36 @@ function toPublicUser(user) {
   };
 }
 
+function resolveFrontendBaseUrl(req) {
+  const fallbackOrigin = `${req.protocol}://${req.get('host')}`;
+  const raw = (process.env.FRONTEND_URL || '').trim();
+
+  if (!raw || raw === '*') {
+    return fallbackOrigin.replace(/\/+$/, '');
+  }
+
+  const candidates = raw.split(',').map((s) => s.trim()).filter(Boolean);
+  for (const candidate of candidates) {
+    if (candidate === '*') continue;
+
+    const normalized = /^https?:\/\//i.test(candidate)
+      ? candidate
+      : `https://${candidate}`;
+
+    try {
+      const parsed = new URL(normalized);
+      if (parsed.protocol === 'http:' || parsed.protocol === 'https:') {
+        return parsed.toString().replace(/\/+$/, '');
+      }
+    } catch {
+      // Try next candidate.
+    }
+  }
+
+  logger.warn(`Invalid FRONTEND_URL value "${raw}". Falling back to request origin ${fallbackOrigin}.`);
+  return fallbackOrigin.replace(/\/+$/, '');
+}
+
 function buildGoogleRoleNotAllowedError(role) {
   const err = new Error('Google sign-in is only available for patient accounts. Doctors and hospital admins must use verified registration.');
   err.statusCode = 403;
@@ -67,8 +97,7 @@ async function authenticateWithGoogleProfile({ googleId, email, firstName, lastN
 }
 
 function buildFrontendAuthRedirect(req, { tokens, user, oauthError }) {
-  const fallbackOrigin = `${req.protocol}://${req.get('host')}`;
-  const frontendBase = (process.env.FRONTEND_URL || fallbackOrigin).replace(/\/+$/, '');
+  const frontendBase = resolveFrontendBaseUrl(req);
   const redirectUrl = new URL('/pages/auth/login.html', frontendBase);
 
   if (oauthError) {
