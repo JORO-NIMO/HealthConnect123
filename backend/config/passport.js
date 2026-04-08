@@ -1,107 +1,71 @@
-/**
- * HealthConnect — Passport.js Configuration
- * Configured for Google OAuth 2.0
- */
-
 const passport = require('passport');
-const LocalStrategy = require('passport-local').Strategy;
-const GoogleStrategy = require('passport-google-oauth20').Strategy;
-const JWTStrategy = require('passport-jwt').Strategy;
-const ExtractJwt = require('passport-jwt').ExtractJwt;
-
-const UserModel = require('../models/User.model');
+const { Strategy: GoogleStrategy } = require('passport-google-oauth20');
 const logger = require('../utils/logger.util');
 
-// ─── Google OAuth Strategy ────────────────────────────────────────────────
-if (process.env.GOOGLE_CLIENT_ID && process.env.GOOGLE_CLIENT_SECRET) {
-  passport.use(new GoogleStrategy({
-    clientID: process.env.GOOGLE_CLIENT_ID,
-    clientSecret: process.env.GOOGLE_CLIENT_SECRET,
-    callbackURL: process.env.GOOGLE_CALLBACK_URL || 'http://localhost:5000/api/v1/auth/google/callback',
-  }, async (accessToken, refreshToken, profile, done) => {
-    try {
-      const { id, displayName, emails, photos } = profile;
-      const email = emails?.[0]?.value;
-      const avatarUrl = photos?.[0]?.value;
-      const [firstName, lastName] = displayName.split(' ');
+function getGoogleOAuthConfigErrors() {
+  const errors = [];
+  const clientId = (process.env.GOOGLE_CLIENT_ID || '').trim();
+  const clientSecret = (process.env.GOOGLE_CLIENT_SECRET || '').trim();
+  const callbackUrl = (process.env.GOOGLE_CALLBACK_URL || '').trim();
 
-      // Check if user exists by Google ID
-      let user = await UserModel.findByGoogleId(id);
+  if (!clientId || clientId === 'placeholder' || clientId === 'your_google_client_id') {
+    errors.push('GOOGLE_CLIENT_ID is missing.');
+  } else if (!clientId.endsWith('.apps.googleusercontent.com')) {
+    errors.push('GOOGLE_CLIENT_ID must be a full OAuth client ID ending with .apps.googleusercontent.com.');
+  }
 
-      if (!user) {
-        // Try to find by email
-        user = await UserModel.findByEmail(email);
-        
-        if (user) {
-          // Link existing account with Google
-          await UserModel.setGoogleId(user.id, id);
-          logger.info(`Linked Google account to existing user: ${email}`);
-        } else {
-          // Create new user with temporary password
-          const { v4: uuidv4 } = require('uuid');
-          user = await UserModel.create({
-            email,
-            password: uuidv4(),
-            firstName,
-            lastName,
-            role: 'patient'
-          });
-          
-          const PatientModel = require('../models/Patient.model');
-          await PatientModel.create(user.id);
-          
-          await UserModel.setGoogleId(user.id, id);
-          logger.info(`Created new user from Google OAuth: ${email}`);
-        }
-      }
+  if (!clientSecret || clientSecret === 'placeholder' || clientSecret === 'your_google_client_secret') {
+    errors.push('GOOGLE_CLIENT_SECRET is missing.');
+  }
 
-      return done(null, {
-        id: user.id,
-        email: user.email,
-        firstName: user.first_name,
-        lastName: user.last_name,
-        role: user.role,
-        googleId: id
-      });
-    } catch (err) {
-      logger.error('Google OAuth error:', err);
-      return done(err);
-    }
-  }));
+  if (!callbackUrl || callbackUrl === 'placeholder') {
+    errors.push('GOOGLE_CALLBACK_URL is missing.');
+  }
 
-  logger.info('✅ Google OAuth Strategy configured');
-} else {
-  logger.warn('⚠️  GOOGLE_CLIENT_ID and GOOGLE_CLIENT_SECRET not set — Google authentication disabled');
+  return errors;
 }
 
-// ─── JWT Strategy ─────────────────────────────────────────────────────────
-passport.use(new JWTStrategy({
-  jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
-  secretOrKey: process.env.JWT_SECRET || 'your_jwt_secret_key_change_this_in_production_12345678'
-}, async (payload, done) => {
-  try {
-    const user = await UserModel.findById(payload.id);
-    if (user) {
-      return done(null, user);
-    }
-    return done(null, false);
-  } catch (err) {
-    return done(err, false);
-  }
-}));
+function isGoogleOAuthConfigured() {
+  return getGoogleOAuthConfigErrors().length === 0;
+}
 
-// ─── Serialize/Deserialize ────────────────────────────────────────────────
-passport.serializeUser((user, done) => {
-  done(null, user.id);
-});
+if (isGoogleOAuthConfigured()) {
+  passport.use(
+    new GoogleStrategy(
+      {
+        clientID: process.env.GOOGLE_CLIENT_ID,
+        clientSecret: process.env.GOOGLE_CLIENT_SECRET,
+        callbackURL: process.env.GOOGLE_CALLBACK_URL,
+        passReqToCallback: false,
+        proxy: true,
+      },
+      async (_accessToken, _refreshToken, profile, done) => {
+        try {
+          const email = profile.emails?.[0]?.value;
+          if (!email) {
+            return done(new Error('Google profile did not include an email.'), null);
+          }
 
-passport.deserializeUser(async (id, done) => {
-  try {
-    const user = await UserModel.findById(id);
-    done(null, user);
-  } catch (err) {
-    done(err);
-  }
-});
+          return done(null, {
+            googleId: profile.id,
+            email,
+            firstName: profile.name?.givenName || '',
+            lastName: profile.name?.familyName || '',
+            avatarUrl: profile.photos?.[0]?.value || null,
+          });
+        } catch (err) {
+          return done(err, null);
+        }
+      }
+    )
+  );
+  logger.info('Google OAuth strategy enabled.');
+} else {
+  logger.warn(`Google OAuth strategy disabled: ${getGoogleOAuthConfigErrors().join(' ')}`);
+}
 
-module.exports = passport;
+module.exports = {
+  passport,
+  isGoogleOAuthConfigured,
+  getGoogleOAuthConfigErrors,
+};

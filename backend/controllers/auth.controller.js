@@ -9,6 +9,79 @@ const { sendVerificationEmail, sendPasswordResetEmail } = require('../services/e
 const { sendOTP: sendSMSOTP }                = require('../services/sms.service');
 const logger = require('../utils/logger.util');
 
+function toPublicUser(user) {
+  return {
+    id: user.id,
+    email: user.email,
+    firstName: user.first_name,
+    lastName: user.last_name,
+    role: user.role,
+  };
+}
+
+function buildGoogleRoleNotAllowedError(role) {
+  const err = new Error('Google sign-in is only available for patient accounts. Doctors and hospital admins must use verified registration.');
+  err.statusCode = 403;
+  err.code = 'google_role_not_allowed';
+  err.role = role;
+  return err;
+}
+
+function assertGoogleRoleAllowed(user) {
+  if (user?.role && user.role !== 'patient') {
+    throw buildGoogleRoleNotAllowedError(user.role);
+  }
+}
+
+async function authenticateWithGoogleProfile({ googleId, email, firstName, lastName }) {
+  if (!googleId || !email) {
+    throw new Error('Missing googleId or email in Google profile payload.');
+  }
+
+  let user = await UserModel.findByGoogleId(googleId);
+
+  if (user) {
+    assertGoogleRoleAllowed(user);
+  }
+
+  if (!user) {
+    user = await UserModel.findByEmail(email);
+    if (user) {
+      assertGoogleRoleAllowed(user);
+      await UserModel.setGoogleId(user.id, googleId);
+      user = await UserModel.findById(user.id);
+    } else {
+      const tempPass = uuidv4();
+      user = await UserModel.create({ email, password: tempPass, firstName, lastName, role: 'patient' });
+      await PatientModel.create(user.id);
+      await UserModel.setGoogleId(user.id, googleId);
+      user = await UserModel.findById(user.id);
+    }
+  }
+
+  const tokens = generateTokens(user);
+  const expiresAt = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000);
+  await UserModel.saveRefreshToken(user.id, tokens.refreshToken, expiresAt);
+
+  return { user, tokens };
+}
+
+function buildFrontendAuthRedirect(req, { tokens, user, oauthError }) {
+  const fallbackOrigin = `${req.protocol}://${req.get('host')}`;
+  const frontendBase = (process.env.FRONTEND_URL || fallbackOrigin).replace(/\/+$/, '');
+  const redirectUrl = new URL('/pages/auth/login.html', frontendBase);
+
+  if (oauthError) {
+    redirectUrl.searchParams.set('oauthError', oauthError);
+    return redirectUrl.toString();
+  }
+
+  redirectUrl.searchParams.set('accessToken', tokens.accessToken);
+  redirectUrl.searchParams.set('refreshToken', tokens.refreshToken);
+  redirectUrl.searchParams.set('user', JSON.stringify(user));
+  return redirectUrl.toString();
+}
+
 // ─── Register ─────────────────────────────────────────────────────────────
 exports.register = async (req, res, next) => {
   try {
@@ -162,29 +235,49 @@ exports.verifyOTP = async (req, res, next) => {
 exports.googleCallback = async (req, res, next) => {
   try {
     const { googleId, email, firstName, lastName, avatarUrl } = req.body;
-
-    let user = await UserModel.findByGoogleId(googleId);
-    if (!user) {
-      user = await UserModel.findByEmail(email);
-      if (user) {
-        await UserModel.setGoogleId(user.id, googleId);
-      } else {
-        const tempPass = uuidv4();
-        user = await UserModel.create({ email, password: tempPass, firstName, lastName, role: 'patient' });
-        await PatientModel.create(user.id);
-        await UserModel.setGoogleId(user.id, googleId);
-      }
-    }
-
-    const tokens    = generateTokens(user);
-    const expiresAt = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000);
-    await UserModel.saveRefreshToken(user.id, tokens.refreshToken, expiresAt);
+    const { user, tokens } = await authenticateWithGoogleProfile({
+      googleId,
+      email,
+      firstName,
+      lastName,
+      avatarUrl,
+    });
 
     return sendSuccess(res, 200, 'Google authentication successful.', {
-      user  : { id: user.id, email: user.email, firstName: user.first_name, lastName: user.last_name, role: user.role },
+      user  : toPublicUser(user),
       tokens,
     });
-  } catch (err) { next(err); }
+  } catch (err) {
+    if (err.code === 'google_role_not_allowed') {
+      return sendError(res, 403, err.message, { code: err.code, role: err.role });
+    }
+    next(err);
+  }
+};
+
+// ─── Google OAuth browser callback (passport flow) ──────────────────────
+exports.googleOAuthRedirect = async (req, res, next) => {
+  try {
+    const googleProfile = req.user;
+    const { user, tokens } = await authenticateWithGoogleProfile(googleProfile);
+    const redirectUrl = buildFrontendAuthRedirect(req, {
+      tokens,
+      user: toPublicUser(user),
+    });
+
+    return res.redirect(302, redirectUrl);
+  } catch (err) {
+    if (err.code === 'google_role_not_allowed') {
+      const redirectUrl = buildFrontendAuthRedirect(req, { oauthError: err.code });
+      return res.redirect(302, redirectUrl);
+    }
+    return next(err);
+  }
+};
+
+exports.googleOAuthFailedRedirect = (req, res) => {
+  const redirectUrl = buildFrontendAuthRedirect(req, { oauthError: 'google_oauth_failed' });
+  return res.redirect(302, redirectUrl);
 };
 
 // ─── Google OAuth callback (Passport-initiated) ────────────────────────

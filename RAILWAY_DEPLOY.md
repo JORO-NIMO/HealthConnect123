@@ -44,6 +44,12 @@ JWT_EXPIRES_IN=1h
 JWT_REFRESH_SECRET=<generate-64-char-random-string>
 JWT_REFRESH_EXPIRES_IN=7d
 
+# Google OAuth
+# IMPORTANT: full OAuth client id must end with .apps.googleusercontent.com
+GOOGLE_CLIENT_ID=<your-google-web-client-id>.apps.googleusercontent.com
+GOOGLE_CLIENT_SECRET=<your-google-client-secret>
+GOOGLE_CALLBACK_URL=https://your-app.railway.app/api/v1/auth/google/callback
+
 # AI Provider
 AI_PROVIDER=huggingface
 HF_TOKEN=<your-huggingface-token>
@@ -128,6 +134,12 @@ Railway will use these to monitor your app:
 - Ensure FRONTEND_URL is set correctly
 - Railway supports WebSocket connections
 - Check CORS settings match your domain
+
+### Google OAuth: "The OAuth client was not found"
+- Confirm `GOOGLE_CLIENT_ID` is the full client ID, not only the numeric project/client prefix.
+- Confirm the OAuth client still exists in Google Cloud Console.
+- In Google Cloud Console, add exact redirect URI: `https://your-app.railway.app/api/v1/auth/google/callback`.
+- If you changed domains, update both authorized redirect URIs and authorized JavaScript origins.
 
 ## Monitoring
 

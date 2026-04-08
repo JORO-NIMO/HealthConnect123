@@ -5,6 +5,19 @@
 
 const Auth = (() => {
 
+  function decodeJwtPayload(token) {
+    try {
+      const payloadPart = token.split('.')[1];
+      if (!payloadPart) return null;
+      const normalized = payloadPart.replace(/-/g, '+').replace(/_/g, '/');
+      const padded = normalized.padEnd(Math.ceil(normalized.length / 4) * 4, '=');
+      const json = atob(padded);
+      return JSON.parse(json);
+    } catch {
+      return null;
+    }
+  }
+
   // ─── Session CRUD ────────────────────────────────────────────────────
 
   function saveSession({ accessToken, refreshToken }, user) {
@@ -193,17 +206,44 @@ const Auth = (() => {
   // ─── Handle OAuth Callback (token in URL hash/query) ─────────────────
 
   function handleOAuthCallback() {
-    const params = new URLSearchParams(window.location.search);
-    const accessToken  = params.get('accessToken');
-    const refreshToken = params.get('refreshToken');
-    const userStr      = params.get('user');
+    const queryParams = new URLSearchParams(window.location.search);
+    const hashParams = new URLSearchParams(window.location.hash.startsWith('#') ? window.location.hash.slice(1) : window.location.hash);
 
-    if (accessToken && userStr) {
+    const accessToken  = queryParams.get('accessToken') || hashParams.get('accessToken');
+    const refreshToken = queryParams.get('refreshToken') || hashParams.get('refreshToken');
+    const userStr      = queryParams.get('user') || hashParams.get('user');
+
+    if (accessToken) {
       try {
-        const user = JSON.parse(decodeURIComponent(userStr));
+        let user = null;
+
+        if (userStr) {
+          try {
+            user = JSON.parse(userStr);
+          } catch {
+            try {
+              user = JSON.parse(decodeURIComponent(userStr));
+            } catch {
+              user = null;
+            }
+          }
+        }
+
+        // If serialized user parsing fails, recover role/id from JWT payload.
+        if (!user) {
+          const payload = decodeJwtPayload(accessToken) || {};
+          user = {
+            id: payload.userId || null,
+            role: payload.role || 'patient',
+          };
+        }
+
         saveSession({ accessToken, refreshToken }, user);
+
         // Clean URL
-        window.history.replaceState({}, '', window.location.pathname);
+        const cleanPath = window.location.pathname + (window.location.search.includes('oauthError=') ? '?oauthError=' + encodeURIComponent(queryParams.get('oauthError')) : '');
+        window.history.replaceState({}, '', cleanPath);
+
         return true;
       } catch {
         return false;

@@ -4,14 +4,13 @@ const cors       = require('cors');
 const helmet     = require('helmet');
 const compression = require('compression');
 const morgan     = require('morgan');
-const session    = require('express-session');
-const passport   = require('passport');
 const path       = require('path');
 const { createServer } = require('http');
 const { Server }       = require('socket.io');
 
 const logger        = require('./utils/logger.util');
 const routes        = require('./routes/index');
+const { passport }  = require('./config/passport');
 const { initializeDatabase } = require('./config/database');
 const { ensureSchema }       = require('./database/ensureSchema');
 const { runMigrations }      = require('./database/autoMigrate');
@@ -72,27 +71,10 @@ app.use(cors({
 app.use(compression());
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true, limit: '10mb' }));
+app.use(passport.initialize());
 app.use(morgan('combined', {
   stream: { write: (msg) => logger.info(msg.trim()) },
 }));
-
-// ─── Express Session (required for Passport.js) ────────────────────────────
-app.use(session({
-  secret: process.env.JWT_SECRET || 'your_session_secret_key_change_this_in_production',
-  resave: false,
-  saveUninitialized: false,
-  cookie: { 
-    httpOnly: true, 
-    secure: process.env.NODE_ENV === 'production',
-    sameSite: 'lax',
-    maxAge: 7 * 24 * 60 * 60 * 1000 // 7 days
-  }
-}));
-
-// ─── Passport.js Configuration ────────────────────────────────────────────
-require('./config/passport');
-app.use(passport.initialize());
-app.use(passport.session());
 
 // ─── Audit Logging ─────────────────────────────────────────────────────────
 app.use('/api', auditMiddleware);
@@ -277,6 +259,11 @@ function logEnvDiagnostics() {
     'AI_PROVIDER'    : process.env.AI_PROVIDER     || '(defaults to huggingface)',
     'HF_TOKEN'       : process.env.HF_TOKEN        ? '✅ SET' : '❌ NOT SET — AI disabled',
     'FRONTEND_URL'   : process.env.FRONTEND_URL    || '(auto-detect from request origin)',
+    'GOOGLE_CLIENT_ID': process.env.GOOGLE_CLIENT_ID
+      ? (process.env.GOOGLE_CLIENT_ID.endsWith('.apps.googleusercontent.com') ? '✅ SET' : '⚠️  INVALID FORMAT')
+      : '❌ NOT SET',
+    'GOOGLE_CLIENT_SECRET': process.env.GOOGLE_CLIENT_SECRET ? '✅ SET' : '❌ NOT SET',
+    'GOOGLE_CALLBACK_URL': process.env.GOOGLE_CALLBACK_URL || '❌ NOT SET',
   };
   logger.info('🔧 Environment Variable Diagnostics:');
   for (const [key, val] of Object.entries(vars)) {
