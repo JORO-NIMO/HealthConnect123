@@ -158,7 +158,7 @@ exports.verifyOTP = async (req, res, next) => {
   } catch (err) { next(err); }
 };
 
-// ─── Google OAuth callback ────────────────────────────────────────────────
+// ─── Google OAuth callback (frontend-initiated) ───────────────────────
 exports.googleCallback = async (req, res, next) => {
   try {
     const { googleId, email, firstName, lastName, avatarUrl } = req.body;
@@ -185,6 +185,59 @@ exports.googleCallback = async (req, res, next) => {
       tokens,
     });
   } catch (err) { next(err); }
+};
+
+// ─── Google OAuth callback (Passport-initiated) ────────────────────────
+exports.handleGoogleCallback = async (req, res, next) => {
+  try {
+    // User is already authenticated by Passport.js
+    if (!req.user) {
+      return res.redirect('/pages/auth/login.html?error=auth_failed');
+    }
+
+    const user = await UserModel.findById(req.user.id);
+    if (!user) {
+      return res.redirect('/pages/auth/login.html?error=user_not_found');
+    }
+
+    // Generate JWT tokens
+    const tokens = generateTokens(user);
+    const expiresAt = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000);
+    await UserModel.saveRefreshToken(user.id, tokens.refreshToken, expiresAt);
+
+    // Determine frontend redirect URL based on environment
+    // Priority: FRONTEND_URL env var > request host > localhost:5000
+    let frontendUrl = process.env.FRONTEND_URL;
+    
+    if (!frontendUrl) {
+      const host = req.get('host') || 'localhost:5000';
+      const protocol = (process.env.NODE_ENV === 'production' ? 'https' : 'http');
+      frontendUrl = `${protocol}://${host}`;
+    }
+
+    const dashboardPath = {
+      doctor: '/pages/doctor/dashboard.html',
+      hospital_admin: '/pages/hospital/dashboard.html',
+      admin: '/pages/admin/dashboard.html',
+      patient: '/pages/patient/dashboard.html'
+    }[user.role] || '/pages/patient/dashboard.html';
+
+    // Redirect to frontend with tokens in URL
+    const redirectUrl = `${frontendUrl}${dashboardPath}?accessToken=${tokens.accessToken}&refreshToken=${tokens.refreshToken}&user=${encodeURIComponent(JSON.stringify({
+      id: user.id,
+      email: user.email,
+      firstName: user.first_name,
+      lastName: user.last_name,
+      role: user.role
+    }))}`;
+
+    logger.info(`✅ Google OAuth successful for user: ${user.email}`);
+    logger.info(`📍 Redirecting to: ${redirectUrl}`);
+    return res.redirect(redirectUrl);
+  } catch (err) {
+    logger.error('Google callback error:', err);
+    next(err);
+  }
 };
 
 // ─── Get current user ────────────────────────────────────────────────────

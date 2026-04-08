@@ -3,6 +3,8 @@
  */
 
 (async () => {
+  // Handle tokens passed back from Google OAuth redirect
+  Auth.handleOAuthCallback();
   const user = Auth.requireRole('patient');
   if (!user) return;
 

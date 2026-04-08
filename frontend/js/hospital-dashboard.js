@@ -4,6 +4,7 @@
  */
 
 (async () => {
+  Auth.handleOAuthCallback();
   const user = Auth.requireRole('hospital_admin');
   if (!user) return;
 
