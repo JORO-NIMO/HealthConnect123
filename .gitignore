@@ -32,6 +32,8 @@ redis_data/
 
 # Uploads
 backend/uploads/
+frontend/uploads/test-results/*
+!frontend/uploads/test-results/.gitkeep
 
 # Coverage
 coverage/
