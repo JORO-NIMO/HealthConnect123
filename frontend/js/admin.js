@@ -3,6 +3,7 @@
  */
 
 (async () => {
+  Auth.handleOAuthCallback();
   Auth.requireRole('admin');
 
   let allUsers  = [];

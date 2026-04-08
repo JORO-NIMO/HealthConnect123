@@ -3,6 +3,7 @@
  */
 
 (async () => {
+  Auth.handleOAuthCallback();
   const user = Auth.requireRole('doctor');
   if (!user) return;
 

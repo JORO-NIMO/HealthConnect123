@@ -123,10 +123,22 @@
   <script src="/js/utils.js"></script>
   <script src="/js/auth.js"></script>
   <script>
+    // Check if returning from Google OAuth callback
+    if (Auth.handleOAuthCallback()) {
+      setTimeout(() => Auth.redirectToDashboard(Auth.getUser()?.role || 'patient'), 100);
+    }
+
     // Toggle password visibility
     document.getElementById('toggle-pw').addEventListener('click', () => {
       const pw = document.getElementById('password');
       pw.type = pw.type === 'password' ? 'text' : 'password';
+    });
+
+    // Google Sign-In button
+    document.getElementById('google-btn').addEventListener('click', (e) => {
+      e.preventDefault();
+      console.log('🔐 Starting Google OAuth flow');
+      Auth.loginWithGoogle();
     });
 
     // Toggle phone OTP form

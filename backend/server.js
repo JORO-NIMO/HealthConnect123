@@ -4,6 +4,8 @@ const cors       = require('cors');
 const helmet     = require('helmet');
 const compression = require('compression');
 const morgan     = require('morgan');
+const session    = require('express-session');
+const passport   = require('passport');
 const path       = require('path');
 const { createServer } = require('http');
 const { Server }       = require('socket.io');
@@ -73,6 +75,24 @@ app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 app.use(morgan('combined', {
   stream: { write: (msg) => logger.info(msg.trim()) },
 }));
+
+// ─── Express Session (required for Passport.js) ────────────────────────────
+app.use(session({
+  secret: process.env.JWT_SECRET || 'your_session_secret_key_change_this_in_production',
+  resave: false,
+  saveUninitialized: false,
+  cookie: { 
+    httpOnly: true, 
+    secure: process.env.NODE_ENV === 'production',
+    sameSite: 'lax',
+    maxAge: 7 * 24 * 60 * 60 * 1000 // 7 days
+  }
+}));
+
+// ─── Passport.js Configuration ────────────────────────────────────────────
+require('./config/passport');
+app.use(passport.initialize());
+app.use(passport.session());
 
 // ─── Audit Logging ─────────────────────────────────────────────────────────
 app.use('/api', auditMiddleware);
@@ -291,13 +311,26 @@ async function startServer() {
 
   // Now connect to DB in the background — server stays up even if DB is slow.
   try {
+    logger.info('🔄 Starting database initialization...');
     await initializeDatabase();
+    logger.info('✅ Database connected');
+    
+    logger.info('🔄 Ensuring schema...');
     await ensureSchema();
+    logger.info('✅ Schema verified');
+    
+    logger.info('🔄 Running migrations...');
     await runMigrations();
+    logger.info('✅ Migrations complete');
+    
+    logger.info('🔄 Starting cron jobs...');
     initCronJobs();
+    logger.info('✅ Cron jobs started');
+    
     logger.info('✅ Database connected, schema verified, cron jobs started');
   } catch (err) {
     logger.error('⚠️  Database initialisation failed — API is up but DB calls will fail:', err.message);
+    logger.error('Stack trace:', err.stack);
     // Do NOT exit — let Railway keep the container alive so it can reconnect
     // after the DB plugin finishes provisioning.
   }
@@ -335,10 +368,19 @@ process.on('uncaughtException', (err) => {
 });
 
 process.on('unhandledRejection', (reason, promise) => {
-  logger.error('Unhandled Rejection at:', promise, 'reason:', reason);
+  logger.error('Unhandled Rejection at:', JSON.stringify(promise));
+  logger.error('Reason type:', typeof reason);
+  logger.error('Reason:', JSON.stringify(reason, null, 2));
+  if (reason instanceof Error) {
+    logger.error('Error message:', reason.message);
+    logger.error('Stack trace:', reason.stack);
+  }
   gracefulShutdown('UNHANDLED_REJECTION');
 });
 
-startServer();
+startServer().catch(err => {
+  logger.error('Fatal startup error:', err);
+  process.exit(1);
+});
 module.exports = { app, io };
 
