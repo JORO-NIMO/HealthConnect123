@@ -73,9 +73,9 @@
 
       // Stats cards
       if (statsRes.status === 'fulfilled') {
-        const s = statsRes.value.data || {};
+        const s = statsRes.value?.data?.stats || statsRes.value?.stats || statsRes.value?.data || {};
         _setText('stat-appointments', s.totalAppointments ?? s.total_appointments ?? '0');
-        _setText('stat-checks', s.totalSymptomChecks ?? s.total_symptom_reports ?? '0');
+        _setText('stat-checks', s.totalSymptomChecks ?? s.total_symptom_reports ?? s.total_symptom_checks ?? '0');
         _setText('stat-prescriptions', s.totalPrescriptions ?? s.total_prescriptions ?? '0');
         _setText('stat-consultations', s.totalConsultations ?? s.total_consultations ?? '0');
       }
@@ -83,7 +83,7 @@
       // Upcoming appointments
       if (apptList) {
         if (apptRes.status === 'fulfilled') {
-          const items = apptRes.value.data?.appointments || [];
+          const items = apptRes.value?.data?.appointments || apptRes.value?.appointments || [];
           apptList.innerHTML = items.length
             ? items.map(renderAppointmentCard).join('')
             : Utils.emptyState('📅', 'No upcoming appointments', 'Book a consultation to get started');
@@ -95,7 +95,7 @@
       // Recent symptom reports
       if (sympList) {
         if (sympRes.status === 'fulfilled') {
-          const items = sympRes.value.data?.reports || [];
+          const items = sympRes.value?.data?.reports || sympRes.value?.reports || [];
           sympList.innerHTML = items.length
             ? items.map(renderReportCard).join('')
             : Utils.emptyState('🔍', 'No symptom checks yet', 'Use the AI Symptom Checker to get started');

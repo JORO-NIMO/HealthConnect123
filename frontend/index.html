@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <meta name="description" content="HealthConnect — AI-powered symptom checker and telemedicine platform for Africa. Get instant health insights and consult verified doctors online.">
-  <meta name="theme-color" content="#2B555F">
+  <meta name="theme-color" content="#16a34a">
   <title>HealthConnect — AI Symptom Checker & Telemedicine</title>
   <link rel="manifest" href="/manifest.json">
   <link rel="icon" type="image/jpeg" href="/images/logo.jpeg">
@@ -15,11 +15,11 @@
       theme: {
         extend: {
           colors: {
-            primary  : { DEFAULT: '#4ED8B9', dark: '#66BFE0', light: '#67E8F9' },
-            secondary: { DEFAULT: '#6ED8AA', dark: '#059669' },
+            primary  : { DEFAULT: '#16A34A', dark: '#15803D', light: '#4ADE80' },
+            secondary: { DEFAULT: '#22C55E', dark: '#166534' },
             danger   : '#F43F5E',
-            warning  : '#85CBEE',
-            navy     : { DEFAULT: '#2B555F', 50: '#356B74', 100: '#45828A', 200: '#56959C', 300: '#67A8AD' },
+            warning  : '#4ADE80',
+            navy     : { DEFAULT: '#16A34A', 50: '#22C55E', 100: '#4ADE80', 200: '#86EFAC', 300: '#BBF7D0' },
           },
           fontFamily: {
             sans: ['Plus Jakarta Sans', 'Inter', 'system-ui', 'sans-serif'],
@@ -30,16 +30,16 @@
     }
   </script>
 </head>
-<body class="font-sans bg-[#2B555F] text-[#E4F2FF]">
+<body class="font-sans text-[var(--text)]">
 
   <!-- ── Navigation ──────────────────────────────────────────────────── -->
-  <nav id="navbar" class="fixed top-0 w-full z-50 transition-all duration-300 py-4" style="background:rgba(33,74,80,.88);backdrop-filter:blur(20px);border-bottom:1px solid rgba(78,216,185,.08)">
+  <nav id="navbar" class="fixed top-0 w-full z-50 transition-all duration-300 py-4" style="background:rgba(255,255,255,.92);backdrop-filter:blur(20px);border-bottom:1px solid rgba(22,163,74,.14)">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 flex items-center justify-between">
       <a href="/" class="flex items-center gap-2.5 font-bold text-xl group">
         <div class="w-9 h-9 rounded-[10px] bg-[#4ED8B9] flex items-center justify-center transition-all group-hover:shadow-[0_0_20px_rgba(78,216,185,.4)]">
           <img src="/images/logo.jpeg" alt="HealthConnect logo" class="hc-logo-img" loading="eager" decoding="async" />
         </div>
-        <span class="font-serif text-[21px] text-[#E4F2FF]">
+        <span class="font-serif text-[21px] text-[var(--text)]">
           HealthConnect
         </span>
       </a>
@@ -52,7 +52,7 @@
         <a href="/pages/auth/login.html" class="btn-out hidden md:inline-flex px-5 py-2.5 text-sm font-medium">Sign In</a>
         <a href="/pages/auth/register.html" class="btn-teal px-5 py-2.5 text-sm font-semibold inline-flex items-center gap-2">Get Started →</a>
         <!-- Mobile menu -->
-        <button id="mobile-menu-btn" class="md:hidden text-[#E4F2FF]/80 p-2">
+        <button id="mobile-menu-btn" class="md:hidden text-[var(--text2)] p-2">
           <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/></svg>
         </button>
       </div>
@@ -60,10 +60,10 @@
     <!-- Mobile menu -->
     <div id="mobile-menu" class="hidden md:hidden glass mx-4 mt-2 rounded-xl p-4">
       <div class="flex flex-col gap-3 text-sm">
-        <a href="#features"     class="hover:bg-[rgba(78,216,185,.08)] px-3 py-2 rounded-lg text-[#E4F2FF]/80 hover:text-[#4ED8B9]">Features</a>
-        <a href="#how-it-works" class="hover:bg-[rgba(78,216,185,.08)] px-3 py-2 rounded-lg text-[#E4F2FF]/80 hover:text-[#4ED8B9]">How It Works</a>
-        <a href="#doctors"      class="hover:bg-[rgba(78,216,185,.08)] px-3 py-2 rounded-lg text-[#E4F2FF]/80 hover:text-[#4ED8B9]">Find Doctors</a>
-        <a href="/pages/auth/login.html"    class="hover:bg-[rgba(78,216,185,.08)] px-3 py-2 rounded-lg text-[#E4F2FF]/80">Sign In</a>
+        <a href="#features"     class="hover:bg-[rgba(78,216,185,.08)] px-3 py-2 rounded-lg text-[var(--text2)] hover:text-[#4ED8B9]">Features</a>
+        <a href="#how-it-works" class="hover:bg-[rgba(78,216,185,.08)] px-3 py-2 rounded-lg text-[var(--text2)] hover:text-[#4ED8B9]">How It Works</a>
+        <a href="#doctors"      class="hover:bg-[rgba(78,216,185,.08)] px-3 py-2 rounded-lg text-[var(--text2)] hover:text-[#4ED8B9]">Find Doctors</a>
+        <a href="/pages/auth/login.html"    class="hover:bg-[rgba(78,216,185,.08)] px-3 py-2 rounded-lg text-[var(--text2)]">Sign In</a>
         <a href="/pages/auth/register.html" class="btn-teal px-3 py-2.5 text-center text-sm font-semibold">Get Started →</a>
       </div>
     </div>
@@ -89,7 +89,7 @@
             Expertly<br>
             <span class="text-[#4ED8B9]">Guided by AI</span>
           </h1>
-          <p class="animate-fade-up-2 text-base sm:text-lg text-[#E4F2FF]/60 leading-relaxed mb-6 sm:mb-8 max-w-xl">
+          <p class="animate-fade-up-2 text-base sm:text-lg text-[var(--text3)] leading-relaxed mb-6 sm:mb-8 max-w-xl">
             Describe symptoms, get instant AI insights, and consult verified African doctors — all in one secure platform.
           </p>
           <div class="animate-fade-up-3 flex flex-col sm:flex-row gap-4 mb-10">
@@ -101,7 +101,7 @@
             </a>
           </div>
           <!-- Trust badges -->
-          <div class="animate-fade-up-4 flex flex-wrap gap-5 text-sm text-[#E4F2FF]/50">
+          <div class="animate-fade-up-4 flex flex-wrap gap-5 text-sm text-[var(--text3)]">
             <div class="flex items-center gap-2"><span class="text-[#6ED8AA]">✓</span> HIPAA-Compliant</div>
             <div class="flex items-center gap-2"><span class="text-[#6ED8AA]">✓</span> Verified Doctors</div>
             <div class="flex items-center gap-2"><span class="text-[#6ED8AA]">✓</span> 24/7 Available</div>
@@ -117,40 +117,40 @@
           </div>
 
           <!-- Floating AI Analysis card -->
-          <div class="absolute bottom-3 left-3 sm:bottom-5 sm:left-5 lg:bottom-7 lg:-left-6 animate-float z-10 w-[220px] sm:w-[250px] lg:w-[270px]" style="background:rgba(9,18,35,.92);backdrop-filter:blur(16px);border-radius:16px;padding:14px;box-shadow:0 20px 60px rgba(0,0,0,.7),0 0 0 1px rgba(78,216,185,.18)">
+          <div class="absolute bottom-3 left-3 sm:bottom-5 sm:left-5 lg:bottom-7 lg:-left-6 animate-float z-10 w-[220px] sm:w-[250px] lg:w-[270px]" style="background:rgba(255,255,255,.94);backdrop-filter:blur(16px);border-radius:16px;padding:14px;box-shadow:0 16px 38px rgba(22,163,74,.12),0 0 0 1px rgba(22,163,74,.18)">
             <div class="flex items-center gap-2.5 mb-3">
               <div class="w-[34px] h-[34px] rounded-[9px] flex items-center justify-center" style="background:rgba(78,216,185,.1)">
                 <svg class="w-[17px] h-[17px] text-[#4ED8B9]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
               </div>
               <div>
                 <div class="font-bold text-[13px]">AI Analysis Complete</div>
-                <div class="text-[11px] text-[#E4F2FF]/35">3 symptoms analyzed</div>
+                <div class="text-[11px] text-[var(--text3)]">3 symptoms analyzed</div>
               </div>
               <span class="badge b-yellow ml-auto text-[11px]">Medium</span>
             </div>
             <div class="space-y-2">
               <div>
-                <div class="flex justify-between text-[12px] mb-1"><span class="text-[#E4F2FF]/60">Seasonal Flu</span><span class="text-[#66BFE0] font-bold">78%</span></div>
+                <div class="flex justify-between text-[12px] mb-1"><span class="text-[var(--text3)]">Seasonal Flu</span><span class="text-[var(--cyan)] font-bold">78%</span></div>
                 <div class="pbar"><div class="pfill" style="width:78%"></div></div>
               </div>
               <div>
-                <div class="flex justify-between text-[12px] mb-1"><span class="text-[#E4F2FF]/60">Common Cold</span><span class="text-[#66BFE0] font-bold">62%</span></div>
+                <div class="flex justify-between text-[12px] mb-1"><span class="text-[var(--text3)]">Common Cold</span><span class="text-[var(--cyan)] font-bold">62%</span></div>
                 <div class="pbar"><div class="pfill" style="width:62%"></div></div>
               </div>
               <div>
-                <div class="flex justify-between text-[12px] mb-1"><span class="text-[#E4F2FF]/60">Sinusitis</span><span class="text-[#66BFE0] font-bold">40%</span></div>
+                <div class="flex justify-between text-[12px] mb-1"><span class="text-[var(--text3)]">Sinusitis</span><span class="text-[var(--cyan)] font-bold">40%</span></div>
                 <div class="pbar"><div class="pfill" style="width:40%"></div></div>
               </div>
             </div>
           </div>
 
           <!-- Rating pill -->
-          <div class="absolute top-3 right-3 sm:top-5 sm:right-4 lg:-right-3" style="background:rgba(9,18,35,.92);backdrop-filter:blur(14px);border-radius:14px;padding:11px 18px;box-shadow:0 8px 28px rgba(0,0,0,.6),0 0 0 1px rgba(78,216,185,.15)">
+          <div class="absolute top-3 right-3 sm:top-5 sm:right-4 lg:-right-3" style="background:rgba(255,255,255,.94);backdrop-filter:blur(14px);border-radius:14px;padding:11px 18px;box-shadow:0 8px 22px rgba(22,163,74,.1),0 0 0 1px rgba(22,163,74,.14)">
             <div class="flex items-center gap-2.5">
               <span class="text-[#85CBEE]">⭐</span>
               <div>
                 <div class="font-bold text-lg">4.9</div>
-                <div class="text-[11px] text-[#E4F2FF]/35">1,200+ doctors</div>
+                <div class="text-[11px] text-[var(--text3)]">1,200+ doctors</div>
               </div>
             </div>
           </div>
@@ -164,19 +164,19 @@
     <div class="max-w-5xl mx-auto px-4 sm:px-6 py-5 sm:py-7 grid grid-cols-2 sm:grid-cols-4 gap-4 sm:gap-6 text-center">
       <div>
         <div id="stat-patients" class="font-serif text-3xl sm:text-4xl gradient-text">0</div>
-        <div class="text-[13px] text-[#E4F2FF]/35 mt-1">Patients Served</div>
+        <div class="text-[13px] text-[var(--text3)] mt-1">Patients Served</div>
       </div>
       <div>
         <div id="stat-doctors" class="font-serif text-3xl sm:text-4xl gradient-text">0</div>
-        <div class="text-[13px] text-[#E4F2FF]/35 mt-1">Verified Doctors</div>
+        <div class="text-[13px] text-[var(--text3)] mt-1">Verified Doctors</div>
       </div>
       <div>
         <div id="stat-hospitals" class="font-serif text-3xl sm:text-4xl gradient-text">0</div>
-        <div class="text-[13px] text-[#E4F2FF]/35 mt-1">Hospitals</div>
+        <div class="text-[13px] text-[var(--text3)] mt-1">Hospitals</div>
       </div>
       <div>
         <div id="stat-rating" class="font-serif text-3xl sm:text-4xl gradient-text">0.0★</div>
-        <div class="text-[13px] text-[#E4F2FF]/35 mt-1">Average Rating</div>
+        <div class="text-[13px] text-[var(--text3)] mt-1">Average Rating</div>
       </div>
     </div>
   </section>
@@ -186,7 +186,7 @@
     <div class="max-w-7xl mx-auto px-4 sm:px-6">
       <div class="text-center mb-8 sm:mb-14">
         <h2 class="font-serif text-2xl sm:text-4xl lg:text-[44px] mb-3.5">Everything in one platform</h2>
-        <p class="text-[#E4F2FF]/60 text-base max-w-lg mx-auto">Built specifically for African healthcare — low-bandwidth, mobile-first, multilingual.</p>
+        <p class="text-[var(--text3)] text-base max-w-lg mx-auto">Built specifically for African healthcare — low-bandwidth, mobile-first, multilingual.</p>
       </div>
       <div class="grid sm:grid-cols-2 lg:grid-cols-3 gap-5">
         <!-- Feature cards with clear image headers -->
@@ -197,7 +197,7 @@
           <div class="p-5 pb-6">
             <div class="w-[42px] h-[42px] rounded-[10px] flex items-center justify-center text-[#4ED8B9] mb-3.5" style="background:rgba(78,216,185,.1)">🤖</div>
             <h3 class="font-bold text-[16px] mb-2">AI Symptom Analysis</h3>
-            <p class="text-[13.5px] text-[#E4F2FF]/60 leading-relaxed">Instant insights with risk assessment and actionable next steps. ICD-10 mapped conditions.</p>
+            <p class="text-[13.5px] text-[var(--text3)] leading-relaxed">Instant insights with risk assessment and actionable next steps. ICD-10 mapped conditions.</p>
           </div>
         </div>
 
@@ -208,7 +208,7 @@
           <div class="p-5 pb-6">
             <div class="w-[42px] h-[42px] rounded-[10px] flex items-center justify-center text-[#85CBEE] mb-3.5" style="background:rgba(133,203,238,.1)">📹</div>
             <h3 class="font-bold text-[16px] mb-2">Video Consultations</h3>
-            <p class="text-[13.5px] text-[#E4F2FF]/60 leading-relaxed">Connect face-to-face with verified African doctors in your language. Works on 2G/3G.</p>
+            <p class="text-[13.5px] text-[var(--text3)] leading-relaxed">Connect face-to-face with verified African doctors in your language. Works on 2G/3G.</p>
           </div>
         </div>
 
@@ -219,7 +219,7 @@
           <div class="p-5 pb-6">
             <div class="w-[42px] h-[42px] rounded-[10px] flex items-center justify-center text-[#6ED8AA] mb-3.5" style="background:rgba(110,216,170,.1)">📋</div>
             <h3 class="font-bold text-[16px] mb-2">Digital Medical Records</h3>
-            <p class="text-[13.5px] text-[#E4F2FF]/60 leading-relaxed">Encrypted, accessible health history from any device, anywhere.</p>
+            <p class="text-[13.5px] text-[var(--text3)] leading-relaxed">Encrypted, accessible health history from any device, anywhere.</p>
           </div>
         </div>
 
@@ -230,7 +230,7 @@
           <div class="p-5 pb-6">
             <div class="w-[42px] h-[42px] rounded-[10px] flex items-center justify-center text-[#83D6E8] mb-3.5" style="background:rgba(131,214,232,.1)">🔒</div>
             <h3 class="font-bold text-[16px] mb-2">HIPAA-Grade Security</h3>
-            <p class="text-[13.5px] text-[#E4F2FF]/60 leading-relaxed">AES-256 encryption, full audit logs, and strict access controls.</p>
+            <p class="text-[13.5px] text-[var(--text3)] leading-relaxed">AES-256 encryption, full audit logs, and strict access controls.</p>
           </div>
         </div>
 
@@ -241,7 +241,7 @@
           <div class="p-5 pb-6">
             <div class="w-[42px] h-[42px] rounded-[10px] flex items-center justify-center text-[#4ED8B9] mb-3.5" style="background:rgba(78,216,185,.1)">📱</div>
             <h3 class="font-bold text-[16px] mb-2">Mobile-First Access</h3>
-            <p class="text-[13.5px] text-[#E4F2FF]/60 leading-relaxed">Fast, reliable care journeys tuned for low-bandwidth connections and older devices.</p>
+            <p class="text-[13.5px] text-[var(--text3)] leading-relaxed">Fast, reliable care journeys tuned for low-bandwidth connections and older devices.</p>
           </div>
         </div>
 
@@ -250,9 +250,9 @@
             <img src="https://images.unsplash.com/photo-1584308666744-24d5c474f2ae?w=600&h=120&fit=crop&q=60" alt="" class="w-full h-full object-cover opacity-95 block" onerror="this.style.display='none'" loading="lazy"/>
           </div>
           <div class="p-5 pb-6">
-            <div class="w-[42px] h-[42px] rounded-[10px] flex items-center justify-center text-[#66BFE0] mb-3.5" style="background:rgba(102,191,224,.1)">💊</div>
+            <div class="w-[42px] h-[42px] rounded-[10px] flex items-center justify-center text-[var(--green)] mb-3.5" style="background:rgba(22,163,74,.1)">💊</div>
             <h3 class="font-bold text-[16px] mb-2">E-Prescriptions</h3>
-            <p class="text-[13.5px] text-[#E4F2FF]/60 leading-relaxed">Doctors issue prescriptions directly to you and local pharmacies after consultation.</p>
+            <p class="text-[13.5px] text-[var(--text3)] leading-relaxed">Doctors issue prescriptions directly to you and local pharmacies after consultation.</p>
           </div>
         </div>
       </div>
@@ -266,7 +266,7 @@
         <!-- Steps -->
         <div>
           <h2 class="font-serif text-3xl sm:text-4xl lg:text-[44px] mb-3">How HealthConnect Works</h2>
-          <p class="text-[#E4F2FF]/60 text-base mb-12 leading-relaxed">From symptom to solution in under 5 minutes.</p>
+          <p class="text-[var(--text3)] text-base mb-12 leading-relaxed">From symptom to solution in under 5 minutes.</p>
 
           <div class="space-y-7">
             <div class="flex gap-[18px] items-start">
@@ -274,9 +274,9 @@
                 <svg class="w-[18px] h-[18px]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>
               </div>
               <div class="pt-0.5">
-                <div class="text-[10px] text-[#E4F2FF]/35 font-bold tracking-[2px] mb-1">01</div>
+                <div class="text-[10px] text-[var(--text3)] font-bold tracking-[2px] mb-1">01</div>
                 <div class="font-semibold text-[15px] mb-1">Enter Symptoms</div>
-                <div class="text-[13.5px] text-[#E4F2FF]/60 leading-relaxed">Select or describe your symptoms in plain language.</div>
+                <div class="text-[13.5px] text-[var(--text3)] leading-relaxed">Select or describe your symptoms in plain language.</div>
               </div>
             </div>
             <div class="flex gap-[18px] items-start">
@@ -284,9 +284,9 @@
                 <svg class="w-[18px] h-[18px]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
               </div>
               <div class="pt-0.5">
-                <div class="text-[10px] text-[#E4F2FF]/35 font-bold tracking-[2px] mb-1">02</div>
+                <div class="text-[10px] text-[var(--text3)] font-bold tracking-[2px] mb-1">02</div>
                 <div class="font-semibold text-[15px] mb-1">AI Analyzes</div>
-                <div class="text-[13.5px] text-[#E4F2FF]/60 leading-relaxed">AI cross-references ICD-10 databases with African disease patterns in seconds.</div>
+                <div class="text-[13.5px] text-[var(--text3)] leading-relaxed">AI cross-references ICD-10 databases with African disease patterns in seconds.</div>
               </div>
             </div>
             <div class="flex gap-[18px] items-start">
@@ -294,9 +294,9 @@
                 <svg class="w-[18px] h-[18px]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
               </div>
               <div class="pt-0.5">
-                <div class="text-[10px] text-[#E4F2FF]/35 font-bold tracking-[2px] mb-1">03</div>
+                <div class="text-[10px] text-[var(--text3)] font-bold tracking-[2px] mb-1">03</div>
                 <div class="font-semibold text-[15px] mb-1">Get Your Report</div>
-                <div class="text-[13.5px] text-[#E4F2FF]/60 leading-relaxed">Risk level, conditions, and recommended next steps.</div>
+                <div class="text-[13.5px] text-[var(--text3)] leading-relaxed">Risk level, conditions, and recommended next steps.</div>
               </div>
             </div>
             <div class="flex gap-[18px] items-start">
@@ -304,9 +304,9 @@
                 <svg class="w-[18px] h-[18px]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z"/></svg>
               </div>
               <div class="pt-0.5">
-                <div class="text-[10px] text-[#E4F2FF]/35 font-bold tracking-[2px] mb-1">04</div>
+                <div class="text-[10px] text-[var(--text3)] font-bold tracking-[2px] mb-1">04</div>
                 <div class="font-semibold text-[15px] mb-1">Book a Doctor</div>
-                <div class="text-[13.5px] text-[#E4F2FF]/60 leading-relaxed">Connect with a verified specialist instantly via video, chat, or phone.</div>
+                <div class="text-[13.5px] text-[var(--text3)] leading-relaxed">Connect with a verified specialist instantly via video, chat, or phone.</div>
               </div>
             </div>
           </div>
@@ -318,13 +318,13 @@
             alt="Doctor using technology" class="w-full h-full object-cover block" onerror="this.style.display='none'" loading="lazy"/>
           <div class="absolute inset-0" style="background:linear-gradient(0deg,rgba(13,78,78,.7) 0%,transparent 50%)"></div>
           <!-- Overlay card -->
-          <div class="absolute bottom-6 left-6 right-6 flex items-center gap-3 p-3.5 px-[18px] rounded-[14px]" style="background:rgba(9,18,35,.88);backdrop-filter:blur(14px);border:1px solid rgba(78,216,185,.18)">
+          <div class="absolute bottom-6 left-6 right-6 flex items-center gap-3 p-3.5 px-[18px] rounded-[14px]" style="background:rgba(255,255,255,.92);backdrop-filter:blur(14px);border:1px solid rgba(22,163,74,.18)">
             <div class="w-[38px] h-[38px] rounded-[10px] flex items-center justify-center flex-shrink-0" style="background:rgba(110,216,170,.14);border:1px solid rgba(110,216,170,.25)">
               <span class="text-[#6ED8AA] text-lg">✓</span>
             </div>
             <div>
               <div class="font-bold text-sm">Available 24 / 7</div>
-              <div class="text-[12px] text-[#E4F2FF]/35">Doctors across 15 African countries</div>
+              <div class="text-[12px] text-[var(--text3)]">Doctors across 15 African countries</div>
             </div>
           </div>
         </div>
@@ -361,11 +361,11 @@
             <div class="w-8 h-8 rounded-lg bg-[#4ED8B9] flex items-center justify-center text-white">🏥</div>
             <span class="font-bold text-lg">HealthConnect</span>
           </div>
-          <p class="text-sm text-[#E4F2FF]/35 leading-relaxed">AI-powered telemedicine platform built for Africa's healthcare future.</p>
+          <p class="text-sm text-[var(--text3)] leading-relaxed">AI-powered telemedicine platform built for Africa's healthcare future.</p>
         </div>
         <div>
           <div class="font-semibold text-sm mb-4">Platform</div>
-          <div class="space-y-2.5 text-sm text-[#E4F2FF]/50">
+          <div class="space-y-2.5 text-sm text-[var(--text3)]">
             <div><a href="/pages/auth/register.html" class="hover:text-[#4ED8B9] transition-colors">Symptom Checker</a></div>
             <div><a href="/pages/auth/register.html" class="hover:text-[#4ED8B9] transition-colors">Find Doctors</a></div>
             <div><a href="/pages/auth/register.html" class="hover:text-[#4ED8B9] transition-colors">Book Appointment</a></div>
@@ -373,21 +373,21 @@
         </div>
         <div>
           <div class="font-semibold text-sm mb-4">For Doctors</div>
-          <div class="space-y-2.5 text-sm text-[#E4F2FF]/50">
+          <div class="space-y-2.5 text-sm text-[var(--text3)]">
             <div><a href="/pages/auth/register.html?role=doctor" class="hover:text-[#4ED8B9] transition-colors">Join as Doctor</a></div>
             <div><a href="#" class="hover:text-[#4ED8B9] transition-colors">Doctor Portal</a></div>
           </div>
         </div>
         <div>
           <div class="font-semibold text-sm mb-4">Legal</div>
-          <div class="space-y-2.5 text-sm text-[#E4F2FF]/50">
+          <div class="space-y-2.5 text-sm text-[var(--text3)]">
             <div><a href="/pages/legal/privacy-policy.html" class="hover:text-[#4ED8B9] transition-colors">Privacy Policy</a></div>
             <div><a href="/pages/legal/terms-and-conditions.html" class="hover:text-[#4ED8B9] transition-colors">Terms of Service</a></div>
             <div><a href="/pages/legal/medical-disclaimer.html" class="hover:text-[#4ED8B9] transition-colors">Medical Disclaimer</a></div>
           </div>
         </div>
       </div>
-      <div class="border-t pt-8 flex flex-col sm:flex-row items-center justify-between gap-4 text-sm text-[#E4F2FF]/35" style="border-color:var(--border)">
+      <div class="border-t pt-8 flex flex-col sm:flex-row items-center justify-between gap-4 text-sm text-[var(--text3)]" style="border-color:var(--border)">
         <span>© 2026 HealthConnect. All rights reserved.</span>
         <span>⚕️ Not a substitute for professional medical advice</span>
       </div>
@@ -399,11 +399,11 @@
     const navbar = document.getElementById('navbar');
     window.addEventListener('scroll', () => {
       if (window.scrollY > 50) {
-        navbar.style.background = 'rgba(33,74,80,.95)';
-        navbar.style.boxShadow = '0 4px 30px rgba(0,0,0,.4)';
+        navbar.style.background = 'rgba(255,255,255,.98)';
+        navbar.style.boxShadow = '0 8px 24px rgba(22,163,74,.1)';
         navbar.style.padding = '0.5rem 0';
       } else {
-        navbar.style.background = 'rgba(33,74,80,.88)';
+        navbar.style.background = 'rgba(255,255,255,.92)';
         navbar.style.boxShadow = 'none';
         navbar.style.padding = '1rem 0';
       }
