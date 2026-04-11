@@ -6,8 +6,8 @@
   "scope": "/",
   "display": "standalone",
   "orientation": "portrait-primary",
-  "theme_color": "#22D3EE",
-  "background_color": "#070E1C",
+  "theme_color": "#4ED8B9",
+  "background_color": "#2B555F",
   "lang": "en",
   "categories": ["health", "medical", "telemedicine"],
   "icons": [

@@ -248,12 +248,12 @@
     var urgencyLevel = (analysis.urgencyLevel || 'MEDIUM').toUpperCase();
     var urgencyMap = {
       LOW: {
-        icon: '✅', color: '#34D399', bg: 'rgba(16,185,129,.08)', border: 'rgba(16,185,129,.2)',
+        icon: '✅', color: '#4ECFB2', bg: 'rgba(110,216,170,.08)', border: 'rgba(110,216,170,.2)',
         label: 'Self-care likely okay',
         helper: 'Monitor symptoms and use home care. Reach out to a doctor if things worsen.',
       },
       MEDIUM: {
-        icon: '🩺', color: '#FBBF24', bg: 'rgba(245,158,11,.08)', border: 'rgba(245,158,11,.2)',
+        icon: '🩺', color: '#A5E2F6', bg: 'rgba(133,203,238,.08)', border: 'rgba(133,203,238,.2)',
         label: 'Plan a doctor review soon',
         helper: 'A routine consultation is recommended to be safe and get personalized treatment.',
       },
@@ -398,7 +398,7 @@
         + '  </div>'
         + '  <div class="text-right flex-shrink-0">'
         + '    <div class="flex items-center gap-1">'
-        + '      <span style="color:#FBBF24">⭐</span>'
+        + '      <span style="color:#A5E2F6">⭐</span>'
         + '      <span class="text-sm font-bold" style="color:var(--text1)">' + (doc.rating ? parseFloat(doc.rating).toFixed(1) : 'New') + '</span>'
         + '    </div>'
         + '    <p class="text-xs mt-1" style="color:var(--text3)">' + (doc.consultation_fee ? '$' + parseFloat(doc.consultation_fee).toFixed(0) : 'Free') + '</p>'

@@ -6,7 +6,7 @@
   <title>Doctor Dashboard — HealthConnect</title>
   <link rel="stylesheet" href="/css/main.css">
   <script src="https://cdn.tailwindcss.com"></script>
-  <script>tailwind.config={theme:{extend:{colors:{primary:{DEFAULT:'#22D3EE',dark:'#0891B2'},secondary:{DEFAULT:'#10B981'}},fontFamily:{sans:['Plus Jakarta Sans','Inter','system-ui','sans-serif'],serif:['Instrument Serif','Georgia','serif']}}}}</script>
+  <script>tailwind.config={theme:{extend:{colors:{primary:{DEFAULT:'#4ED8B9',dark:'#66BFE0'},secondary:{DEFAULT:'#6ED8AA'}},fontFamily:{sans:['Plus Jakarta Sans','Inter','system-ui','sans-serif'],serif:['Instrument Serif','Georgia','serif']}}}}</script>
 </head>
 <body class="min-h-screen" style="background:var(--bg);color:var(--text)">
 
@@ -14,10 +14,10 @@
   <div id="sidebar-overlay" class="fixed inset-0 bg-black/40 backdrop-blur-sm z-20 lg:hidden hidden" onclick="toggleSidebar()"></div>
 
   <!-- Sidebar -->
-  <aside id="sidebar" class="fixed left-0 top-0 h-full w-[220px] z-30 -translate-x-full lg:translate-x-0 transition-transform duration-300 flex flex-col" style="background:var(--surface2);border-right:1px solid rgba(34,211,238,.1)">
+  <aside id="sidebar" class="fixed left-0 top-0 h-full w-[220px] z-30 -translate-x-full lg:translate-x-0 transition-transform duration-300 flex flex-col" style="background:var(--surface2);border-right:1px solid rgba(78,216,185,.1)">
     <div class="p-5 pb-3" style="border-bottom:1px solid var(--border)">
       <a href="/" class="flex items-center gap-2 font-bold text-lg">
-        <div class="w-8 h-8 rounded-[10px] bg-[#22D3EE] flex items-center justify-center text-white text-sm">🏥</div>
+        <div class="w-8 h-8 rounded-[10px] bg-[#4ED8B9] flex items-center justify-center text-white text-sm">🏥</div>
         <span class="font-serif text-[18px]">HealthConnect</span>
       </a>
       <div class="text-[11px] mt-1" style="color:var(--text3)">Doctor Portal</div>
@@ -48,7 +48,7 @@
   <!-- Main Content -->
   <main class="lg:ml-[220px] min-h-screen">
     <!-- Top Bar -->
-    <div class="px-4 sm:px-6 py-4 flex items-center gap-4 sticky top-0 z-10" style="background:rgba(7,14,28,.88);backdrop-filter:blur(20px);border-bottom:1px solid rgba(34,211,238,.08)">
+    <div class="px-4 sm:px-6 py-4 flex items-center gap-4 sticky top-0 z-10" style="background:rgba(33,74,80,.88);backdrop-filter:blur(20px);border-bottom:1px solid rgba(78,216,185,.08)">
       <button class="lg:hidden text-xl" style="color:var(--text2)" onclick="toggleSidebar()">☰</button>
       <div>
         <h1 class="font-bold font-serif">Good morning, <span id="header-name">Doctor</span> 👋</h1>
@@ -72,19 +72,19 @@
       <div id="view-dashboard">
         <!-- Stats -->
         <div class="animate-fade-up grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3.5 mb-5">
-          <div class="rounded-2xl p-5" style="background:var(--surface2);border:1px solid rgba(34,211,238,.1)">
+          <div class="rounded-2xl p-5" style="background:var(--surface2);border:1px solid rgba(78,216,185,.1)">
             <div class="text-2xl font-extrabold" style="color:var(--cyan)" id="stat-today">0</div>
             <div class="text-[11px] mt-1" style="color:var(--text3)">Today's Appointments</div>
           </div>
-          <div class="rounded-2xl p-5" style="background:var(--surface2);border:1px solid rgba(34,211,238,.1)">
+          <div class="rounded-2xl p-5" style="background:var(--surface2);border:1px solid rgba(78,216,185,.1)">
             <div class="text-2xl font-extrabold" style="color:var(--green)" id="stat-pending">0</div>
             <div class="text-[11px] mt-1" style="color:var(--text3)">Pending Requests</div>
           </div>
-          <div class="rounded-2xl p-5" style="background:var(--surface2);border:1px solid rgba(34,211,238,.1)">
+          <div class="rounded-2xl p-5" style="background:var(--surface2);border:1px solid rgba(78,216,185,.1)">
             <div class="text-2xl font-extrabold" style="color:var(--gold)" id="stat-rating">—</div>
             <div class="text-[11px] mt-1" style="color:var(--text3)">Average Rating</div>
           </div>
-          <div class="rounded-2xl p-5" style="background:var(--surface2);border:1px solid rgba(34,211,238,.1)">
+          <div class="rounded-2xl p-5" style="background:var(--surface2);border:1px solid rgba(78,216,185,.1)">
             <div class="text-2xl font-extrabold" style="color:var(--purple)" id="stat-total">0</div>
             <div class="text-[11px] mt-1" style="color:var(--text3)">Total Patients</div>
           </div>
@@ -92,7 +92,7 @@
 
         <div class="animate-fade-up-1 grid lg:grid-cols-2 gap-5">
           <!-- Today's Appointments -->
-          <div class="rounded-[18px] p-5" style="background:var(--surface2);border:1px solid rgba(34,211,238,.1)">
+          <div class="rounded-[18px] p-5" style="background:var(--surface2);border:1px solid rgba(78,216,185,.1)">
             <div class="flex items-center justify-between mb-4">
               <h2 class="font-bold">Today's Schedule</h2>
               <a href="/pages/doctor/schedule.html" class="text-xs hover:underline" style="color:var(--cyan)">Manage</a>
@@ -104,7 +104,7 @@
           </div>
 
           <!-- Pending Appointments -->
-          <div class="rounded-[18px] p-5" style="background:var(--surface2);border:1px solid rgba(34,211,238,.1)">
+          <div class="rounded-[18px] p-5" style="background:var(--surface2);border:1px solid rgba(78,216,185,.1)">
             <h2 class="font-bold mb-4">Pending Requests</h2>
             <div id="pending-appointments" class="space-y-3">
               <div class="animate-pulse h-16 rounded-xl" style="background:var(--bg2)"></div>
@@ -113,7 +113,7 @@
         </div>
 
         <!-- Recent Prescriptions preview -->
-        <div class="animate-fade-up-2 rounded-[18px] p-5 mt-5" style="background:var(--surface2);border:1px solid rgba(34,211,238,.1)">
+        <div class="animate-fade-up-2 rounded-[18px] p-5 mt-5" style="background:var(--surface2);border:1px solid rgba(78,216,185,.1)">
           <div class="flex items-center justify-between mb-4">
             <h2 class="font-bold">Recent Prescriptions</h2>
             <a href="#" onclick="showTab('prescriptions');return false" class="text-xs hover:underline" style="color:var(--cyan)">View all →</a>

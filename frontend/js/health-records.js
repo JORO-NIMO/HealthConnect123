@@ -7,17 +7,17 @@
 
   const TYPE_META = {
     diagnosis:    { icon: '🩺', label: 'Diagnosis',    color: '#F87171', bg: 'rgba(239,68,68,.1)' },
-    condition:    { icon: '💊', label: 'Condition',    color: '#FBBF24', bg: 'rgba(245,158,11,.1)' },
+    condition:    { icon: '💊', label: 'Condition',    color: '#A5E2F6', bg: 'rgba(133,203,238,.1)' },
     procedure:    { icon: '🏥', label: 'Procedure',    color: '#818CF8', bg: 'rgba(129,140,248,.1)' },
-    lab_result:   { icon: '🔬', label: 'Lab Result',   color: '#34D399', bg: 'rgba(16,185,129,.1)' },
-    immunization: { icon: '💉', label: 'Immunization', color: '#22D3EE', bg: 'rgba(34,211,238,.1)' },
+    lab_result:   { icon: '🔬', label: 'Lab Result',   color: '#4ECFB2', bg: 'rgba(110,216,170,.1)' },
+    immunization: { icon: '💉', label: 'Immunization', color: '#4ED8B9', bg: 'rgba(78,216,185,.1)' },
     allergy:      { icon: '⚠️', label: 'Allergy',      color: '#FB923C', bg: 'rgba(251,146,60,.1)' },
     note:         { icon: '📝', label: 'Note',         color: '#94A3B8', bg: 'rgba(148,163,184,.1)' },
   };
 
   const SEVERITY_COLORS = {
-    mild:     '#34D399',
-    moderate: '#FBBF24',
+    mild:     '#4ECFB2',
+    moderate: '#A5E2F6',
     severe:   '#F87171',
     critical: '#EF4444',
   };
@@ -137,11 +137,11 @@
           <div class="text-xs mt-1" style="color:var(--text3)">Diagnoses</div>
         </div>
         <div class="rounded-xl p-4" style="background:var(--surface2);border:1px solid var(--border)">
-          <div class="text-2xl font-bold" style="color:#FBBF24">${activeConditions.length}</div>
+          <div class="text-2xl font-bold" style="color:#A5E2F6">${activeConditions.length}</div>
           <div class="text-xs mt-1" style="color:var(--text3)">Active Conditions</div>
         </div>
         <div class="rounded-xl p-4" style="background:var(--surface2);border:1px solid var(--border)">
-          <div class="text-2xl font-bold" style="color:#34D399">${countMap.lab_result || 0}</div>
+          <div class="text-2xl font-bold" style="color:#4ECFB2">${countMap.lab_result || 0}</div>
           <div class="text-xs mt-1" style="color:var(--text3)">Lab Results</div>
         </div>
       `;

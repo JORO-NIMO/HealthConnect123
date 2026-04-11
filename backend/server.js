@@ -243,18 +243,20 @@ io.on('connection', (socket) => {
 });
 
 // ─── Start Server ──────────────────────────────────────────────────────────
-const PORT = process.env.PORT || 5000;
+const DEFAULT_PORT = Number(process.env.PORT) || 5000;
+const MAX_PORT_RETRIES = 5;
 
 // ─── Startup Diagnostics ───────────────────────────────────────────────────
-function logEnvDiagnostics() {
+function logEnvDiagnostics(activePort) {
   const vars = {
     'NODE_ENV'       : process.env.NODE_ENV,
-    'PORT'           : process.env.PORT,
+    'PORT'           : process.env.PORT || '(not set, defaults to 5000)',
+    'ACTIVE_PORT'    : activePort,
     'MYSQL_URL'      : process.env.MYSQL_URL      ? '✅ SET' : '❌ NOT SET',
     'DATABASE_URL'   : process.env.DATABASE_URL    ? '✅ SET' : '❌ NOT SET',
     'DB_HOST'        : process.env.DB_HOST         || '(not set, defaults to localhost)',
     'JWT_SECRET'     : process.env.JWT_SECRET      ? '✅ SET' : '❌ NOT SET — auth will fail!',
-    'JWT_REFRESH_SECRET': process.env.JWT_REFRESH_SECRET ? '✅ SET' : '❌ NOT SET',
+      'JWT_REFRESH_SECRET': process.env.JWT_REFRESH_SECRET ? '✅ SET' : '❌ NOT SET',
     'ENCRYPTION_KEY' : process.env.ENCRYPTION_KEY  ? '✅ SET' : '⚠️  NOT SET',
     'AI_PROVIDER'    : process.env.AI_PROVIDER     || '(defaults to huggingface)',
     'HF_TOKEN'       : process.env.HF_TOKEN        ? '✅ SET' : '❌ NOT SET — AI disabled',
@@ -272,7 +274,7 @@ function logEnvDiagnostics() {
 
   // Warn about critical missing vars
   if (!process.env.MYSQL_URL && !process.env.DATABASE_URL && !process.env.DB_HOST) {
-    logger.error('🚨 No database connection configured! Set MYSQL_URL (Railway plugin) or DB_HOST/DB_USER/DB_PASSWORD/DB_NAME');
+    logger.error('🚨 No database connection configured! Set MYSQL_URL (Railway plugin) or DB_HOST + DB_USER/DB_USERNAME + DB_PASSWORD/DB_PASS + DB_NAME/DB_DATABASE');
   }
   if (!process.env.JWT_SECRET) {
     logger.error('🚨 JWT_SECRET is not set — all authenticated API requests will fail with 401!');
@@ -282,19 +284,54 @@ function logEnvDiagnostics() {
   }
 }
 
+function listenOnPort(port) {
+  return new Promise((resolve, reject) => {
+    const onError = (err) => {
+      httpServer.off('listening', onListening);
+      reject(err);
+    };
+
+    const onListening = () => {
+      httpServer.off('error', onError);
+      resolve(port);
+    };
+
+    httpServer.once('error', onError);
+    httpServer.once('listening', onListening);
+    httpServer.listen(port, '0.0.0.0');
+  });
+}
+
+async function bindServerPort(startPort, maxRetries) {
+  let port = startPort;
+
+  for (let attempt = 1; attempt <= maxRetries; attempt += 1) {
+    try {
+      return await listenOnPort(port);
+    } catch (err) {
+      if (err.code !== 'EADDRINUSE' || attempt === maxRetries) {
+        throw err;
+      }
+
+      logger.warn(`⚠️  Port ${port} is in use. Retrying on ${port + 1}...`);
+      port += 1;
+    }
+  }
+
+  throw new Error(`Could not bind to any port in range ${startPort}-${startPort + maxRetries - 1}`);
+}
+
 async function startServer() {
   // Bind to port FIRST — Railway health checks must get a response immediately.
   // DB init happens after, so a slow/misconfigured DB never causes a 502.
-  await new Promise((resolve, reject) => {
-    httpServer.listen(PORT, '0.0.0.0', () => {
-      logger.info(`🚀 HealthConnect API running on port ${PORT}`);
-      logger.info(`🌍 Environment : ${process.env.NODE_ENV || 'development'}`);
-      logger.info(`📡 Frontend    : auto-detected from request origin`);
-      logEnvDiagnostics();
-      resolve();
-    });
-    httpServer.on('error', reject);
-  });
+  const activePort = await bindServerPort(DEFAULT_PORT, MAX_PORT_RETRIES);
+  logger.info(`🚀 HealthConnect API running on port ${activePort}`);
+  if (activePort !== DEFAULT_PORT) {
+    logger.warn(`⚠️  Requested port ${DEFAULT_PORT} unavailable, using ${activePort} instead.`);
+  }
+  logger.info(`🌍 Environment : ${process.env.NODE_ENV || 'development'}`);
+  logger.info(`📡 Frontend    : auto-detected from request origin`);
+  logEnvDiagnostics(activePort);
 
   // Now connect to DB in the background — server stays up even if DB is slow.
   try {

@@ -41,7 +41,7 @@
         c.style.background = 'transparent';
       });
       card.style.borderColor = 'var(--cyan)';
-      card.style.background = 'rgba(34,211,238,.06)';
+      card.style.background = 'rgba(78,216,185,.06)';
     });
   });
 

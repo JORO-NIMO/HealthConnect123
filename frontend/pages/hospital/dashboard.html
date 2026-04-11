@@ -6,7 +6,7 @@
   <title>Hospital Dashboard — HealthConnect</title>
   <link rel="stylesheet" href="/css/main.css">
   <script src="https://cdn.tailwindcss.com"></script>
-  <script>tailwind.config={theme:{extend:{colors:{primary:{DEFAULT:'#22D3EE',dark:'#0891B2'},secondary:{DEFAULT:'#10B981'}},fontFamily:{sans:['Plus Jakarta Sans','Inter','system-ui','sans-serif'],serif:['Instrument Serif','Georgia','serif']}}}}</script>
+  <script>tailwind.config={theme:{extend:{colors:{primary:{DEFAULT:'#4ED8B9',dark:'#66BFE0'},secondary:{DEFAULT:'#6ED8AA'}},fontFamily:{sans:['Plus Jakarta Sans','Inter','system-ui','sans-serif'],serif:['Instrument Serif','Georgia','serif']}}}}</script>
 </head>
 <body class="min-h-screen" style="background:var(--bg);color:var(--text)">
 
@@ -14,10 +14,10 @@
   <div id="sidebar-overlay" class="fixed inset-0 bg-black/40 backdrop-blur-sm z-20 lg:hidden hidden" onclick="toggleSidebar()"></div>
 
   <!-- Sidebar -->
-  <aside id="sidebar" class="fixed left-0 top-0 h-full w-[220px] max-w-[80vw] z-30 -translate-x-full lg:translate-x-0 transition-transform duration-300 flex flex-col" style="background:var(--surface2);border-right:1px solid rgba(34,211,238,.1)">
+  <aside id="sidebar" class="fixed left-0 top-0 h-full w-[220px] max-w-[80vw] z-30 -translate-x-full lg:translate-x-0 transition-transform duration-300 flex flex-col" style="background:var(--surface2);border-right:1px solid rgba(78,216,185,.1)">
     <div class="p-5 pb-3" style="border-bottom:1px solid var(--border)">
       <a href="/" class="flex items-center gap-2 font-bold text-lg">
-        <div class="w-8 h-8 rounded-[10px] bg-[#22D3EE] flex items-center justify-center text-white text-sm">🏥</div>
+        <div class="w-8 h-8 rounded-[10px] bg-[#4ED8B9] flex items-center justify-center text-white text-sm">🏥</div>
         <span class="font-serif text-[18px]">HealthConnect</span>
       </a>
       <div class="text-[11px] mt-1" style="color:var(--text3)">Hospital Portal</div>
@@ -46,7 +46,7 @@
   <!-- Main Content -->
   <main class="lg:ml-[220px] min-h-screen">
     <!-- Top Bar -->
-    <div class="px-4 sm:px-6 py-4 flex items-center gap-4 sticky top-0 z-10" style="background:rgba(7,14,28,.88);backdrop-filter:blur(20px);border-bottom:1px solid rgba(34,211,238,.08)">
+    <div class="px-4 sm:px-6 py-4 flex items-center gap-4 sticky top-0 z-10" style="background:rgba(33,74,80,.88);backdrop-filter:blur(20px);border-bottom:1px solid rgba(78,216,185,.08)">
       <button class="lg:hidden text-xl" style="color:var(--text2)" onclick="toggleSidebar()">☰</button>
       <div>
         <h1 class="font-bold font-serif">Hospital Dashboard</h1>
@@ -291,7 +291,7 @@
           <label class="text-xs font-semibold block mb-1" style="color:var(--text3)">Patient (search by name or ID) *</label>
           <input type="text" id="test-patient-search" placeholder="Type patient name or ID..." class="w-full px-3 py-2 rounded-lg text-sm" style="background:var(--surface1);border:1px solid var(--border);color:var(--text1)">
           <div id="test-patient-search-results" class="mt-2 max-h-44 overflow-y-auto space-y-1"></div>
-          <div id="test-selected-patient" class="hidden mt-2 text-xs px-3 py-2 rounded-lg" style="background:rgba(34,211,238,.08);border:1px solid rgba(34,211,238,.18);color:var(--cyan)"></div>
+          <div id="test-selected-patient" class="hidden mt-2 text-xs px-3 py-2 rounded-lg" style="background:rgba(78,216,185,.08);border:1px solid rgba(78,216,185,.18);color:var(--cyan)"></div>
           <input type="hidden" id="test-patient-id" required>
         </div>
         <div>

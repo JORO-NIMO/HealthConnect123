@@ -7,14 +7,14 @@
   <link rel="manifest" href="/manifest.json">
   <link rel="stylesheet" href="/css/main.css">
   <script src="https://cdn.tailwindcss.com"></script>
-  <script>tailwind.config={theme:{extend:{colors:{primary:{DEFAULT:'#22D3EE',dark:'#0891B2'},secondary:{DEFAULT:'#10B981'}},fontFamily:{sans:['Plus Jakarta Sans','Inter','system-ui','sans-serif'],serif:['Instrument Serif','Georgia','serif']}}}}</script>
+  <script>tailwind.config={theme:{extend:{colors:{primary:{DEFAULT:'#4ED8B9',dark:'#66BFE0'},secondary:{DEFAULT:'#6ED8AA'}},fontFamily:{sans:['Plus Jakarta Sans','Inter','system-ui','sans-serif'],serif:['Instrument Serif','Georgia','serif']}}}}</script>
   <style>
     .step-indicator{width:2.25rem;height:2.25rem;border-radius:9999px;display:flex;align-items:center;justify-content:center;font-size:.8rem;font-weight:700;background:var(--surface2);color:var(--text3);border:1.5px solid var(--border);transition:all .25s}
-    .step-indicator.active{background:var(--cyan);color:#fff;border-color:var(--cyan);box-shadow:0 0 14px rgba(34,211,238,.35)}
+    .step-indicator.active{background:var(--cyan);color:#fff;border-color:var(--cyan);box-shadow:0 0 14px rgba(78,216,185,.35)}
     .step-indicator.done{background:var(--green);color:#fff;border-color:var(--green)}
 
     .condition-card{padding:1.15rem;background:var(--bg2);border-radius:.85rem;border:1px solid var(--border);transition:border-color .2s}
-    .condition-card:hover{border-color:rgba(34,211,238,.4)}
+    .condition-card:hover{border-color:rgba(78,216,185,.4)}
 
     .symptom-chip{
       display:inline-flex;align-items:center;gap:.35rem;
@@ -22,14 +22,14 @@
       border:1.5px solid var(--border);background:var(--surface2);color:var(--text2);
       cursor:pointer;user-select:none;transition:all .18s ease;
     }
-    .symptom-chip:hover{border-color:var(--cyan);color:var(--cyan);background:rgba(34,211,238,.06)}
+    .symptom-chip:hover{border-color:var(--cyan);color:var(--cyan);background:rgba(78,216,185,.06)}
     .symptom-chip.active{background:var(--cyan);color:#fff;border-color:var(--cyan)}
-    .symptom-chip.active:hover{background:#0891B2}
+    .symptom-chip.active:hover{background:#66BFE0}
 
     .selected-pill{
       display:inline-flex;align-items:center;gap:.35rem;
       padding:.35rem .75rem;border-radius:9999px;font-size:.8125rem;font-weight:500;
-      background:rgba(34,211,238,.12);color:var(--cyan);
+      background:rgba(78,216,185,.12);color:var(--cyan);
     }
     .selected-pill button{font-size:1rem;line-height:1;color:var(--cyan);opacity:.7;transition:all .15s}
     .selected-pill button:hover{opacity:1;color:var(--red)}
@@ -44,7 +44,7 @@
       outline:none;transition:border-color .2s;
     }
     .input-dark::placeholder{color:var(--text3)}
-    .input-dark:focus{border-color:var(--cyan);box-shadow:0 0 0 3px rgba(34,211,238,.12)}
+    .input-dark:focus{border-color:var(--cyan);box-shadow:0 0 0 3px rgba(78,216,185,.12)}
 
     select.input-dark{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%2394A3B8' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 1rem center}
   </style>
@@ -52,13 +52,13 @@
 <body class="min-h-screen" style="background:var(--bg);color:var(--text)">
 
   <!-- Top nav -->
-  <header class="px-4 sm:px-6 py-4 flex items-center gap-4 sticky top-0 z-10" style="background:rgba(7,14,28,.88);backdrop-filter:blur(20px);border-bottom:1px solid rgba(34,211,238,.08)">
+  <header class="px-4 sm:px-6 py-4 flex items-center gap-4 sticky top-0 z-10" style="background:rgba(33,74,80,.88);backdrop-filter:blur(20px);border-bottom:1px solid rgba(78,216,185,.08)">
     <a href="/pages/patient/dashboard.html" class="p-1.5 rounded-lg transition-colors" style="color:var(--text2)" onmouseover="this.style.color='var(--cyan)'" onmouseout="this.style.color='var(--text2)'">←</a>
     <div>
       <h1 class="font-bold font-serif">AI Symptom Checker</h1>
       <p class="text-xs" style="color:var(--text3)">Powered by GPT-4 with African disease patterns</p>
     </div>
-    <div class="ml-auto text-xs hidden sm:flex items-center gap-1.5 px-3 py-1.5 rounded-full" style="color:var(--gold);background:rgba(245,158,11,.08);border:1px solid rgba(245,158,11,.15)">
+    <div class="ml-auto text-xs hidden sm:flex items-center gap-1.5 px-3 py-1.5 rounded-full" style="color:var(--gold);background:rgba(133,203,238,.08);border:1px solid rgba(133,203,238,.15)">
       ⚕️ Not a substitute for professional advice
     </div>
   </header>
@@ -85,7 +85,7 @@
 
     <!-- ── STEP 1: Enter Symptoms ── -->
     <div id="step-1" class="animate-fade-up">
-      <div class="rounded-[18px] p-4 sm:p-6" style="background:var(--surface2);border:1px solid rgba(34,211,238,.1)">
+      <div class="rounded-[18px] p-4 sm:p-6" style="background:var(--surface2);border:1px solid rgba(78,216,185,.1)">
         <h2 class="text-lg sm:text-xl font-bold mb-1">What symptoms are you experiencing?</h2>
         <p class="text-sm mb-5" style="color:var(--text3)">Tap the symptoms that apply, or type your own below.</p>
 
@@ -102,7 +102,7 @@
         </div>
 
         <!-- Categorised symptom chips -->
-        <div id="symptom-categories" class="space-y-4 mb-5 max-h-[340px] overflow-y-auto pr-1" style="scrollbar-width:thin;scrollbar-color:rgba(34,211,238,.2) transparent">
+        <div id="symptom-categories" class="space-y-4 mb-5 max-h-[340px] overflow-y-auto pr-1" style="scrollbar-width:thin;scrollbar-color:rgba(78,216,185,.2) transparent">
           <div data-category="general">
             <div class="cat-label">🌡️ General</div>
             <div class="cat-chips">
@@ -243,7 +243,7 @@
 
     <!-- ── STEP 2: Patient Details ── -->
     <div id="step-2" class="hidden animate-fade-up">
-      <div class="rounded-[18px] p-4 sm:p-6" style="background:var(--surface2);border:1px solid rgba(34,211,238,.1)">
+      <div class="rounded-[18px] p-4 sm:p-6" style="background:var(--surface2);border:1px solid rgba(78,216,185,.1)">
         <h2 class="text-lg sm:text-xl font-bold mb-2">Tell us more about yourself</h2>
         <p class="text-sm mb-5" style="color:var(--text3)">This helps the AI give more accurate results. All fields are optional.</p>
 
@@ -293,7 +293,7 @@
     <div id="step-3" class="hidden animate-fade-up">
 
       <!-- Loading state -->
-      <div id="results-loading" class="rounded-[18px] p-6 sm:p-10 text-center" style="background:var(--surface2);border:1px solid rgba(34,211,238,.1)">
+      <div id="results-loading" class="rounded-[18px] p-6 sm:p-10 text-center" style="background:var(--surface2);border:1px solid rgba(78,216,185,.1)">
         <div class="relative w-20 h-20 mx-auto mb-6">
           <div class="absolute inset-0 rounded-full opacity-20 animate-ping" style="background:var(--cyan)"></div>
           <div class="relative w-20 h-20 rounded-full flex items-center justify-center text-3xl" style="background:linear-gradient(135deg,var(--cyan),#1A9090)">🤖</div>
@@ -318,7 +318,7 @@
         </div>
 
         <!-- Friendly interpretation helper -->
-        <div class="rounded-[18px] p-4" style="background:rgba(34,211,238,.06);border:1px solid rgba(34,211,238,.2)">
+        <div class="rounded-[18px] p-4" style="background:rgba(78,216,185,.06);border:1px solid rgba(78,216,185,.2)">
           <p class="text-sm leading-relaxed" style="color:var(--text2)">
             <span class="font-semibold" style="color:var(--cyan)">How to read this:</span>
             These results are a support tool, not a diagnosis. We focus on practical next steps and when to seek care.
@@ -326,26 +326,26 @@
         </div>
 
         <!-- Summary -->
-        <div class="rounded-[18px] p-5" style="background:var(--surface2);border:1px solid rgba(34,211,238,.1)">
+        <div class="rounded-[18px] p-5" style="background:var(--surface2);border:1px solid rgba(78,216,185,.1)">
           <h3 class="font-bold mb-2 flex items-center gap-2">🤖 What this may mean</h3>
           <p class="text-sm leading-relaxed" style="color:var(--text2)" id="ai-summary"></p>
         </div>
 
         <!-- Possible explanations -->
-        <div class="rounded-[18px] p-5" style="background:var(--surface2);border:1px solid rgba(34,211,238,.1)">
+        <div class="rounded-[18px] p-5" style="background:var(--surface2);border:1px solid rgba(78,216,185,.1)">
           <h3 class="font-bold mb-4">Possible explanations</h3>
           <p class="text-xs mb-3" style="color:var(--text3)">These are possibilities to discuss with a clinician, not confirmed diagnoses.</p>
           <div id="conditions-list" class="space-y-3"></div>
         </div>
 
         <!-- Recommended actions -->
-        <div class="rounded-[18px] p-5" style="background:var(--surface2);border:1px solid rgba(34,211,238,.1)">
+        <div class="rounded-[18px] p-5" style="background:var(--surface2);border:1px solid rgba(78,216,185,.1)">
           <h3 class="font-bold mb-3">Next best steps</h3>
           <ul id="actions-list" class="space-y-2 text-sm" style="color:var(--text2)"></ul>
         </div>
 
         <!-- Medical disclaimer -->
-        <div class="rounded-[18px] p-4" style="background:rgba(245,158,11,.06);border:1px solid rgba(245,158,11,.2)">
+        <div class="rounded-[18px] p-4" style="background:rgba(133,203,238,.06);border:1px solid rgba(133,203,238,.2)">
           <p class="text-xs leading-relaxed" style="color:var(--gold)" id="disclaimer"></p>
         </div>
 
@@ -369,6 +369,7 @@
   <script src="/js/config.js"></script>
   <script src="/js/api.js"></script>
   <script src="/js/utils.js"></script>
+  <script src="/js/patient-icons.js"></script>
   <script src="/js/auth.js"></script>
   <script src="/js/symptom-checker.js"></script>
 </body>

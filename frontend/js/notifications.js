@@ -108,7 +108,7 @@ const Notifications = (() => {
       panel.style.cssText = `
         position:fixed;top:60px;right:16px;width:360px;max-width:calc(100vw - 32px);
         max-height:70vh;border-radius:18px;z-index:100;overflow:hidden;
-        background:var(--surface2);border:1px solid rgba(34,211,238,.15);
+        background:var(--surface2);border:1px solid rgba(78,216,185,.15);
         box-shadow:0 20px 60px rgba(0,0,0,.5);
       `;
       document.body.appendChild(panel);
@@ -159,13 +159,13 @@ const Notifications = (() => {
             : new Date(n.created_at).toLocaleDateString();
           const bg = n.is_read
             ? 'transparent'
-            : 'rgba(34,211,238,.04)';
+            : 'rgba(78,216,185,.04)';
           const dot = n.is_read
             ? ''
             : '<span style="width:8px;height:8px;border-radius:50%;background:var(--cyan);flex-shrink:0"></span>';
 
           return `
-          <div class="notif-item" data-id="${n.id}" style="display:flex;align-items:flex-start;gap:10px;padding:12px;border-radius:12px;margin-bottom:4px;cursor:pointer;background:${bg};transition:background .15s" onmouseover="this.style.background='rgba(34,211,238,.08)'" onmouseout="this.style.background='${bg}'">
+          <div class="notif-item" data-id="${n.id}" style="display:flex;align-items:flex-start;gap:10px;padding:12px;border-radius:12px;margin-bottom:4px;cursor:pointer;background:${bg};transition:background .15s" onmouseover="this.style.background='rgba(78,216,185,.08)'" onmouseout="this.style.background='${bg}'">
             <span style="font-size:1.2rem;flex-shrink:0">${icon}</span>
             <div style="flex:1;min-width:0">
               <div style="font-size:13px;font-weight:${n.is_read ? '400' : '600'};line-height:1.4">${n.title || n.message}</div>

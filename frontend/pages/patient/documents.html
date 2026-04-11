@@ -7,15 +7,15 @@
   <link rel="manifest" href="/manifest.json">
   <link rel="stylesheet" href="/css/main.css">
   <script src="https://cdn.tailwindcss.com"></script>
-  <script>tailwind.config={theme:{extend:{colors:{primary:{DEFAULT:'#22D3EE',dark:'#0891B2'},secondary:{DEFAULT:'#10B981'}},fontFamily:{sans:['Plus Jakarta Sans','Inter','system-ui','sans-serif'],serif:['Instrument Serif','Georgia','serif']}}}}</script>
+  <script>tailwind.config={theme:{extend:{colors:{primary:{DEFAULT:'#4ED8B9',dark:'#66BFE0'},secondary:{DEFAULT:'#6ED8AA'}},fontFamily:{sans:['Plus Jakarta Sans','Inter','system-ui','sans-serif'],serif:['Instrument Serif','Georgia','serif']}}}}</script>
 </head>
 <body class="min-h-screen" style="background:var(--bg);color:var(--text)">
   <div class="flex h-screen overflow-hidden">
     <!-- Sidebar -->
-    <aside id="sidebar" class="w-[220px] flex flex-col fixed h-full z-30 -translate-x-full lg:translate-x-0 transition-transform duration-300" style="background:var(--surface2);border-right:1px solid rgba(34,211,238,.1)">
+    <aside id="sidebar" class="w-[220px] flex flex-col fixed h-full z-30 -translate-x-full lg:translate-x-0 transition-transform duration-300" style="background:var(--surface2);border-right:1px solid rgba(78,216,185,.1)">
       <div class="p-5 pb-3" style="border-bottom:1px solid var(--border)">
         <a href="/" class="flex items-center gap-2 font-bold text-lg">
-          <div class="w-8 h-8 rounded-[10px] bg-[#22D3EE] flex items-center justify-center text-white text-sm">🏥</div>
+          <div class="w-8 h-8 rounded-[10px] bg-[#4ED8B9] flex items-center justify-center text-white text-sm">🏥</div>
           <span class="font-serif text-[18px]">HealthConnect</span>
         </a>
       </div>
@@ -46,7 +46,7 @@
     <div id="sidebar-overlay" class="fixed inset-0 bg-black/40 z-20 hidden lg:hidden backdrop-blur-sm" onclick="toggleSidebar()"></div>
 
     <main class="flex-1 lg:ml-[220px] overflow-y-auto">
-      <header class="px-4 sm:px-6 py-4 flex items-center justify-between sticky top-0 z-10" style="background:rgba(7,14,28,.88);backdrop-filter:blur(20px);border-bottom:1px solid rgba(34,211,238,.08)">
+      <header class="px-4 sm:px-6 py-4 flex items-center justify-between sticky top-0 z-10" style="background:rgba(33,74,80,.88);backdrop-filter:blur(20px);border-bottom:1px solid rgba(78,216,185,.08)">
         <div class="flex items-center gap-3">
           <button onclick="toggleSidebar()" class="lg:hidden p-2" style="color:var(--text2)">
             <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/></svg>
@@ -66,7 +66,7 @@
 
         <!-- Filter Tabs -->
         <div class="animate-fade-up-1 flex gap-2 overflow-x-auto pb-2">
-          <button class="tab-filter active text-xs px-4 py-2 rounded-full font-semibold transition-all" data-type="" onclick="filterDocs('')" style="background:rgba(34,211,238,.1);border:1px solid rgba(34,211,238,.2);color:var(--cyan)">All</button>
+          <button class="tab-filter active text-xs px-4 py-2 rounded-full font-semibold transition-all" data-type="" onclick="filterDocs('')" style="background:rgba(78,216,185,.1);border:1px solid rgba(78,216,185,.2);color:var(--cyan)">All</button>
           <button class="tab-filter text-xs px-4 py-2 rounded-full font-semibold transition-all" data-type="lab_result" onclick="filterDocs('lab_result')" style="background:var(--bg2);border:1px solid var(--border);color:var(--text2)">🧪 Lab Results</button>
           <button class="tab-filter text-xs px-4 py-2 rounded-full font-semibold transition-all" data-type="imaging" onclick="filterDocs('imaging')" style="background:var(--bg2);border:1px solid var(--border);color:var(--text2)">🩻 Imaging</button>
           <button class="tab-filter text-xs px-4 py-2 rounded-full font-semibold transition-all" data-type="prescription" onclick="filterDocs('prescription')" style="background:var(--bg2);border:1px solid var(--border);color:var(--text2)">💊 Prescriptions</button>
@@ -137,6 +137,7 @@
   <script src="/js/config.js"></script>
   <script src="/js/api.js"></script>
   <script src="/js/utils.js"></script>
+  <script src="/js/patient-icons.js"></script>
   <script src="/js/auth.js"></script>
   <script>
     Auth.requireRole('patient');
@@ -163,12 +164,12 @@
         const statsEl = document.getElementById('doc-stats');
         const totalDocs = stats?.reduce((sum, s) => sum + s.count, 0) || 0;
         statsEl.innerHTML = `
-          <div class="rounded-2xl p-4 text-center" style="background:var(--surface2);border:1px solid rgba(34,211,238,.1)">
+          <div class="rounded-2xl p-4 text-center" style="background:var(--surface2);border:1px solid rgba(78,216,185,.1)">
             <div class="text-2xl font-extrabold" style="color:var(--cyan)">${totalDocs}</div>
             <div class="text-[10px]" style="color:var(--text3)">Total Documents</div>
           </div>
           ${(stats || []).slice(0, 3).map(s => `
-            <div class="rounded-2xl p-4 text-center" style="background:var(--surface2);border:1px solid rgba(34,211,238,.1)">
+            <div class="rounded-2xl p-4 text-center" style="background:var(--surface2);border:1px solid rgba(78,216,185,.1)">
               <div class="text-2xl font-extrabold">${s.count}</div>
               <div class="text-[10px]" style="color:var(--text3)">${typeIcons[s.doc_type] || '📄'} ${s.doc_type.replace(/_/g, ' ')}</div>
             </div>
@@ -186,7 +187,7 @@
         }
 
         grid.innerHTML = documents.map(doc => `
-          <div class="rounded-[18px] p-5 card-hover" style="background:var(--surface2);border:1px solid rgba(34,211,238,.1)">
+          <div class="rounded-[18px] p-5 card-hover" style="background:var(--surface2);border:1px solid rgba(78,216,185,.1)">
             <div class="flex items-start gap-3 mb-3">
               <div class="text-2xl">${typeIcons[doc.doc_type] || '📄'}</div>
               <div class="flex-1 min-w-0">
@@ -217,8 +218,8 @@
       currentFilter = type;
       document.querySelectorAll('.tab-filter').forEach(btn => {
         const isActive = btn.dataset.type === type;
-        btn.style.background = isActive ? 'rgba(34,211,238,.1)' : 'var(--bg2)';
-        btn.style.borderColor = isActive ? 'rgba(34,211,238,.2)' : 'var(--border)';
+        btn.style.background = isActive ? 'rgba(78,216,185,.1)' : 'var(--bg2)';
+        btn.style.borderColor = isActive ? 'rgba(78,216,185,.2)' : 'var(--border)';
         btn.style.color = isActive ? 'var(--cyan)' : 'var(--text2)';
       });
       loadDocuments(type);

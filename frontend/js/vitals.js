@@ -33,14 +33,14 @@ const chartDefaults = {
         maxRotation: 45,
         minRotation: 0,
       }, 
-      grid: { color: 'rgba(34,211,238,.06)' } 
+      grid: { color: 'rgba(78,216,185,.06)' } 
     },
     y: { 
       ticks: { 
         color: 'rgba(228,242,255,.35)', 
         font: { size: window.innerWidth < 768 ? 9 : 10 } 
       }, 
-      grid: { color: 'rgba(34,211,238,.06)' } 
+      grid: { color: 'rgba(78,216,185,.06)' } 
     },
   },
 };
@@ -162,8 +162,8 @@ function renderBPChart(data) {
     data: {
       labels: data.map(d => new Date(d.recorded_at).toLocaleDateString('en-GB', { day:'numeric', month:'short' })),
       datasets: [
-        { label: 'Systolic', data: data.map(d => d.systolic_bp), borderColor: '#22D3EE', backgroundColor: 'rgba(34,211,238,.1)', tension: 0.3, fill: true },
-        { label: 'Diastolic', data: data.map(d => d.diastolic_bp), borderColor: '#A78BFA', backgroundColor: 'rgba(167,139,250,.1)', tension: 0.3, fill: true },
+        { label: 'Systolic', data: data.map(d => d.systolic_bp), borderColor: '#4ED8B9', backgroundColor: 'rgba(78,216,185,.1)', tension: 0.3, fill: true },
+        { label: 'Diastolic', data: data.map(d => d.diastolic_bp), borderColor: '#83D6E8', backgroundColor: 'rgba(131,214,232,.1)', tension: 0.3, fill: true },
       ],
     },
     options: { ...chartDefaults, plugins: { ...chartDefaults.plugins, annotation: {} } },
@@ -193,7 +193,7 @@ function renderSugarChart(data) {
     data: {
       labels: data.map(d => new Date(d.recorded_at).toLocaleDateString('en-GB', { day:'numeric', month:'short' })),
       datasets: [
-        { label: 'Blood Sugar', data: data.map(d => d.blood_sugar), borderColor: '#FBBF24', backgroundColor: 'rgba(251,191,36,.1)', tension: 0.3, fill: true },
+        { label: 'Blood Sugar', data: data.map(d => d.blood_sugar), borderColor: '#A5E2F6', backgroundColor: 'rgba(165,226,246,.1)', tension: 0.3, fill: true },
       ],
     },
     options: chartDefaults,
@@ -208,7 +208,7 @@ function renderWeightChart(data) {
     data: {
       labels: data.map(d => new Date(d.recorded_at).toLocaleDateString('en-GB', { day:'numeric', month:'short' })),
       datasets: [
-        { label: 'Weight (kg)', data: data.map(d => d.weight_kg), borderColor: '#10B981', backgroundColor: 'rgba(16,185,129,.1)', tension: 0.3, fill: true },
+        { label: 'Weight (kg)', data: data.map(d => d.weight_kg), borderColor: '#6ED8AA', backgroundColor: 'rgba(110,216,170,.1)', tension: 0.3, fill: true },
       ],
     },
     options: chartDefaults,

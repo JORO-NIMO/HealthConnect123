@@ -7,14 +7,14 @@
   <link rel="manifest" href="/manifest.json">
   <link rel="stylesheet" href="/css/main.css">
   <script src="https://cdn.tailwindcss.com"></script>
-  <script>tailwind.config={theme:{extend:{colors:{primary:{DEFAULT:'#22D3EE',dark:'#0891B2'},secondary:{DEFAULT:'#10B981'}},fontFamily:{sans:['Plus Jakarta Sans','Inter','system-ui','sans-serif'],serif:['Instrument Serif','Georgia','serif']}}}}</script>
+  <script>tailwind.config={theme:{extend:{colors:{primary:{DEFAULT:'#4ED8B9',dark:'#66BFE0'},secondary:{DEFAULT:'#6ED8AA'}},fontFamily:{sans:['Plus Jakarta Sans','Inter','system-ui','sans-serif'],serif:['Instrument Serif','Georgia','serif']}}}}</script>
 </head>
 <body class="min-h-screen" style="background:var(--bg);color:var(--text)">
   <div class="flex h-screen overflow-hidden">
-    <aside id="sidebar" class="w-[220px] flex flex-col fixed h-full z-30 -translate-x-full lg:translate-x-0 transition-transform duration-300" style="background:var(--surface2);border-right:1px solid rgba(34,211,238,.1)">
+    <aside id="sidebar" class="w-[220px] flex flex-col fixed h-full z-30 -translate-x-full lg:translate-x-0 transition-transform duration-300" style="background:var(--surface2);border-right:1px solid rgba(78,216,185,.1)">
       <div class="p-5 pb-3" style="border-bottom:1px solid var(--border)">
         <a href="/" class="flex items-center gap-2 font-bold text-lg">
-          <div class="w-8 h-8 rounded-[10px] bg-[#22D3EE] flex items-center justify-center text-white text-sm">🏥</div>
+          <div class="w-8 h-8 rounded-[10px] bg-[#4ED8B9] flex items-center justify-center text-white text-sm">🏥</div>
           <span class="font-serif text-[18px]">HealthConnect</span>
         </a>
       </div>
@@ -45,7 +45,7 @@
     <div id="sidebar-overlay" class="fixed inset-0 bg-black/40 z-20 hidden lg:hidden backdrop-blur-sm" onclick="toggleSidebar()"></div>
 
     <main class="flex-1 lg:ml-[220px] overflow-y-auto">
-      <header class="px-4 sm:px-6 py-4 flex items-center justify-between sticky top-0 z-10" style="background:rgba(7,14,28,.88);backdrop-filter:blur(20px);border-bottom:1px solid rgba(34,211,238,.08)">
+      <header class="px-4 sm:px-6 py-4 flex items-center justify-between sticky top-0 z-10" style="background:rgba(33,74,80,.88);backdrop-filter:blur(20px);border-bottom:1px solid rgba(78,216,185,.08)">
         <div class="flex items-center gap-3">
           <button onclick="toggleSidebar()" class="lg:hidden p-2" style="color:var(--text2)">
             <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/></svg>
@@ -60,7 +60,7 @@
       <div class="p-4 sm:p-6 space-y-5" style="background-image:var(--g-hero)">
 
         <!-- Input Section -->
-        <div class="animate-fade-up rounded-[18px] p-4 sm:p-6" style="background:var(--surface2);border:1px solid rgba(34,211,238,.1)">
+        <div class="animate-fade-up rounded-[18px] p-4 sm:p-6" style="background:var(--surface2);border:1px solid rgba(78,216,185,.1)">
           <h2 class="font-bold mb-1">Enter Your Medications</h2>
           <p class="text-xs mb-4" style="color:var(--text3)">Add at least 2 medications to check for potential interactions.</p>
 
@@ -98,10 +98,10 @@
           <div id="interactions-list" class="animate-fade-up-1 space-y-3"></div>
 
           <!-- Recommendations -->
-          <div id="recommendations-card" class="animate-fade-up-2 rounded-[18px] p-4 sm:p-6" style="background:var(--surface2);border:1px solid rgba(34,211,238,.1)"></div>
+          <div id="recommendations-card" class="animate-fade-up-2 rounded-[18px] p-4 sm:p-6" style="background:var(--surface2);border:1px solid rgba(78,216,185,.1)"></div>
 
           <!-- Disclaimer -->
-          <div class="animate-fade-up-3 rounded-[18px] p-4" style="background:rgba(245,158,11,.06);border:1px solid rgba(245,158,11,.2)">
+          <div class="animate-fade-up-3 rounded-[18px] p-4" style="background:rgba(133,203,238,.06);border:1px solid rgba(133,203,238,.2)">
             <p class="text-xs" style="color:var(--yellow)">⚠️ <strong>Disclaimer:</strong> This AI analysis is for informational purposes only. Always consult your pharmacist or healthcare provider before making changes to your medication regimen.</p>
           </div>
         </div>
@@ -112,6 +112,7 @@
   <script src="/js/config.js"></script>
   <script src="/js/api.js"></script>
   <script src="/js/utils.js"></script>
+  <script src="/js/patient-icons.js"></script>
   <script src="/js/auth.js"></script>
   <script>
     Auth.requireRole('patient');
@@ -172,9 +173,9 @@
       const score = data.safetyScore || 50;
       const severity = data.overallSeverity || 'none';
       const severityConfig = {
-        none:             { color: '#10B981', bg: 'rgba(16,185,129,.08)', border: 'rgba(16,185,129,.2)', icon: '✅', label: 'No Interactions Found' },
-        mild:             { color: '#22D3EE', bg: 'rgba(34,211,238,.08)', border: 'rgba(34,211,238,.2)', icon: 'ℹ️', label: 'Mild Interactions' },
-        moderate:         { color: '#FBBF24', bg: 'rgba(251,191,36,.08)', border: 'rgba(251,191,36,.2)', icon: '⚠️', label: 'Moderate Interactions' },
+        none:             { color: '#6ED8AA', bg: 'rgba(110,216,170,.08)', border: 'rgba(110,216,170,.2)', icon: '✅', label: 'No Interactions Found' },
+        mild:             { color: '#4ED8B9', bg: 'rgba(78,216,185,.08)', border: 'rgba(78,216,185,.2)', icon: 'ℹ️', label: 'Mild Interactions' },
+        moderate:         { color: '#A5E2F6', bg: 'rgba(165,226,246,.08)', border: 'rgba(165,226,246,.2)', icon: '⚠️', label: 'Moderate Interactions' },
         severe:           { color: '#F97316', bg: 'rgba(249,115,22,.08)', border: 'rgba(249,115,22,.2)', icon: '🔴', label: 'Severe Interactions' },
         contraindicated:  { color: '#F43F5E', bg: 'rgba(244,63,94,.08)', border: 'rgba(244,63,94,.2)', icon: '🚫', label: 'Contraindicated!' },
       };

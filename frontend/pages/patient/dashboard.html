@@ -7,7 +7,7 @@
   <link rel="manifest" href="/manifest.json">
   <link rel="stylesheet" href="/css/main.css">
   <script src="https://cdn.tailwindcss.com"></script>
-  <script>tailwind.config={theme:{extend:{colors:{primary:{DEFAULT:'#22D3EE',dark:'#0891B2'},secondary:{DEFAULT:'#10B981'}},fontFamily:{sans:['Plus Jakarta Sans','Inter','system-ui','sans-serif'],serif:['Instrument Serif','Georgia','serif']}}}}</script>
+  <script>tailwind.config={theme:{extend:{colors:{primary:{DEFAULT:'#4ED8B9',dark:'#66BFE0'},secondary:{DEFAULT:'#6ED8AA'}},fontFamily:{sans:['Plus Jakarta Sans','Inter','system-ui','sans-serif'],serif:['Instrument Serif','Georgia','serif']}}}}</script>
 </head>
 <body class="min-h-screen" style="background:var(--bg);color:var(--text)">
 
@@ -15,10 +15,10 @@
   <div class="flex h-screen overflow-hidden">
 
     <!-- Sidebar -->
-    <aside id="sidebar" class="w-[220px] flex flex-col fixed h-full z-30 -translate-x-full lg:translate-x-0 transition-transform duration-300" style="background:var(--surface2);border-right:1px solid rgba(34,211,238,.1)">
+    <aside id="sidebar" class="w-[220px] flex flex-col fixed h-full z-30 -translate-x-full lg:translate-x-0 transition-transform duration-300" style="background:var(--surface2);border-right:1px solid rgba(78,216,185,.1)">
       <div class="p-5 pb-3" style="border-bottom:1px solid var(--border)">
         <a href="/" class="flex items-center gap-2 font-bold text-lg">
-          <div class="w-8 h-8 rounded-[10px] bg-[#22D3EE] flex items-center justify-center text-white text-sm">🏥</div>
+          <div class="w-8 h-8 rounded-[10px] bg-[#4ED8B9] flex items-center justify-center text-white text-sm">🏥</div>
           <span class="font-serif text-[18px]">HealthConnect</span>
         </a>
       </div>
@@ -28,7 +28,7 @@
         <div class="relative w-[52px] h-[52px] mb-3 group">
           <div class="w-full h-full rounded-full overflow-hidden" style="border:2px solid var(--border)">
             <img id="avatar-img" src="" alt="" class="hidden w-full h-full object-cover">
-            <div class="w-full h-full da0 flex items-center justify-center text-white font-bold text-sm" id="avatar-initials">?</div>
+            <div class="w-full h-full gradient-bg flex items-center justify-center text-white font-bold text-sm" id="avatar-initials">?</div>
           </div>
         </div>
         <div class="font-bold text-[15px]" id="user-name">Loading...</div>
@@ -65,7 +65,7 @@
     <main class="flex-1 lg:ml-[220px] overflow-y-auto">
 
       <!-- Top bar -->
-      <header class="px-4 sm:px-6 py-4 flex items-center justify-between sticky top-0 z-10" style="background:rgba(7,14,28,.88);backdrop-filter:blur(20px);border-bottom:1px solid rgba(34,211,238,.08)">
+      <header class="px-4 sm:px-6 py-4 flex items-center justify-between sticky top-0 z-10" style="background:rgba(33,74,80,.88);backdrop-filter:blur(20px);border-bottom:1px solid rgba(78,216,185,.08)">
         <div class="flex items-center gap-3">
           <button onclick="toggleSidebar()" class="lg:hidden p-2" style="color:var(--text2)">
             <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/></svg>
@@ -102,26 +102,26 @@
 
         <!-- Stats cards -->
         <div class="animate-fade-up-1 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3.5">
-          <div class="rounded-2xl p-5" style="background:var(--surface2);border:1px solid rgba(34,211,238,.1)">
-            <div class="text-[#22D3EE] mb-3">📹</div>
+          <div class="metric-card p-5">
+            <div class="text-[#4ED8B9] mb-3">📹</div>
             <div class="text-2xl font-extrabold" id="stat-appointments">—</div>
             <div class="text-[11px] mt-1" style="color:var(--text3)">Appointments</div>
             <div class="text-[11px]" style="color:var(--text3)">This year</div>
           </div>
-          <div class="rounded-2xl p-5" style="background:var(--surface2);border:1px solid rgba(34,211,238,.1)">
-            <div class="text-[#A78BFA] mb-3">🤖</div>
+          <div class="metric-card p-5">
+            <div class="text-[#83D6E8] mb-3">🤖</div>
             <div class="text-2xl font-extrabold" id="stat-checks">—</div>
             <div class="text-[11px] mt-1" style="color:var(--text3)">Symptom Checks</div>
             <div class="text-[11px]" style="color:var(--text3)">Total</div>
           </div>
-          <div class="rounded-2xl p-5" style="background:var(--surface2);border:1px solid rgba(34,211,238,.1)">
-            <div class="text-[#10B981] mb-3">💊</div>
+          <div class="metric-card p-5">
+            <div class="text-[#6ED8AA] mb-3">💊</div>
             <div class="text-2xl font-extrabold" id="stat-prescriptions">—</div>
             <div class="text-[11px] mt-1" style="color:var(--text3)">Prescriptions</div>
             <div class="text-[11px]" style="color:var(--text3)">Active</div>
           </div>
-          <div class="rounded-2xl p-5" style="background:var(--surface2);border:1px solid rgba(34,211,238,.1)">
-            <div class="text-[#F59E0B] mb-3">🩺</div>
+          <div class="metric-card p-5">
+            <div class="text-[#85CBEE] mb-3">🩺</div>
             <div class="text-2xl font-extrabold" id="stat-consultations">—</div>
             <div class="text-[11px] mt-1" style="color:var(--text3)">Consultations</div>
             <div class="text-[11px]" style="color:var(--text3)">Completed</div>
@@ -132,78 +132,78 @@
         <div class="animate-fade-up-2 grid lg:grid-cols-3 gap-5">
 
           <!-- Quick actions -->
-          <div class="rounded-[18px] p-4 sm:p-6" style="background:var(--surface2);border:1px solid rgba(34,211,238,.1)">
+          <div class="rounded-[18px] p-4 sm:p-6" style="background:var(--surface2);border:1px solid rgba(78,216,185,.1)">
             <h2 class="font-bold mb-4">Quick Actions</h2>
             <div class="space-y-3">
-              <a href="/pages/patient/symptom-checker.html" class="flex items-center gap-3.5 p-4 rounded-xl transition-all" style="background:rgba(34,211,238,.06);border:1px solid rgba(34,211,238,.12)" onmouseover="this.style.background='rgba(34,211,238,.12)'" onmouseout="this.style.background='rgba(34,211,238,.06)'">
+              <a href="/pages/patient/symptom-checker.html" class="quick-action-card qa-cyan">
                 <span class="text-xl">🤖</span>
                 <div class="flex-1">
                   <div class="font-semibold text-sm">Check Symptoms</div>
                   <div class="text-xs" style="color:var(--text3)">AI-powered analysis</div>
                 </div>
-                <span style="color:var(--cyan)">→</span>
+                <span class="qa-arrow">→</span>
               </a>
-              <a href="/pages/patient/appointments.html" class="flex items-center gap-3.5 p-4 rounded-xl transition-all" style="background:rgba(16,185,129,.06);border:1px solid rgba(16,185,129,.12)" onmouseover="this.style.background='rgba(16,185,129,.12)'" onmouseout="this.style.background='rgba(16,185,129,.06)'">
+              <a href="/pages/patient/appointments.html" class="quick-action-card qa-green">
                 <span class="text-xl">📅</span>
                 <div class="flex-1">
                   <div class="font-semibold text-sm">Book Appointment</div>
                   <div class="text-xs" style="color:var(--text3)">See available doctors</div>
                 </div>
-                <span style="color:var(--green)">→</span>
+                <span class="qa-arrow">→</span>
               </a>
-              <a href="/pages/patient/medical-history.html" class="flex items-center gap-3.5 p-4 rounded-xl transition-all" style="background:rgba(167,139,250,.06);border:1px solid rgba(167,139,250,.12)" onmouseover="this.style.background='rgba(167,139,250,.12)'" onmouseout="this.style.background='rgba(167,139,250,.06)'">
+              <a href="/pages/patient/medical-history.html" class="quick-action-card qa-purple">
                 <span class="text-xl">📋</span>
                 <div class="flex-1">
                   <div class="font-semibold text-sm">Medical Records</div>
                   <div class="text-xs" style="color:var(--text3)">View full history</div>
                 </div>
-                <span style="color:var(--purple)">→</span>
+                <span class="qa-arrow">→</span>
               </a>
-              <a href="/pages/patient/vitals.html" class="flex items-center gap-3.5 p-4 rounded-xl transition-all" style="background:rgba(244,63,94,.06);border:1px solid rgba(244,63,94,.12)" onmouseover="this.style.background='rgba(244,63,94,.12)'" onmouseout="this.style.background='rgba(244,63,94,.06)'">
+              <a href="/pages/patient/vitals.html" class="quick-action-card qa-red">
                 <span class="text-xl">❤️</span>
                 <div class="flex-1">
                   <div class="font-semibold text-sm">Vital Signs</div>
                   <div class="text-xs" style="color:var(--text3)">Track your health</div>
                 </div>
-                <span style="color:var(--red)">→</span>
+                <span class="qa-arrow">→</span>
               </a>
-              <a href="/pages/patient/drug-checker.html" class="flex items-center gap-3.5 p-4 rounded-xl transition-all" style="background:rgba(245,158,11,.06);border:1px solid rgba(245,158,11,.12)" onmouseover="this.style.background='rgba(245,158,11,.12)'" onmouseout="this.style.background='rgba(245,158,11,.06)'">
+              <a href="/pages/patient/drug-checker.html" class="quick-action-card qa-yellow">
                 <span class="text-xl">💊</span>
                 <div class="flex-1">
                   <div class="font-semibold text-sm">Drug Checker</div>
                   <div class="text-xs" style="color:var(--text3)">Check interactions</div>
                 </div>
-                <span style="color:var(--yellow)">→</span>
+                <span class="qa-arrow">→</span>
               </a>
-              <a href="/pages/patient/find-doctors.html" class="flex items-center gap-3.5 p-4 rounded-xl transition-all" style="background:rgba(34,211,238,.06);border:1px solid rgba(34,211,238,.12)" onmouseover="this.style.background='rgba(34,211,238,.12)'" onmouseout="this.style.background='rgba(34,211,238,.06)'">
+              <a href="/pages/patient/find-doctors.html" class="quick-action-card qa-cyan">
                 <span class="text-xl">🔍</span>
                 <div class="flex-1">
                   <div class="font-semibold text-sm">Find Doctors</div>
                   <div class="text-xs" style="color:var(--text3)">AI-powered matching</div>
                 </div>
-                <span style="color:var(--cyan)">→</span>
+                <span class="qa-arrow">→</span>
               </a>
-              <a href="/pages/patient/health-records.html" class="flex items-center gap-3.5 p-4 rounded-xl transition-all" style="background:rgba(16,185,129,.06);border:1px solid rgba(16,185,129,.12)" onmouseover="this.style.background='rgba(16,185,129,.12)'" onmouseout="this.style.background='rgba(16,185,129,.06)'">
+              <a href="/pages/patient/health-records.html" class="quick-action-card qa-green">
                 <span class="text-xl">🏥</span>
                 <div class="flex-1">
                   <div class="font-semibold text-sm">Health Records</div>
                   <div class="text-xs" style="color:var(--text3)">Universal health timeline</div>
                 </div>
-                <span style="color:var(--green)">→</span>
+                <span class="qa-arrow">→</span>
               </a>
-              <a href="/pages/patient/emergency.html" class="flex items-center gap-3.5 p-4 rounded-xl transition-all" style="background:rgba(239,68,68,.06);border:1px solid rgba(239,68,68,.12)" onmouseover="this.style.background='rgba(239,68,68,.12)'" onmouseout="this.style.background='rgba(239,68,68,.06)'">
+              <a href="/pages/patient/emergency.html" class="quick-action-card qa-rose">
                 <span class="text-xl">🆘</span>
                 <div class="flex-1">
                   <div class="font-semibold text-sm">Emergency SOS</div>
                   <div class="text-xs" style="color:var(--text3)">Quick help access</div>
                 </div>
-                <span style="color:#EF4444">→</span>
+                <span class="qa-arrow">→</span>
               </a>
             </div>
           </div>
 
           <!-- Upcoming appointments -->
-          <div class="lg:col-span-2 rounded-[18px] p-4 sm:p-6" style="background:var(--surface2);border:1px solid rgba(34,211,238,.1)">
+          <div class="lg:col-span-2 rounded-[18px] p-4 sm:p-6" style="background:var(--surface2);border:1px solid rgba(78,216,185,.1)">
             <div class="flex items-center justify-between mb-4">
               <h2 class="font-bold">Upcoming Appointments</h2>
               <a href="/pages/patient/appointments.html" class="text-sm hover:underline" style="color:var(--cyan)">View all</a>
@@ -219,7 +219,7 @@
         </div>
 
         <!-- Recent symptom checks -->
-        <div class="animate-fade-up-3 rounded-[18px] p-4 sm:p-6" style="background:var(--surface2);border:1px solid rgba(34,211,238,.1)">
+        <div class="animate-fade-up-3 rounded-[18px] p-4 sm:p-6" style="background:var(--surface2);border:1px solid rgba(78,216,185,.1)">
           <div class="flex items-center justify-between mb-4">
             <h2 class="font-bold">Recent Symptom Reports</h2>
             <a href="/pages/patient/medical-history.html" class="text-sm hover:underline" style="color:var(--cyan)">View all</a>
@@ -240,6 +240,7 @@
   <script src="/js/config.js"></script>
   <script src="/js/api.js"></script>
   <script src="/js/utils.js"></script>
+  <script src="/js/patient-icons.js"></script>
   <script src="/js/auth.js"></script>
   <script src="https://cdn.socket.io/4.7.5/socket.io.min.js"></script>
   <script src="/js/notifications.js"></script>

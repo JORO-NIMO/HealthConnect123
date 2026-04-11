@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <meta name="description" content="HealthConnect — AI-powered symptom checker and telemedicine platform for Africa. Get instant health insights and consult verified doctors online.">
-  <meta name="theme-color" content="#070E1C">
+  <meta name="theme-color" content="#2B555F">
   <title>HealthConnect — AI Symptom Checker & Telemedicine</title>
   <link rel="manifest" href="/manifest.json">
   <link rel="icon" type="image/jpeg" href="/images/logo.jpeg">
@@ -15,11 +15,11 @@
       theme: {
         extend: {
           colors: {
-            primary  : { DEFAULT: '#22D3EE', dark: '#0891B2', light: '#67E8F9' },
-            secondary: { DEFAULT: '#10B981', dark: '#059669' },
+            primary  : { DEFAULT: '#4ED8B9', dark: '#66BFE0', light: '#67E8F9' },
+            secondary: { DEFAULT: '#6ED8AA', dark: '#059669' },
             danger   : '#F43F5E',
-            warning  : '#F59E0B',
-            navy     : { DEFAULT: '#070E1C', 50: '#0A1528', 100: '#0E1B30', 200: '#122038', 300: '#162540' },
+            warning  : '#85CBEE',
+            navy     : { DEFAULT: '#2B555F', 50: '#356B74', 100: '#45828A', 200: '#56959C', 300: '#67A8AD' },
           },
           fontFamily: {
             sans: ['Plus Jakarta Sans', 'Inter', 'system-ui', 'sans-serif'],
@@ -30,13 +30,13 @@
     }
   </script>
 </head>
-<body class="font-sans bg-[#070E1C] text-[#E4F2FF]">
+<body class="font-sans bg-[#2B555F] text-[#E4F2FF]">
 
   <!-- ── Navigation ──────────────────────────────────────────────────── -->
-  <nav id="navbar" class="fixed top-0 w-full z-50 transition-all duration-300 py-4" style="background:rgba(7,14,28,.88);backdrop-filter:blur(20px);border-bottom:1px solid rgba(34,211,238,.08)">
+  <nav id="navbar" class="fixed top-0 w-full z-50 transition-all duration-300 py-4" style="background:rgba(33,74,80,.88);backdrop-filter:blur(20px);border-bottom:1px solid rgba(78,216,185,.08)">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 flex items-center justify-between">
       <a href="/" class="flex items-center gap-2.5 font-bold text-xl group">
-        <div class="w-9 h-9 rounded-[10px] bg-[#22D3EE] flex items-center justify-center transition-all group-hover:shadow-[0_0_20px_rgba(34,211,238,.4)]">
+        <div class="w-9 h-9 rounded-[10px] bg-[#4ED8B9] flex items-center justify-center transition-all group-hover:shadow-[0_0_20px_rgba(78,216,185,.4)]">
           <img src="/images/logo.jpeg" alt="HealthConnect logo" class="hc-logo-img" loading="eager" decoding="async" />
         </div>
         <span class="font-serif text-[21px] text-[#E4F2FF]">
@@ -60,10 +60,10 @@
     <!-- Mobile menu -->
     <div id="mobile-menu" class="hidden md:hidden glass mx-4 mt-2 rounded-xl p-4">
       <div class="flex flex-col gap-3 text-sm">
-        <a href="#features"     class="hover:bg-[rgba(34,211,238,.08)] px-3 py-2 rounded-lg text-[#E4F2FF]/80 hover:text-[#22D3EE]">Features</a>
-        <a href="#how-it-works" class="hover:bg-[rgba(34,211,238,.08)] px-3 py-2 rounded-lg text-[#E4F2FF]/80 hover:text-[#22D3EE]">How It Works</a>
-        <a href="#doctors"      class="hover:bg-[rgba(34,211,238,.08)] px-3 py-2 rounded-lg text-[#E4F2FF]/80 hover:text-[#22D3EE]">Find Doctors</a>
-        <a href="/pages/auth/login.html"    class="hover:bg-[rgba(34,211,238,.08)] px-3 py-2 rounded-lg text-[#E4F2FF]/80">Sign In</a>
+        <a href="#features"     class="hover:bg-[rgba(78,216,185,.08)] px-3 py-2 rounded-lg text-[#E4F2FF]/80 hover:text-[#4ED8B9]">Features</a>
+        <a href="#how-it-works" class="hover:bg-[rgba(78,216,185,.08)] px-3 py-2 rounded-lg text-[#E4F2FF]/80 hover:text-[#4ED8B9]">How It Works</a>
+        <a href="#doctors"      class="hover:bg-[rgba(78,216,185,.08)] px-3 py-2 rounded-lg text-[#E4F2FF]/80 hover:text-[#4ED8B9]">Find Doctors</a>
+        <a href="/pages/auth/login.html"    class="hover:bg-[rgba(78,216,185,.08)] px-3 py-2 rounded-lg text-[#E4F2FF]/80">Sign In</a>
         <a href="/pages/auth/register.html" class="btn-teal px-3 py-2.5 text-center text-sm font-semibold">Get Started →</a>
       </div>
     </div>
@@ -73,9 +73,9 @@
   <section class="min-h-screen flex items-center relative overflow-hidden" style="background:var(--bg);background-image:var(--g-hero)">
     <!-- Background decoration -->
     <div class="absolute inset-0 opacity-[0.07]">
-      <div class="absolute top-20 left-10 w-[500px] h-[500px] bg-[#22D3EE] rounded-full blur-[120px]"></div>
-      <div class="absolute bottom-20 right-10 w-[400px] h-[400px] bg-[#F59E0B] rounded-full blur-[100px]"></div>
-      <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[300px] h-[300px] bg-[#A78BFA] rounded-full blur-[80px]"></div>
+      <div class="absolute top-20 left-10 w-[500px] h-[500px] bg-[#4ED8B9] rounded-full blur-[120px]"></div>
+      <div class="absolute bottom-20 right-10 w-[400px] h-[400px] bg-[#85CBEE] rounded-full blur-[100px]"></div>
+      <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[300px] h-[300px] bg-[#83D6E8] rounded-full blur-[80px]"></div>
     </div>
     <div class="max-w-7xl mx-auto px-4 sm:px-6 py-28 pt-32 relative z-10">
       <div class="grid lg:grid-cols-2 gap-12 lg:gap-16 items-center">
@@ -87,7 +87,7 @@
           <h1 class="font-serif animate-fade-up-1 text-[1.75rem] sm:text-5xl lg:text-[62px] font-normal leading-[1.1] mb-5">
             Your Health,<br>
             Expertly<br>
-            <span class="text-[#22D3EE]">Guided by AI</span>
+            <span class="text-[#4ED8B9]">Guided by AI</span>
           </h1>
           <p class="animate-fade-up-2 text-base sm:text-lg text-[#E4F2FF]/60 leading-relaxed mb-6 sm:mb-8 max-w-xl">
             Describe symptoms, get instant AI insights, and consult verified African doctors — all in one secure platform.
@@ -102,10 +102,10 @@
           </div>
           <!-- Trust badges -->
           <div class="animate-fade-up-4 flex flex-wrap gap-5 text-sm text-[#E4F2FF]/50">
-            <div class="flex items-center gap-2"><span class="text-[#10B981]">✓</span> HIPAA-Compliant</div>
-            <div class="flex items-center gap-2"><span class="text-[#10B981]">✓</span> Verified Doctors</div>
-            <div class="flex items-center gap-2"><span class="text-[#10B981]">✓</span> 24/7 Available</div>
-            <div class="flex items-center gap-2"><span class="text-[#10B981]">✓</span> Africa-Optimized</div>
+            <div class="flex items-center gap-2"><span class="text-[#6ED8AA]">✓</span> HIPAA-Compliant</div>
+            <div class="flex items-center gap-2"><span class="text-[#6ED8AA]">✓</span> Verified Doctors</div>
+            <div class="flex items-center gap-2"><span class="text-[#6ED8AA]">✓</span> 24/7 Available</div>
+            <div class="flex items-center gap-2"><span class="text-[#6ED8AA]">✓</span> Africa-Optimized</div>
           </div>
         </div>
         <!-- Right: Hero visual -->
@@ -113,14 +113,14 @@
           <div class="rounded-3xl overflow-hidden h-[330px] sm:h-[420px] lg:h-[520px] relative" style="background:linear-gradient(135deg,#050D1A,#0A2040,#091830)">
             <img src="https://images.unsplash.com/photo-1651008376811-b90baee60c1f?w=900&h=600&fit=crop&q=85&crop=faces,top"
               alt="Doctor" class="w-full h-full object-cover object-[center_top]" onerror="this.onerror=null;this.src='https://images.unsplash.com/photo-1579684385127-1ef15d508118?w=900&h=600&fit=crop&q=85'" loading="lazy"/>
-            <div class="absolute inset-0" style="background:linear-gradient(160deg,rgba(34,211,238,.06),transparent 55%,rgba(8,14,28,.4))"></div>
+            <div class="absolute inset-0" style="background:linear-gradient(160deg,rgba(78,216,185,.06),transparent 55%,rgba(8,14,28,.4))"></div>
           </div>
 
           <!-- Floating AI Analysis card -->
-          <div class="absolute bottom-3 left-3 sm:bottom-5 sm:left-5 lg:bottom-7 lg:-left-6 animate-float z-10 w-[220px] sm:w-[250px] lg:w-[270px]" style="background:rgba(9,18,35,.92);backdrop-filter:blur(16px);border-radius:16px;padding:14px;box-shadow:0 20px 60px rgba(0,0,0,.7),0 0 0 1px rgba(34,211,238,.18)">
+          <div class="absolute bottom-3 left-3 sm:bottom-5 sm:left-5 lg:bottom-7 lg:-left-6 animate-float z-10 w-[220px] sm:w-[250px] lg:w-[270px]" style="background:rgba(9,18,35,.92);backdrop-filter:blur(16px);border-radius:16px;padding:14px;box-shadow:0 20px 60px rgba(0,0,0,.7),0 0 0 1px rgba(78,216,185,.18)">
             <div class="flex items-center gap-2.5 mb-3">
-              <div class="w-[34px] h-[34px] rounded-[9px] flex items-center justify-center" style="background:rgba(34,211,238,.1)">
-                <svg class="w-[17px] h-[17px] text-[#22D3EE]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
+              <div class="w-[34px] h-[34px] rounded-[9px] flex items-center justify-center" style="background:rgba(78,216,185,.1)">
+                <svg class="w-[17px] h-[17px] text-[#4ED8B9]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
               </div>
               <div>
                 <div class="font-bold text-[13px]">AI Analysis Complete</div>
@@ -130,24 +130,24 @@
             </div>
             <div class="space-y-2">
               <div>
-                <div class="flex justify-between text-[12px] mb-1"><span class="text-[#E4F2FF]/60">Seasonal Flu</span><span class="text-[#0891B2] font-bold">78%</span></div>
+                <div class="flex justify-between text-[12px] mb-1"><span class="text-[#E4F2FF]/60">Seasonal Flu</span><span class="text-[#66BFE0] font-bold">78%</span></div>
                 <div class="pbar"><div class="pfill" style="width:78%"></div></div>
               </div>
               <div>
-                <div class="flex justify-between text-[12px] mb-1"><span class="text-[#E4F2FF]/60">Common Cold</span><span class="text-[#0891B2] font-bold">62%</span></div>
+                <div class="flex justify-between text-[12px] mb-1"><span class="text-[#E4F2FF]/60">Common Cold</span><span class="text-[#66BFE0] font-bold">62%</span></div>
                 <div class="pbar"><div class="pfill" style="width:62%"></div></div>
               </div>
               <div>
-                <div class="flex justify-between text-[12px] mb-1"><span class="text-[#E4F2FF]/60">Sinusitis</span><span class="text-[#0891B2] font-bold">40%</span></div>
+                <div class="flex justify-between text-[12px] mb-1"><span class="text-[#E4F2FF]/60">Sinusitis</span><span class="text-[#66BFE0] font-bold">40%</span></div>
                 <div class="pbar"><div class="pfill" style="width:40%"></div></div>
               </div>
             </div>
           </div>
 
           <!-- Rating pill -->
-          <div class="absolute top-3 right-3 sm:top-5 sm:right-4 lg:-right-3" style="background:rgba(9,18,35,.92);backdrop-filter:blur(14px);border-radius:14px;padding:11px 18px;box-shadow:0 8px 28px rgba(0,0,0,.6),0 0 0 1px rgba(34,211,238,.15)">
+          <div class="absolute top-3 right-3 sm:top-5 sm:right-4 lg:-right-3" style="background:rgba(9,18,35,.92);backdrop-filter:blur(14px);border-radius:14px;padding:11px 18px;box-shadow:0 8px 28px rgba(0,0,0,.6),0 0 0 1px rgba(78,216,185,.15)">
             <div class="flex items-center gap-2.5">
-              <span class="text-[#F59E0B]">⭐</span>
+              <span class="text-[#85CBEE]">⭐</span>
               <div>
                 <div class="font-bold text-lg">4.9</div>
                 <div class="text-[11px] text-[#E4F2FF]/35">1,200+ doctors</div>
@@ -160,7 +160,7 @@
   </section>
 
   <!-- ── Stats Bar ────────────────────────────────────────────────────── -->
-  <section style="border-top:1px solid rgba(34,211,238,.1);border-bottom:1px solid rgba(34,211,238,.1);background:var(--surface)">
+  <section style="border-top:1px solid rgba(78,216,185,.1);border-bottom:1px solid rgba(78,216,185,.1);background:var(--surface)">
     <div class="max-w-5xl mx-auto px-4 sm:px-6 py-5 sm:py-7 grid grid-cols-2 sm:grid-cols-4 gap-4 sm:gap-6 text-center">
       <div>
         <div id="stat-patients" class="font-serif text-3xl sm:text-4xl gradient-text">0</div>
@@ -191,55 +191,55 @@
       <div class="grid sm:grid-cols-2 lg:grid-cols-3 gap-5">
         <!-- Feature cards with gradient strips -->
         <div class="card-hover rounded-[20px] overflow-hidden" style="background:var(--surface);border:1px solid var(--border)">
-          <div class="h-[100px] relative overflow-hidden" style="background:linear-gradient(135deg,rgba(34,211,238,.22),rgba(8,145,178,.1),transparent)">
+          <div class="h-[100px] relative overflow-hidden" style="background:linear-gradient(135deg,rgba(78,216,185,.22),rgba(8,145,178,.1),transparent)">
             <img src="https://images.unsplash.com/photo-1559757148-5c350d0d3c56?w=600&h=120&fit=crop&q=60" alt="" class="w-full h-full object-cover opacity-30 block" onerror="this.style.display='none'" loading="lazy"/>
           </div>
           <div class="p-5 pb-6">
-            <div class="w-[42px] h-[42px] rounded-[10px] flex items-center justify-center text-[#22D3EE] mb-3.5" style="background:rgba(34,211,238,.1)">🤖</div>
+            <div class="w-[42px] h-[42px] rounded-[10px] flex items-center justify-center text-[#4ED8B9] mb-3.5" style="background:rgba(78,216,185,.1)">🤖</div>
             <h3 class="font-bold text-[16px] mb-2">AI Symptom Analysis</h3>
             <p class="text-[13.5px] text-[#E4F2FF]/60 leading-relaxed">Instant insights with risk assessment and actionable next steps. ICD-10 mapped conditions.</p>
           </div>
         </div>
 
         <div class="card-hover rounded-[20px] overflow-hidden" style="background:var(--surface);border:1px solid var(--border)">
-          <div class="h-[100px] relative overflow-hidden" style="background:linear-gradient(135deg,rgba(245,158,11,.2),rgba(251,191,36,.08),transparent)">
+          <div class="h-[100px] relative overflow-hidden" style="background:linear-gradient(135deg,rgba(133,203,238,.2),rgba(165,226,246,.08),transparent)">
             <img src="https://images.unsplash.com/photo-1587854692152-cbe660dbde88?w=600&h=120&fit=crop&q=60" alt="" class="w-full h-full object-cover opacity-30 block" onerror="this.style.display='none'" loading="lazy"/>
           </div>
           <div class="p-5 pb-6">
-            <div class="w-[42px] h-[42px] rounded-[10px] flex items-center justify-center text-[#F59E0B] mb-3.5" style="background:rgba(245,158,11,.1)">📹</div>
+            <div class="w-[42px] h-[42px] rounded-[10px] flex items-center justify-center text-[#85CBEE] mb-3.5" style="background:rgba(133,203,238,.1)">📹</div>
             <h3 class="font-bold text-[16px] mb-2">Video Consultations</h3>
             <p class="text-[13.5px] text-[#E4F2FF]/60 leading-relaxed">Connect face-to-face with verified African doctors in your language. Works on 2G/3G.</p>
           </div>
         </div>
 
         <div class="card-hover rounded-[20px] overflow-hidden" style="background:var(--surface);border:1px solid var(--border)">
-          <div class="h-[100px] relative overflow-hidden" style="background:linear-gradient(135deg,rgba(16,185,129,.2),rgba(16,185,129,.06),transparent)">
+          <div class="h-[100px] relative overflow-hidden" style="background:linear-gradient(135deg,rgba(110,216,170,.2),rgba(110,216,170,.06),transparent)">
             <img src="https://images.unsplash.com/photo-1530026405186-ed1f139313f8?w=600&h=120&fit=crop&q=60" alt="" class="w-full h-full object-cover opacity-30 block" onerror="this.style.display='none'" loading="lazy"/>
           </div>
           <div class="p-5 pb-6">
-            <div class="w-[42px] h-[42px] rounded-[10px] flex items-center justify-center text-[#10B981] mb-3.5" style="background:rgba(16,185,129,.1)">📋</div>
+            <div class="w-[42px] h-[42px] rounded-[10px] flex items-center justify-center text-[#6ED8AA] mb-3.5" style="background:rgba(110,216,170,.1)">📋</div>
             <h3 class="font-bold text-[16px] mb-2">Digital Medical Records</h3>
             <p class="text-[13.5px] text-[#E4F2FF]/60 leading-relaxed">Encrypted, accessible health history from any device, anywhere.</p>
           </div>
         </div>
 
         <div class="card-hover rounded-[20px] overflow-hidden" style="background:var(--surface);border:1px solid var(--border)">
-          <div class="h-[100px] relative overflow-hidden" style="background:linear-gradient(135deg,rgba(167,139,250,.2),rgba(167,139,250,.06),transparent)">
+          <div class="h-[100px] relative overflow-hidden" style="background:linear-gradient(135deg,rgba(131,214,232,.2),rgba(131,214,232,.06),transparent)">
             <img src="https://images.unsplash.com/photo-1471864190281-a93a3070b6de?w=600&h=120&fit=crop&q=60" alt="" class="w-full h-full object-cover opacity-30 block" onerror="this.style.display='none'" loading="lazy"/>
           </div>
           <div class="p-5 pb-6">
-            <div class="w-[42px] h-[42px] rounded-[10px] flex items-center justify-center text-[#A78BFA] mb-3.5" style="background:rgba(167,139,250,.1)">🔒</div>
+            <div class="w-[42px] h-[42px] rounded-[10px] flex items-center justify-center text-[#83D6E8] mb-3.5" style="background:rgba(131,214,232,.1)">🔒</div>
             <h3 class="font-bold text-[16px] mb-2">HIPAA-Grade Security</h3>
             <p class="text-[13.5px] text-[#E4F2FF]/60 leading-relaxed">AES-256 encryption, full audit logs, and strict access controls.</p>
           </div>
         </div>
 
         <div class="card-hover rounded-[20px] overflow-hidden" style="background:var(--surface);border:1px solid var(--border)">
-          <div class="h-[100px] relative overflow-hidden" style="background:linear-gradient(135deg,rgba(34,211,238,.18),rgba(14,116,144,.08),transparent)">
+          <div class="h-[100px] relative overflow-hidden" style="background:linear-gradient(135deg,rgba(78,216,185,.18),rgba(14,116,144,.08),transparent)">
             <img src="https://images.unsplash.com/photo-1512941937669-90a1b58e7e9c?w=600&h=120&fit=crop&q=60" alt="" class="w-full h-full object-cover opacity-30 block" onerror="this.style.display='none'" loading="lazy"/>
           </div>
           <div class="p-5 pb-6">
-            <div class="w-[42px] h-[42px] rounded-[10px] flex items-center justify-center text-[#22D3EE] mb-3.5" style="background:rgba(34,211,238,.1)">📱</div>
+            <div class="w-[42px] h-[42px] rounded-[10px] flex items-center justify-center text-[#4ED8B9] mb-3.5" style="background:rgba(78,216,185,.1)">📱</div>
             <h3 class="font-bold text-[16px] mb-2">Works Offline (PWA)</h3>
             <p class="text-[13.5px] text-[#E4F2FF]/60 leading-relaxed">Built for Africa — works in low-bandwidth, offline environments as a PWA.</p>
           </div>
@@ -270,7 +270,7 @@
 
           <div class="space-y-7">
             <div class="flex gap-[18px] items-start">
-              <div class="w-11 h-11 rounded-xl flex items-center justify-center text-[#22D3EE] flex-shrink-0" style="background:rgba(34,211,238,.1)">
+              <div class="w-11 h-11 rounded-xl flex items-center justify-center text-[#4ED8B9] flex-shrink-0" style="background:rgba(78,216,185,.1)">
                 <svg class="w-[18px] h-[18px]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>
               </div>
               <div class="pt-0.5">
@@ -280,7 +280,7 @@
               </div>
             </div>
             <div class="flex gap-[18px] items-start">
-              <div class="w-11 h-11 rounded-xl flex items-center justify-center text-[#22D3EE] flex-shrink-0" style="background:rgba(34,211,238,.1)">
+              <div class="w-11 h-11 rounded-xl flex items-center justify-center text-[#4ED8B9] flex-shrink-0" style="background:rgba(78,216,185,.1)">
                 <svg class="w-[18px] h-[18px]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
               </div>
               <div class="pt-0.5">
@@ -290,7 +290,7 @@
               </div>
             </div>
             <div class="flex gap-[18px] items-start">
-              <div class="w-11 h-11 rounded-xl flex items-center justify-center text-[#22D3EE] flex-shrink-0" style="background:rgba(34,211,238,.1)">
+              <div class="w-11 h-11 rounded-xl flex items-center justify-center text-[#4ED8B9] flex-shrink-0" style="background:rgba(78,216,185,.1)">
                 <svg class="w-[18px] h-[18px]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
               </div>
               <div class="pt-0.5">
@@ -300,7 +300,7 @@
               </div>
             </div>
             <div class="flex gap-[18px] items-start">
-              <div class="w-11 h-11 rounded-xl flex items-center justify-center text-[#22D3EE] flex-shrink-0" style="background:rgba(34,211,238,.1)">
+              <div class="w-11 h-11 rounded-xl flex items-center justify-center text-[#4ED8B9] flex-shrink-0" style="background:rgba(78,216,185,.1)">
                 <svg class="w-[18px] h-[18px]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z"/></svg>
               </div>
               <div class="pt-0.5">
@@ -318,9 +318,9 @@
             alt="Doctor using technology" class="w-full h-full object-cover block" onerror="this.style.display='none'" loading="lazy"/>
           <div class="absolute inset-0" style="background:linear-gradient(0deg,rgba(13,78,78,.7) 0%,transparent 50%)"></div>
           <!-- Overlay card -->
-          <div class="absolute bottom-6 left-6 right-6 flex items-center gap-3 p-3.5 px-[18px] rounded-[14px]" style="background:rgba(9,18,35,.88);backdrop-filter:blur(14px);border:1px solid rgba(34,211,238,.18)">
-            <div class="w-[38px] h-[38px] rounded-[10px] flex items-center justify-center flex-shrink-0" style="background:rgba(16,185,129,.14);border:1px solid rgba(16,185,129,.25)">
-              <span class="text-[#10B981] text-lg">✓</span>
+          <div class="absolute bottom-6 left-6 right-6 flex items-center gap-3 p-3.5 px-[18px] rounded-[14px]" style="background:rgba(9,18,35,.88);backdrop-filter:blur(14px);border:1px solid rgba(78,216,185,.18)">
+            <div class="w-[38px] h-[38px] rounded-[10px] flex items-center justify-center flex-shrink-0" style="background:rgba(110,216,170,.14);border:1px solid rgba(110,216,170,.25)">
+              <span class="text-[#6ED8AA] text-lg">✓</span>
             </div>
             <div>
               <div class="font-bold text-sm">Available 24 / 7</div>
@@ -334,14 +334,14 @@
 
   <!-- ── CTA ───────────────────────────────────────────────────────────── -->
   <section class="py-12 sm:py-20 px-4 sm:px-6">
-    <div class="max-w-[860px] mx-auto rounded-[20px] sm:rounded-[28px] px-5 py-10 sm:p-[60px_48px] text-center relative overflow-hidden" style="background:var(--cyan);border:1px solid rgba(34,211,238,.2);box-shadow:0 0 80px rgba(34,211,238,.08),inset 0 1px 0 rgba(255,255,255,.04)">
+    <div class="max-w-[860px] mx-auto rounded-[20px] sm:rounded-[28px] px-5 py-10 sm:p-[60px_48px] text-center relative overflow-hidden" style="background:var(--cyan);border:1px solid rgba(78,216,185,.2);box-shadow:0 0 80px rgba(78,216,185,.08),inset 0 1px 0 rgba(255,255,255,.04)">
       <!-- Pattern -->
-      <div class="absolute inset-0 opacity-[.12]" style="background-image:radial-gradient(circle at 20% 50%,rgba(34,211,238,.6) 1px,transparent 1px),radial-gradient(circle at 80% 20%,rgba(245,158,11,.4) 1px,transparent 1px);background-size:40px 40px"></div>
+      <div class="absolute inset-0 opacity-[.12]" style="background-image:radial-gradient(circle at 20% 50%,rgba(78,216,185,.6) 1px,transparent 1px),radial-gradient(circle at 80% 20%,rgba(133,203,238,.4) 1px,transparent 1px);background-size:40px 40px"></div>
       <div class="relative z-10">
-        <h2 class="font-serif text-3xl sm:text-4xl lg:text-[46px] mb-4" style="background:linear-gradient(135deg,#E4F2FF,#22D3EE);-webkit-background-clip:text;-webkit-text-fill-color:transparent">Ready to take control<br>of your health?</h2>
+        <h2 class="font-serif text-3xl sm:text-4xl lg:text-[46px] mb-4" style="background:linear-gradient(135deg,#E4F2FF,#4ED8B9);-webkit-background-clip:text;-webkit-text-fill-color:transparent">Ready to take control<br>of your health?</h2>
         <p class="text-white/70 text-base max-w-[440px] mx-auto mb-9">Join Africans using HealthConnect for faster, smarter healthcare.</p>
         <div class="flex flex-col sm:flex-row gap-4 justify-center">
-          <a href="/pages/auth/register.html" class="inline-block bg-white text-[#22D3EE] font-bold px-6 sm:px-10 py-3.5 sm:py-4 rounded-2xl text-sm sm:text-base hover:bg-blue-50 transition-all shadow-xl hover:-translate-y-0.5">
+          <a href="/pages/auth/register.html" class="inline-block bg-white text-[#4ED8B9] font-bold px-6 sm:px-10 py-3.5 sm:py-4 rounded-2xl text-sm sm:text-base hover:bg-blue-50 transition-all shadow-xl hover:-translate-y-0.5">
             Start Free — Check Symptoms Now →
           </a>
           <a href="/pages/auth/register.html?role=doctor" class="inline-block border-2 border-white/40 text-white font-semibold px-6 sm:px-10 py-3.5 sm:py-4 rounded-2xl text-sm sm:text-base hover:bg-white/10 transition-all">
@@ -358,7 +358,7 @@
       <div class="grid sm:grid-cols-2 lg:grid-cols-4 gap-8 mb-10">
         <div>
           <div class="flex items-center gap-2 mb-4">
-            <div class="w-8 h-8 rounded-lg bg-[#22D3EE] flex items-center justify-center text-white">🏥</div>
+            <div class="w-8 h-8 rounded-lg bg-[#4ED8B9] flex items-center justify-center text-white">🏥</div>
             <span class="font-bold text-lg">HealthConnect</span>
           </div>
           <p class="text-sm text-[#E4F2FF]/35 leading-relaxed">AI-powered telemedicine platform built for Africa's healthcare future.</p>
@@ -366,24 +366,24 @@
         <div>
           <div class="font-semibold text-sm mb-4">Platform</div>
           <div class="space-y-2.5 text-sm text-[#E4F2FF]/50">
-            <div><a href="/pages/auth/register.html" class="hover:text-[#22D3EE] transition-colors">Symptom Checker</a></div>
-            <div><a href="/pages/auth/register.html" class="hover:text-[#22D3EE] transition-colors">Find Doctors</a></div>
-            <div><a href="/pages/auth/register.html" class="hover:text-[#22D3EE] transition-colors">Book Appointment</a></div>
+            <div><a href="/pages/auth/register.html" class="hover:text-[#4ED8B9] transition-colors">Symptom Checker</a></div>
+            <div><a href="/pages/auth/register.html" class="hover:text-[#4ED8B9] transition-colors">Find Doctors</a></div>
+            <div><a href="/pages/auth/register.html" class="hover:text-[#4ED8B9] transition-colors">Book Appointment</a></div>
           </div>
         </div>
         <div>
           <div class="font-semibold text-sm mb-4">For Doctors</div>
           <div class="space-y-2.5 text-sm text-[#E4F2FF]/50">
-            <div><a href="/pages/auth/register.html?role=doctor" class="hover:text-[#22D3EE] transition-colors">Join as Doctor</a></div>
-            <div><a href="#" class="hover:text-[#22D3EE] transition-colors">Doctor Portal</a></div>
+            <div><a href="/pages/auth/register.html?role=doctor" class="hover:text-[#4ED8B9] transition-colors">Join as Doctor</a></div>
+            <div><a href="#" class="hover:text-[#4ED8B9] transition-colors">Doctor Portal</a></div>
           </div>
         </div>
         <div>
           <div class="font-semibold text-sm mb-4">Legal</div>
           <div class="space-y-2.5 text-sm text-[#E4F2FF]/50">
-            <div><a href="/pages/legal/privacy-policy.html" class="hover:text-[#22D3EE] transition-colors">Privacy Policy</a></div>
-            <div><a href="/pages/legal/terms-and-conditions.html" class="hover:text-[#22D3EE] transition-colors">Terms of Service</a></div>
-            <div><a href="/pages/legal/medical-disclaimer.html" class="hover:text-[#22D3EE] transition-colors">Medical Disclaimer</a></div>
+            <div><a href="/pages/legal/privacy-policy.html" class="hover:text-[#4ED8B9] transition-colors">Privacy Policy</a></div>
+            <div><a href="/pages/legal/terms-and-conditions.html" class="hover:text-[#4ED8B9] transition-colors">Terms of Service</a></div>
+            <div><a href="/pages/legal/medical-disclaimer.html" class="hover:text-[#4ED8B9] transition-colors">Medical Disclaimer</a></div>
           </div>
         </div>
       </div>
@@ -399,11 +399,11 @@
     const navbar = document.getElementById('navbar');
     window.addEventListener('scroll', () => {
       if (window.scrollY > 50) {
-        navbar.style.background = 'rgba(7,14,28,.95)';
+        navbar.style.background = 'rgba(33,74,80,.95)';
         navbar.style.boxShadow = '0 4px 30px rgba(0,0,0,.4)';
         navbar.style.padding = '0.5rem 0';
       } else {
-        navbar.style.background = 'rgba(7,14,28,.88)';
+        navbar.style.background = 'rgba(33,74,80,.88)';
         navbar.style.boxShadow = 'none';
         navbar.style.padding = '1rem 0';
       }
@@ -494,5 +494,6 @@
 
     loadLandingStats();
   </script>
+  <script src="/js/support-chatbot.js" defer></script>
 </body>
 </html>

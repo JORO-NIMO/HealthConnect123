@@ -35,9 +35,9 @@ if (rawDbUrl) {
 // 2) Fill any missing pieces from Railway's individual vars or local defaults
 dbConfig.host     = dbConfig.host     || process.env.MYSQLHOST     || process.env.DB_HOST     || 'localhost';
 dbConfig.port     = dbConfig.port     || Number(process.env.MYSQLPORT || process.env.DB_PORT || 3306);
-dbConfig.user     = dbConfig.user     || process.env.MYSQLUSER     || process.env.DB_USER     || 'root';
-dbConfig.password = dbConfig.password || process.env.MYSQLPASSWORD || process.env.DB_PASSWORD || '';
-dbConfig.database = dbConfig.database || process.env.MYSQLDATABASE || process.env.DB_NAME     || 'mucosa_db';
+dbConfig.user     = dbConfig.user     || process.env.MYSQLUSER     || process.env.DB_USERNAME || process.env.DB_USER || 'root';
+dbConfig.password = dbConfig.password || process.env.MYSQLPASSWORD || process.env.DB_PASS || process.env.DB_PASSWORD || '';
+dbConfig.database = dbConfig.database || process.env.MYSQLDATABASE || process.env.DB_DATABASE || process.env.DB_NAME || 'mucosa_db';
 
 // 3) Log config (mask password)
 logger.info(`🔌 DB target: ${dbConfig.user}@${dbConfig.host}:${dbConfig.port}/${dbConfig.database} (password: ${dbConfig.password ? '***' : 'NOT SET'})`);
@@ -54,9 +54,22 @@ async function initializeDatabase(retries = 5, delay = 3000) {
       logger.info('✅ MySQL database connected successfully');
       return;
     } catch (err) {
-      logger.error(`❌ MySQL connection attempt ${attempt}/${retries} failed:`, err.message);
+      const code = err.code || 'UNKNOWN';
+      const message = err.message || 'No error message provided';
+      logger.error(`❌ MySQL connection attempt ${attempt}/${retries} failed: [${code}] ${message}`);
+
+      if (attempt === 1) {
+        if (code === 'ECONNREFUSED') {
+          logger.error('💡 MySQL is not reachable on the configured host/port. Start MySQL or update DB_HOST/DB_PORT in backend/.env.');
+        } else if (code === 'ER_ACCESS_DENIED_ERROR') {
+          logger.error('💡 MySQL credentials were rejected. Check DB_USER/DB_USERNAME and DB_PASSWORD/DB_PASS in backend/.env.');
+        } else if (code === 'ER_BAD_DB_ERROR') {
+          logger.error('💡 The configured database does not exist. Create it or update DB_NAME/DB_DATABASE in backend/.env.');
+        }
+      }
+
       if (attempt === retries) {
-        logger.error('All database connection attempts failed. Exiting.');
+        logger.error('All database connection attempts failed. The API will stay up, but database-backed endpoints will fail until MySQL is reachable.');
         throw err;
       }
       logger.info(`Retrying in ${delay / 1000} seconds...`);

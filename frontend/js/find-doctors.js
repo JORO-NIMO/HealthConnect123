@@ -17,21 +17,21 @@
     chip.textContent = text;
 
     if (tone === 'ok') {
-      chip.style.background = 'rgba(16,185,129,.08)';
-      chip.style.borderColor = 'rgba(16,185,129,.2)';
-      chip.style.color = '#10B981';
+      chip.style.background = 'rgba(110,216,170,.08)';
+      chip.style.borderColor = 'rgba(110,216,170,.2)';
+      chip.style.color = '#6ED8AA';
       return;
     }
 
     if (tone === 'warn') {
-      chip.style.background = 'rgba(245,158,11,.08)';
-      chip.style.borderColor = 'rgba(245,158,11,.2)';
-      chip.style.color = '#F59E0B';
+      chip.style.background = 'rgba(133,203,238,.08)';
+      chip.style.borderColor = 'rgba(133,203,238,.2)';
+      chip.style.color = '#85CBEE';
       return;
     }
 
-    chip.style.background = 'rgba(34,211,238,.08)';
-    chip.style.borderColor = 'rgba(34,211,238,.15)';
+    chip.style.background = 'rgba(78,216,185,.08)';
+    chip.style.borderColor = 'rgba(78,216,185,.15)';
     chip.style.color = 'var(--cyan)';
   }
 
@@ -165,14 +165,14 @@
 
   function doctorCard(d, showMatch = false) {
     const stars = '⭐'.repeat(Math.round(d.rating || 0));
-    const availBadge = `<span class="text-[10px] px-2 py-0.5 rounded-full font-semibold" style="background:rgba(16,185,129,.1);color:#10B981;border:1px solid rgba(16,185,129,.2)">● Available</span>`;
+    const availBadge = `<span class="text-[10px] px-2 py-0.5 rounded-full font-semibold" style="background:rgba(110,216,170,.1);color:#6ED8AA;border:1px solid rgba(110,216,170,.2)">● Available</span>`;
     const matchHtml = showMatch && d.matchScore ? `
       <div class="mt-3 pt-3" style="border-top:1px solid var(--border)">
         <div class="flex items-center justify-between mb-1">
           <span class="text-xs font-semibold" style="color:var(--cyan)">AI Match</span>
           <span class="text-xs font-bold" style="color:var(--cyan)">${d.matchScore}%</span>
         </div>
-        <div class="match-bar"><div class="match-bar-fill" style="width:${d.matchScore}%;background:${d.matchScore >= 80 ? '#10B981' : d.matchScore >= 60 ? '#FBBF24' : '#F87171'}"></div></div>
+        <div class="match-bar"><div class="match-bar-fill" style="width:${d.matchScore}%;background:${d.matchScore >= 80 ? '#6ED8AA' : d.matchScore >= 60 ? '#A5E2F6' : '#F87171'}"></div></div>
         ${d.matchReason ? `<p class="text-xs mt-1.5" style="color:var(--text3)">${Utils.escapeHtml(d.matchReason)}</p>` : ''}
       </div>` : '';
 
@@ -204,10 +204,10 @@
           </div>
         </div>
         ${d.bio ? `<p class="text-xs mt-3 leading-relaxed" style="color:var(--text3)">${Utils.truncate(d.bio, 120)}</p>` : ''}
-        ${d.languages ? `<div class="flex flex-wrap gap-1 mt-2">${d.languages.split(',').map(l => `<span class="text-[10px] px-2 py-0.5 rounded-full" style="background:rgba(34,211,238,.08);color:var(--cyan);border:1px solid rgba(34,211,238,.15)">${l.trim()}</span>`).join('')}</div>` : ''}
+        ${d.languages ? `<div class="flex flex-wrap gap-1 mt-2">${d.languages.split(',').map(l => `<span class="text-[10px] px-2 py-0.5 rounded-full" style="background:rgba(78,216,185,.08);color:var(--cyan);border:1px solid rgba(78,216,185,.15)">${l.trim()}</span>`).join('')}</div>` : ''}
         ${matchHtml}
         <div class="flex gap-2 mt-4">
-          <button onclick="viewDoctorProfile('${d.id}')" class="flex-1 text-sm py-2.5 rounded-xl font-semibold transition" style="background:rgba(34,211,238,.08);color:var(--cyan);border:1px solid rgba(34,211,238,.15)" onmouseover="this.style.background='rgba(34,211,238,.15)'" onmouseout="this.style.background='rgba(34,211,238,.08)'">
+          <button onclick="viewDoctorProfile('${d.id}')" class="flex-1 text-sm py-2.5 rounded-xl font-semibold transition" style="background:rgba(78,216,185,.08);color:var(--cyan);border:1px solid rgba(78,216,185,.15)" onmouseover="this.style.background='rgba(78,216,185,.15)'" onmouseout="this.style.background='rgba(78,216,185,.08)'">
             View Profile
           </button>
           <a href="/pages/patient/appointments.html?doctor=${d.id}" class="flex-1 text-sm py-2.5 rounded-xl font-semibold text-center btn-teal">
@@ -271,7 +271,7 @@
   function renderSymptomTags() {
     const container = document.getElementById('symptom-tags');
     container.innerHTML = symptoms.map((s, i) => `
-      <span class="inline-flex items-center gap-1 px-3 py-1.5 rounded-full text-xs font-medium" style="background:rgba(34,211,238,.1);color:var(--cyan);border:1px solid rgba(34,211,238,.2)">
+      <span class="inline-flex items-center gap-1 px-3 py-1.5 rounded-full text-xs font-medium" style="background:rgba(78,216,185,.1);color:var(--cyan);border:1px solid rgba(78,216,185,.2)">
         ${Utils.escapeHtml(s)}
         <button onclick="removeSymptom(${i})" class="ml-0.5 text-base leading-none opacity-60 hover:opacity-100">×</button>
       </span>
@@ -313,8 +313,8 @@
       }
 
       list.innerHTML = `
-        <div class="mb-4 rounded-xl p-3" style="background:rgba(16,185,129,.06);border:1px solid rgba(16,185,129,.15)">
-          <p class="text-sm font-medium" style="color:#10B981">✅ Found ${docs.length} matching doctor${docs.length > 1 ? 's' : ''} based on your symptoms</p>
+        <div class="mb-4 rounded-xl p-3" style="background:rgba(110,216,170,.06);border:1px solid rgba(110,216,170,.15)">
+          <p class="text-sm font-medium" style="color:#6ED8AA">✅ Found ${docs.length} matching doctor${docs.length > 1 ? 's' : ''} based on your symptoms</p>
         </div>
         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
           ${docs.map(d => doctorCard(d, true)).join('')}

@@ -7,15 +7,15 @@
   <link rel="manifest" href="/manifest.json">
   <link rel="stylesheet" href="/css/main.css">
   <script src="https://cdn.tailwindcss.com"></script>
-  <script>tailwind.config={theme:{extend:{colors:{primary:{DEFAULT:'#22D3EE',dark:'#0891B2'},secondary:{DEFAULT:'#10B981'}},fontFamily:{sans:['Plus Jakarta Sans','Inter','system-ui','sans-serif'],serif:['Instrument Serif','Georgia','serif']}}}}</script>
+  <script>tailwind.config={theme:{extend:{colors:{primary:{DEFAULT:'#4ED8B9',dark:'#66BFE0'},secondary:{DEFAULT:'#6ED8AA'}},fontFamily:{sans:['Plus Jakarta Sans','Inter','system-ui','sans-serif'],serif:['Instrument Serif','Georgia','serif']}}}}</script>
 </head>
 <body class="min-h-screen" style="background:var(--bg);color:var(--text)">
   <div class="flex h-screen overflow-hidden">
     <!-- Sidebar -->
-    <aside id="sidebar" class="w-[220px] flex flex-col fixed h-full z-30 -translate-x-full lg:translate-x-0 transition-transform duration-300" style="background:var(--surface2);border-right:1px solid rgba(34,211,238,.1)">
+    <aside id="sidebar" class="w-[220px] flex flex-col fixed h-full z-30 -translate-x-full lg:translate-x-0 transition-transform duration-300" style="background:var(--surface2);border-right:1px solid rgba(78,216,185,.1)">
       <div class="p-5 pb-3" style="border-bottom:1px solid var(--border)">
         <a href="/" class="flex items-center gap-2 font-bold text-lg">
-          <div class="w-8 h-8 rounded-[10px] bg-[#22D3EE] flex items-center justify-center text-white text-sm">🏥</div>
+          <div class="w-8 h-8 rounded-[10px] bg-[#4ED8B9] flex items-center justify-center text-white text-sm">🏥</div>
           <span class="font-serif text-[18px]">HealthConnect</span>
         </a>
       </div>
@@ -47,7 +47,7 @@
     <div id="sidebar-overlay" class="fixed inset-0 bg-black/40 z-20 hidden lg:hidden backdrop-blur-sm" onclick="toggleSidebar()"></div>
 
     <main class="flex-1 lg:ml-[220px] overflow-y-auto">
-      <header class="px-4 sm:px-6 py-4 flex items-center justify-between sticky top-0 z-10" style="background:rgba(7,14,28,.88);backdrop-filter:blur(20px);border-bottom:1px solid rgba(34,211,238,.08)">
+      <header class="px-4 sm:px-6 py-4 flex items-center justify-between sticky top-0 z-10" style="background:rgba(33,74,80,.88);backdrop-filter:blur(20px);border-bottom:1px solid rgba(78,216,185,.08)">
         <div class="flex items-center gap-3">
           <button onclick="toggleSidebar()" class="lg:hidden p-2" style="color:var(--text2)">
             <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/></svg>
@@ -70,14 +70,14 @@
             🚨 TRIGGER SOS
           </button>
           <p class="text-xs mt-4" style="color:var(--text3)">Your location and latest vitals will be shared with emergency contacts.</p>
-          <div id="sos-status" class="hidden mt-4 p-4 rounded-xl" style="background:rgba(16,185,129,.08);border:1px solid rgba(16,185,129,.2)">
+          <div id="sos-status" class="hidden mt-4 p-4 rounded-xl" style="background:rgba(110,216,170,.08);border:1px solid rgba(110,216,170,.2)">
             <div class="text-sm font-semibold" style="color:var(--green)">✅ SOS Alert Sent Successfully</div>
             <div class="text-xs mt-1" style="color:var(--text3)">Emergency contacts have been notified. Stay calm — help is on the way.</div>
           </div>
         </div>
 
         <!-- Emergency Contacts -->
-        <div class="animate-fade-up-1 rounded-[18px] p-4 sm:p-6" style="background:var(--surface2);border:1px solid rgba(34,211,238,.1)">
+        <div class="animate-fade-up-1 rounded-[18px] p-4 sm:p-6" style="background:var(--surface2);border:1px solid rgba(78,216,185,.1)">
           <div class="flex items-center justify-between mb-4">
             <h3 class="font-bold">Emergency Contacts</h3>
             <button onclick="showContactModal()" class="btn-teal text-xs font-semibold px-4 py-2">+ Add Contact</button>
@@ -92,7 +92,7 @@
         </div>
 
         <!-- SOS History -->
-        <div class="animate-fade-up-2 rounded-[18px] p-4 sm:p-6" style="background:var(--surface2);border:1px solid rgba(34,211,238,.1)">
+        <div class="animate-fade-up-2 rounded-[18px] p-4 sm:p-6" style="background:var(--surface2);border:1px solid rgba(78,216,185,.1)">
           <h3 class="font-bold mb-4">SOS History</h3>
           <div id="sos-history" class="space-y-3">
             <div class="text-center py-6" style="color:var(--text3)">
@@ -102,7 +102,7 @@
         </div>
 
         <!-- Important Numbers -->
-        <div class="animate-fade-up-3 rounded-[18px] p-4 sm:p-6" style="background:var(--surface2);border:1px solid rgba(34,211,238,.1)">
+        <div class="animate-fade-up-3 rounded-[18px] p-4 sm:p-6" style="background:var(--surface2);border:1px solid rgba(78,216,185,.1)">
           <h3 class="font-bold mb-4">🏥 Emergency Numbers</h3>
           <div class="grid sm:grid-cols-2 lg:grid-cols-3 gap-3">
             <a href="tel:911" class="flex items-center gap-3 p-4 rounded-xl" style="background:rgba(244,63,94,.06);border:1px solid rgba(244,63,94,.12)">
@@ -202,6 +202,7 @@
   <script src="/js/config.js"></script>
   <script src="/js/api.js"></script>
   <script src="/js/utils.js"></script>
+  <script src="/js/patient-icons.js"></script>
   <script src="/js/auth.js"></script>
   <script>
     Auth.requireRole('patient');
@@ -227,7 +228,7 @@
 
         el.innerHTML = contacts.map(c => `
           <div class="flex items-center gap-3 p-4 rounded-xl" style="background:var(--bg2);border:1px solid var(--border)">
-            <div class="w-10 h-10 rounded-full flex items-center justify-center text-lg" style="background:rgba(34,211,238,.1)">👤</div>
+            <div class="w-10 h-10 rounded-full flex items-center justify-center text-lg" style="background:rgba(78,216,185,.1)">👤</div>
             <div class="flex-1">
               <div class="font-semibold text-sm">${c.name} ${c.is_primary ? '<span class="badge b-cyan text-[10px] ml-1">Primary</span>' : ''}</div>
               <div class="text-xs" style="color:var(--text3)">${c.relationship} · ${c.phone}</div>

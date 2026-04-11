@@ -175,7 +175,7 @@
             ${canJoin ? `<a href="/pages/doctor/consultation.html?apptId=${appt.id}" class="text-xs font-semibold" style="color:var(--cyan)">Join →</a>` : ''}
             ${isPending ? `
               <div class="flex gap-1.5">
-                <button onclick="confirmAppt('${appt.id}')" class="text-xs px-2.5 py-1 rounded-lg font-medium" style="background:rgba(16,185,129,.1);color:var(--green)">✓ Accept</button>
+                <button onclick="confirmAppt('${appt.id}')" class="text-xs px-2.5 py-1 rounded-lg font-medium" style="background:rgba(110,216,170,.1);color:var(--green)">✓ Accept</button>
                 <button onclick="cancelAppt('${appt.id}')" class="text-xs px-2.5 py-1 rounded-lg font-medium" style="background:rgba(239,68,68,.08);color:var(--red)">✕</button>
               </div>` : ''}
           </div>
@@ -251,7 +251,7 @@
           <div class="text-xs" style="color:var(--text3)">${date} ${time}</div>
         </div>
         <div class="flex gap-2">
-          <button onclick="confirmAppt('${appt.id}')" class="text-xs px-2.5 py-1.5 rounded-lg font-medium transition" style="background:rgba(16,185,129,.1);color:var(--green)">✓</button>
+          <button onclick="confirmAppt('${appt.id}')" class="text-xs px-2.5 py-1.5 rounded-lg font-medium transition" style="background:rgba(110,216,170,.1);color:var(--green)">✓</button>
           <button onclick="cancelAppt('${appt.id}')" class="text-xs px-2.5 py-1.5 rounded-lg font-medium transition" style="background:rgba(239,68,68,.08);color:var(--red)">✕</button>
         </div>
       </div>`;

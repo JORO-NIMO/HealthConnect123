@@ -54,6 +54,20 @@ const aiLimiter = rateLimit({
   },
 });
 
+// ─── Support Chatbot (per user/IP) ───────────────────────────────────────
+const supportChatLimiter = rateLimit({
+  windowMs       : 60 * 60 * 1000, // 1 hour
+  max            : parseInt(process.env.SUPPORT_CHAT_RATE_LIMIT_MAX || '40'),
+  keyGenerator   : (req) => req.user?.id || req.ip,
+  standardHeaders: true,
+  legacyHeaders  : false,
+  message        : rateLimitMessage(60, parseInt(process.env.SUPPORT_CHAT_RATE_LIMIT_MAX || '40')),
+  handler        : (req, res, _next, options) => {
+    logger.warn(`Support chat rate limit exceeded for user: ${req.user?.id || req.ip}`);
+    res.status(429).json(options.message);
+  },
+});
+
 // ─── OTP Endpoints ─────────────────────────────────────────────────────────
 const otpLimiter = rateLimit({
   windowMs       : 10 * 60 * 1000, // 10 minutes
@@ -99,6 +113,7 @@ module.exports = {
   globalLimiter, 
   authLimiter, 
   aiLimiter, 
+  supportChatLimiter,
   otpLimiter, 
   paymentLimiter,
   uploadLimiter,

@@ -6,7 +6,7 @@
   <title>Consultation Room — HealthConnect</title>
   <link rel="stylesheet" href="/css/main.css">
   <script src="https://cdn.tailwindcss.com"></script>
-  <script>tailwind.config={theme:{extend:{colors:{primary:{DEFAULT:'#22D3EE',dark:'#0891B2'},secondary:{DEFAULT:'#10B981'}},fontFamily:{sans:['Plus Jakarta Sans','Inter','system-ui','sans-serif'],serif:['Instrument Serif','Georgia','serif']}}}}</script>
+  <script>tailwind.config={theme:{extend:{colors:{primary:{DEFAULT:'#4ED8B9',dark:'#66BFE0'},secondary:{DEFAULT:'#6ED8AA'}},fontFamily:{sans:['Plus Jakarta Sans','Inter','system-ui','sans-serif'],serif:['Instrument Serif','Georgia','serif']}}}}</script>
   <style>
     #local-video{transform:scaleX(-1)}
     #remote-video{transform:scaleX(-1)}
@@ -16,13 +16,13 @@
     .ctrl-btn:hover{opacity:.85}
     .input-dark{width:100%;padding:.6rem .85rem;border-radius:.75rem;font-size:.875rem;background:var(--bg2);border:1px solid var(--border);color:var(--text);outline:none;transition:border-color .2s}
     .input-dark::placeholder{color:var(--text3)}
-    .input-dark:focus{border-color:var(--cyan);box-shadow:0 0 0 3px rgba(34,211,238,.12)}
+    .input-dark:focus{border-color:var(--cyan);box-shadow:0 0 0 3px rgba(78,216,185,.12)}
   </style>
 </head>
-<body class="h-screen flex flex-col overflow-hidden" style="background:var(--bg);color:var(--text)">
+<body class="h-screen flex flex-col overflow-hidden" data-support-chatbot="off" style="background:var(--bg);color:var(--text)">
 
   <!-- Top Bar -->
-  <div class="flex items-center justify-between px-4 py-3" style="background:rgba(7,14,28,.8);backdrop-filter:blur(20px);border-bottom:1px solid var(--border)">
+  <div class="flex items-center justify-between px-4 py-3" style="background:rgba(33,74,80,.8);backdrop-filter:blur(20px);border-bottom:1px solid var(--border)">
     <div class="flex items-center gap-3">
       <div class="w-8 h-8 rounded-lg flex items-center justify-center text-white text-sm font-bold" style="background:linear-gradient(135deg,var(--cyan),var(--green))">M</div>
       <span class="font-semibold text-sm">HealthConnect Consultation Room</span>
@@ -32,7 +32,7 @@
         <div class="w-2 h-2 rounded-full" style="background:var(--text3)" id="status-dot"></div>
         <span class="text-xs" style="color:var(--text3)" id="status-text">Waiting...</span>
       </div>
-      <div class="text-xs px-3 py-1 rounded-full font-medium" style="background:rgba(34,211,238,.1);color:var(--cyan)" id="timer">00:00</div>
+      <div class="text-xs px-3 py-1 rounded-full font-medium" style="background:rgba(78,216,185,.1);color:var(--cyan)" id="timer">00:00</div>
     </div>
   </div>
 
@@ -76,7 +76,7 @@
   </div>
 
   <!-- Controls Bar -->
-  <div class="flex items-center justify-center gap-3 sm:gap-4 py-4 px-4" style="background:rgba(7,14,28,.8);backdrop-filter:blur(20px);border-top:1px solid var(--border)">
+  <div class="flex items-center justify-center gap-3 sm:gap-4 py-4 px-4" style="background:rgba(33,74,80,.8);backdrop-filter:blur(20px);border-top:1px solid var(--border)">
     <button id="mic-btn" onclick="toggleMic()" title="Toggle Microphone"
       class="ctrl-btn" style="background:var(--surface2)">🎤</button>
     <button id="cam-btn" onclick="toggleCamera()" title="Toggle Camera"

@@ -41,8 +41,8 @@ const CONFIG = {
   URGENCY: {
     emergency: { label: 'Emergency',    color: '#F87171', bg: 'rgba(239,68,68,.08)',    border: 'rgba(239,68,68,.2)',    icon: '🚨', badge: 'badge b-red' },
     high:      { label: 'High',         color: '#FB923C', bg: 'rgba(251,146,60,.08)',   border: 'rgba(251,146,60,.2)',   icon: '⚠️', badge: 'badge b-gold' },
-    medium:    { label: 'Medium',       color: '#FBBF24', bg: 'rgba(245,158,11,.08)',   border: 'rgba(245,158,11,.2)',   icon: '📋', badge: 'badge b-yellow' },
-    low:       { label: 'Low',          color: '#34D399', bg: 'rgba(16,185,129,.08)',   border: 'rgba(16,185,129,.2)',   icon: 'ℹ️', badge: 'badge b-green' },
+    medium:    { label: 'Medium',       color: '#A5E2F6', bg: 'rgba(133,203,238,.08)',   border: 'rgba(133,203,238,.2)',   icon: '📋', badge: 'badge b-yellow' },
+    low:       { label: 'Low',          color: '#4ECFB2', bg: 'rgba(110,216,170,.08)',   border: 'rgba(110,216,170,.2)',   icon: 'ℹ️', badge: 'badge b-green' },
   },
 
   // Appointment status config
@@ -112,4 +112,16 @@ Object.freeze(CONFIG.DASHBOARDS);
   } else {
     applyBranding();
   }
+})();
+
+// ─── Load Support Chatbot On App Pages ───────────────────────────────────
+(function initSupportChatbotLoader() {
+  if (window.location.pathname.startsWith('/pages/auth/')) return;
+  if (document.querySelector('script[data-hc-support-chatbot="1"]')) return;
+
+  const script = document.createElement('script');
+  script.src = '/js/support-chatbot.js';
+  script.defer = true;
+  script.dataset.hcSupportChatbot = '1';
+  document.head.appendChild(script);
 })();

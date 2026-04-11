@@ -7,16 +7,16 @@
   <link rel="manifest" href="/manifest.json">
   <link rel="stylesheet" href="/css/main.css">
   <script src="https://cdn.tailwindcss.com"></script>
-  <script>tailwind.config={theme:{extend:{colors:{primary:{DEFAULT:'#22D3EE',dark:'#0891B2'},secondary:{DEFAULT:'#10B981'}},fontFamily:{sans:['Plus Jakarta Sans','Inter','system-ui','sans-serif'],serif:['Instrument Serif','Georgia','serif']}}}}</script>
+  <script>tailwind.config={theme:{extend:{colors:{primary:{DEFAULT:'#4ED8B9',dark:'#66BFE0'},secondary:{DEFAULT:'#6ED8AA'}},fontFamily:{sans:['Plus Jakarta Sans','Inter','system-ui','sans-serif'],serif:['Instrument Serif','Georgia','serif']}}}}</script>
 </head>
 <body class="min-h-screen" style="background:var(--bg);color:var(--text)">
   <div class="flex h-screen overflow-hidden">
 
     <!-- Sidebar -->
-    <aside id="sidebar" class="w-[220px] flex flex-col fixed h-full z-30 -translate-x-full lg:translate-x-0 transition-transform duration-300" style="background:var(--surface2);border-right:1px solid rgba(34,211,238,.1)">
+    <aside id="sidebar" class="w-[220px] flex flex-col fixed h-full z-30 -translate-x-full lg:translate-x-0 transition-transform duration-300" style="background:var(--surface2);border-right:1px solid rgba(78,216,185,.1)">
       <div class="p-5 pb-3" style="border-bottom:1px solid var(--border)">
         <a href="/" class="flex items-center gap-2 font-bold text-lg">
-          <div class="w-8 h-8 rounded-[10px] bg-[#22D3EE] flex items-center justify-center text-white text-sm">🏥</div>
+          <div class="w-8 h-8 rounded-[10px] bg-[#4ED8B9] flex items-center justify-center text-white text-sm">🏥</div>
           <span class="font-serif text-[18px]">HealthConnect</span>
         </a>
       </div>
@@ -46,7 +46,7 @@
 
     <!-- Main content -->
     <main class="flex-1 lg:ml-[220px] overflow-y-auto">
-      <header class="px-4 sm:px-6 py-4 flex items-center justify-between sticky top-0 z-10" style="background:rgba(7,14,28,.88);backdrop-filter:blur(20px);border-bottom:1px solid rgba(34,211,238,.08)">
+      <header class="px-4 sm:px-6 py-4 flex items-center justify-between sticky top-0 z-10" style="background:rgba(33,74,80,.88);backdrop-filter:blur(20px);border-bottom:1px solid rgba(78,216,185,.08)">
         <div class="flex items-center gap-3">
           <button onclick="toggleSidebar()" class="lg:hidden p-2" style="color:var(--text2)">
             <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/></svg>
@@ -113,7 +113,7 @@
   <!-- Result Detail Modal -->
   <div id="result-modal" class="fixed inset-0 z-50 hidden">
     <div class="absolute inset-0 bg-black/60 backdrop-blur-sm" onclick="closeModal()"></div>
-    <div class="absolute inset-4 sm:inset-auto sm:top-1/2 sm:left-1/2 sm:-translate-x-1/2 sm:-translate-y-1/2 sm:w-full sm:max-w-2xl sm:max-h-[85vh] rounded-2xl overflow-y-auto" style="background:var(--surface2);border:1px solid rgba(34,211,238,.15)">
+    <div class="absolute inset-4 sm:inset-auto sm:top-1/2 sm:left-1/2 sm:-translate-x-1/2 sm:-translate-y-1/2 sm:w-full sm:max-w-2xl sm:max-h-[85vh] rounded-2xl overflow-y-auto" style="background:var(--surface2);border:1px solid rgba(78,216,185,.15)">
       <div class="p-4 sm:p-6">
         <div class="flex items-center justify-between mb-5">
           <h2 class="font-bold text-lg font-serif" id="modal-title">Test Result Details</h2>
@@ -127,6 +127,7 @@
   <script src="/js/config.js"></script>
   <script src="/js/api.js"></script>
   <script src="/js/utils.js"></script>
+  <script src="/js/patient-icons.js"></script>
   <script src="/js/auth.js"></script>
   <script src="https://cdn.socket.io/4.7.5/socket.io.min.js"></script>
   <script src="/js/notifications.js"></script>
@@ -204,11 +205,11 @@
         return `
           <div class="p-5 rounded-xl mb-3 cursor-pointer transition-all ${r.is_critical ? 'ring-1 ring-red-400/30' : ''}" 
                style="background:var(--bg2);border:1px solid ${r.is_critical ? 'rgba(239,68,68,.3)' : 'var(--border)'}" 
-               onmouseover="this.style.borderColor='rgba(34,211,238,.3)'" 
+               onmouseover="this.style.borderColor='rgba(78,216,185,.3)'" 
                onmouseout="this.style.borderColor='${r.is_critical ? 'rgba(239,68,68,.3)' : 'var(--border)'}'"
                onclick="viewResult('${r.id}')">
             <div class="flex items-start gap-4">
-              <div class="w-12 h-12 rounded-xl flex items-center justify-center text-xl flex-shrink-0" style="background:${r.is_critical ? 'rgba(239,68,68,.1)' : 'rgba(34,211,238,.1)'}">
+              <div class="w-12 h-12 rounded-xl flex items-center justify-center text-xl flex-shrink-0" style="background:${r.is_critical ? 'rgba(239,68,68,.1)' : 'rgba(78,216,185,.1)'}">
                 ${typeIcons[r.test_type] || '🧪'}
               </div>
               <div class="flex-1 min-w-0">
@@ -224,7 +225,7 @@
                   <span class="text-xs" style="color:var(--text3)">📅 ${date}</span>
                   ${r.file_url ? `<span class="text-xs" style="color:var(--cyan)">📎 Attachment</span>` : ''}
                 </div>
-                ${r.test_type ? `<span class="text-[11px] mt-2 inline-block px-2 py-0.5 rounded-full" style="background:rgba(34,211,238,.06);color:var(--cyan)">${r.test_type.replace(/_/g, ' ')}</span>` : ''}
+                ${r.test_type ? `<span class="text-[11px] mt-2 inline-block px-2 py-0.5 rounded-full" style="background:rgba(78,216,185,.06);color:var(--cyan)">${r.test_type.replace(/_/g, ' ')}</span>` : ''}
               </div>
               <span class="text-sm" style="color:var(--text3)">→</span>
             </div>
@@ -336,7 +337,7 @@
             </div>
 
             ${r.notes ? `
-              <div class="p-4 rounded-xl" style="background:rgba(34,211,238,.04);border:1px solid rgba(34,211,238,.1)">
+              <div class="p-4 rounded-xl" style="background:rgba(78,216,185,.04);border:1px solid rgba(78,216,185,.1)">
                 <div class="text-[11px] mb-2 font-semibold" style="color:var(--cyan)">Doctor's Notes</div>
                 <p class="text-sm" style="color:var(--text2)">${r.notes}</p>
               </div>
@@ -373,7 +374,7 @@
                     const fileName = a.name || a.filename || fileUrl.split('/').pop() || 'Download';
                     const isImage = /\.(png|jpe?g|gif|webp|bmp|svg)$/i.test(fileUrl);
                     return `
-                    <a href="${fileUrl}" target="_blank" class="flex items-center gap-3 p-3 rounded-xl transition-all" style="background:var(--bg);border:1px solid var(--border)" onmouseover="this.style.borderColor='rgba(34,211,238,.3)'" onmouseout="this.style.borderColor='var(--border)'">
+                    <a href="${fileUrl}" target="_blank" class="flex items-center gap-3 p-3 rounded-xl transition-all" style="background:var(--bg);border:1px solid var(--border)" onmouseover="this.style.borderColor='rgba(78,216,185,.3)'" onmouseout="this.style.borderColor='var(--border)'">
                       <span>📎</span>
                       <span class="text-sm">${fileName}</span>
                     </a>

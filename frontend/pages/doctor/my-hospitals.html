@@ -7,16 +7,16 @@
   <link rel="manifest" href="/manifest.json">
   <link rel="stylesheet" href="/css/main.css">
   <script src="https://cdn.tailwindcss.com"></script>
-  <script>tailwind.config={theme:{extend:{colors:{primary:{DEFAULT:'#22D3EE',dark:'#0891B2'},secondary:{DEFAULT:'#10B981'}},fontFamily:{sans:['Plus Jakarta Sans','Inter','system-ui','sans-serif'],serif:['Instrument Serif','Georgia','serif']}}}}</script>
+  <script>tailwind.config={theme:{extend:{colors:{primary:{DEFAULT:'#4ED8B9',dark:'#66BFE0'},secondary:{DEFAULT:'#6ED8AA'}},fontFamily:{sans:['Plus Jakarta Sans','Inter','system-ui','sans-serif'],serif:['Instrument Serif','Georgia','serif']}}}}</script>
 </head>
 <body class="min-h-screen" style="background:var(--bg);color:var(--text)">
   <div class="flex h-screen overflow-hidden">
 
     <!-- Sidebar -->
-    <aside id="sidebar" class="w-[220px] flex flex-col fixed h-full z-30 -translate-x-full lg:translate-x-0 transition-transform duration-300" style="background:var(--surface2);border-right:1px solid rgba(34,211,238,.1)">
+    <aside id="sidebar" class="w-[220px] flex flex-col fixed h-full z-30 -translate-x-full lg:translate-x-0 transition-transform duration-300" style="background:var(--surface2);border-right:1px solid rgba(78,216,185,.1)">
       <div class="p-5 pb-3" style="border-bottom:1px solid var(--border)">
         <a href="/" class="flex items-center gap-2 font-bold text-lg">
-          <div class="w-8 h-8 rounded-[10px] bg-[#22D3EE] flex items-center justify-center text-white text-sm">🏥</div>
+          <div class="w-8 h-8 rounded-[10px] bg-[#4ED8B9] flex items-center justify-center text-white text-sm">🏥</div>
           <span class="font-serif text-[18px]">HealthConnect</span>
         </a>
       </div>
@@ -39,7 +39,7 @@
 
     <!-- Main -->
     <main class="flex-1 lg:ml-[220px] overflow-y-auto">
-      <header class="px-4 sm:px-6 py-4 flex items-center justify-between sticky top-0 z-10" style="background:rgba(7,14,28,.88);backdrop-filter:blur(20px);border-bottom:1px solid rgba(34,211,238,.08)">
+      <header class="px-4 sm:px-6 py-4 flex items-center justify-between sticky top-0 z-10" style="background:rgba(33,74,80,.88);backdrop-filter:blur(20px);border-bottom:1px solid rgba(78,216,185,.08)">
         <div class="flex items-center gap-3">
           <button onclick="toggleSidebar()" class="lg:hidden p-2" style="color:var(--text2)">
             <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/></svg>
@@ -97,9 +97,9 @@
         }
 
         el.innerHTML = hospitals.map(h => `
-          <div class="rounded-[18px] p-4 sm:p-6 mb-4 transition-all" style="background:var(--surface2);border:1px solid rgba(34,211,238,.1)" onmouseover="this.style.borderColor='rgba(34,211,238,.25)'" onmouseout="this.style.borderColor='rgba(34,211,238,.1)'">
+          <div class="rounded-[18px] p-4 sm:p-6 mb-4 transition-all" style="background:var(--surface2);border:1px solid rgba(78,216,185,.1)" onmouseover="this.style.borderColor='rgba(78,216,185,.25)'" onmouseout="this.style.borderColor='rgba(78,216,185,.1)'">
             <div class="flex items-start gap-5">
-              <div class="w-16 h-16 rounded-2xl flex items-center justify-center text-3xl flex-shrink-0" style="background:rgba(34,211,238,.08)">🏥</div>
+              <div class="w-16 h-16 rounded-2xl flex items-center justify-center text-3xl flex-shrink-0" style="background:rgba(78,216,185,.08)">🏥</div>
               <div class="flex-1 min-w-0">
                 <div class="flex items-center gap-2 flex-wrap">
                   <h3 class="font-bold text-lg">${h.name}</h3>
@@ -134,7 +134,7 @@
 
                 ${h.specializations ? `
                   <div class="flex flex-wrap gap-1.5 mt-3">
-                    ${(typeof h.specializations === 'string' ? JSON.parse(h.specializations) : h.specializations).slice(0, 6).map(s => `<span class="px-2 py-0.5 text-[11px] rounded-full" style="background:rgba(34,211,238,.08);color:var(--cyan)">${s}</span>`).join('')}
+                    ${(typeof h.specializations === 'string' ? JSON.parse(h.specializations) : h.specializations).slice(0, 6).map(s => `<span class="px-2 py-0.5 text-[11px] rounded-full" style="background:rgba(78,216,185,.08);color:var(--cyan)">${s}</span>`).join('')}
                   </div>
                 ` : ''}
               </div>

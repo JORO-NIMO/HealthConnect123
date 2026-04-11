@@ -7,16 +7,16 @@
   <link rel="manifest" href="/manifest.json">
   <link rel="stylesheet" href="/css/main.css">
   <script src="https://cdn.tailwindcss.com"></script>
-  <script>tailwind.config={theme:{extend:{colors:{primary:{DEFAULT:'#22D3EE',dark:'#0891B2'},secondary:{DEFAULT:'#10B981'}},fontFamily:{sans:['Plus Jakarta Sans','Inter','system-ui','sans-serif'],serif:['Instrument Serif','Georgia','serif']}}}}</script>
+  <script>tailwind.config={theme:{extend:{colors:{primary:{DEFAULT:'#4ED8B9',dark:'#66BFE0'},secondary:{DEFAULT:'#6ED8AA'}},fontFamily:{sans:['Plus Jakarta Sans','Inter','system-ui','sans-serif'],serif:['Instrument Serif','Georgia','serif']}}}}</script>
 </head>
 <body class="min-h-screen" style="background:var(--bg);color:var(--text)">
   <div class="flex h-screen overflow-hidden">
 
     <!-- Sidebar -->
-    <aside id="sidebar" class="w-[220px] flex flex-col fixed h-full z-30 -translate-x-full lg:translate-x-0 transition-transform duration-300" style="background:var(--surface2);border-right:1px solid rgba(34,211,238,.1)">
+    <aside id="sidebar" class="w-[220px] flex flex-col fixed h-full z-30 -translate-x-full lg:translate-x-0 transition-transform duration-300" style="background:var(--surface2);border-right:1px solid rgba(78,216,185,.1)">
       <div class="p-5 pb-3" style="border-bottom:1px solid var(--border)">
         <a href="/" class="flex items-center gap-2 font-bold text-lg">
-          <div class="w-8 h-8 rounded-[10px] bg-[#22D3EE] flex items-center justify-center text-white text-sm">🏥</div>
+          <div class="w-8 h-8 rounded-[10px] bg-[#4ED8B9] flex items-center justify-center text-white text-sm">🏥</div>
           <span class="font-serif text-[18px]">HealthConnect</span>
         </a>
       </div>
@@ -46,7 +46,7 @@
 
     <!-- Main content -->
     <main class="flex-1 lg:ml-[220px] overflow-y-auto">
-      <header class="px-4 sm:px-6 py-4 flex items-center justify-between sticky top-0 z-10" style="background:rgba(7,14,28,.88);backdrop-filter:blur(20px);border-bottom:1px solid rgba(34,211,238,.08)">
+      <header class="px-4 sm:px-6 py-4 flex items-center justify-between sticky top-0 z-10" style="background:rgba(33,74,80,.88);backdrop-filter:blur(20px);border-bottom:1px solid rgba(78,216,185,.08)">
         <div class="flex items-center gap-3">
           <button onclick="toggleSidebar()" class="lg:hidden p-2" style="color:var(--text2)">
             <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/></svg>
@@ -66,10 +66,10 @@
 
       <div class="p-4 sm:p-6 space-y-5">
 
-        <div class="rounded-[18px] p-4 sm:p-6" style="background:var(--surface2);border:1px solid rgba(34,211,238,.1)">
+        <div class="rounded-[18px] p-4 sm:p-6" style="background:var(--surface2);border:1px solid rgba(78,216,185,.1)">
           <div class="flex items-center justify-between flex-wrap gap-3 mb-4">
             <h2 class="font-bold">Search Hospitals by Region</h2>
-            <span id="saved-location-chip" class="text-xs px-3 py-1.5 rounded-full" style="background:rgba(34,211,238,.08);border:1px solid rgba(34,211,238,.15);color:var(--cyan)">Checking saved location…</span>
+            <span id="saved-location-chip" class="text-xs px-3 py-1.5 rounded-full" style="background:rgba(78,216,185,.08);border:1px solid rgba(78,216,185,.15);color:var(--cyan)">Checking saved location…</span>
           </div>
           <div class="grid grid-cols-1 sm:grid-cols-4 gap-3">
             <input id="hospital-city-filter" type="text" placeholder="City" class="input-dark">
@@ -93,7 +93,7 @@
         </div>
 
         <!-- My linked hospitals -->
-        <div class="rounded-[18px] p-4 sm:p-6" style="background:var(--surface2);border:1px solid rgba(34,211,238,.1)">
+        <div class="rounded-[18px] p-4 sm:p-6" style="background:var(--surface2);border:1px solid rgba(78,216,185,.1)">
           <h2 class="font-bold mb-4">My Linked Hospitals</h2>
           <div id="my-hospitals-list">
             <div class="text-center py-10" style="color:var(--text3)">
@@ -105,7 +105,7 @@
         </div>
 
         <!-- Nearby hospitals search results -->
-        <div id="nearby-section" class="hidden rounded-[18px] p-4 sm:p-6" style="background:var(--surface2);border:1px solid rgba(34,211,238,.1)">
+        <div id="nearby-section" class="hidden rounded-[18px] p-4 sm:p-6" style="background:var(--surface2);border:1px solid rgba(78,216,185,.1)">
           <h2 class="font-bold mb-4">Nearby Hospitals</h2>
           <div id="nearby-hospitals-list">
             <div class="text-center py-8" style="color:var(--text3)">
@@ -122,6 +122,7 @@
   <script src="/js/config.js"></script>
   <script src="/js/api.js"></script>
   <script src="/js/utils.js"></script>
+  <script src="/js/patient-icons.js"></script>
   <script src="/js/auth.js"></script>
   <script src="https://cdn.socket.io/4.7.5/socket.io.min.js"></script>
   <script src="/js/notifications.js"></script>
@@ -164,19 +165,19 @@
       if (!chip) return;
       chip.textContent = text;
       if (tone === 'ok') {
-        chip.style.background = 'rgba(16,185,129,.08)';
-        chip.style.borderColor = 'rgba(16,185,129,.2)';
-        chip.style.color = '#10B981';
+        chip.style.background = 'rgba(110,216,170,.08)';
+        chip.style.borderColor = 'rgba(110,216,170,.2)';
+        chip.style.color = '#6ED8AA';
         return;
       }
       if (tone === 'warn') {
-        chip.style.background = 'rgba(245,158,11,.08)';
-        chip.style.borderColor = 'rgba(245,158,11,.2)';
-        chip.style.color = '#F59E0B';
+        chip.style.background = 'rgba(133,203,238,.08)';
+        chip.style.borderColor = 'rgba(133,203,238,.2)';
+        chip.style.color = '#85CBEE';
         return;
       }
-      chip.style.background = 'rgba(34,211,238,.08)';
-      chip.style.borderColor = 'rgba(34,211,238,.15)';
+      chip.style.background = 'rgba(78,216,185,.08)';
+      chip.style.borderColor = 'rgba(78,216,185,.15)';
       chip.style.color = 'var(--cyan)';
     }
 
@@ -213,9 +214,9 @@
       if (!hospitals.length) return;
 
       el.innerHTML = hospitals.map(h => `
-        <div class="p-5 rounded-xl mb-3 transition-all" style="background:var(--bg2);border:1px solid var(--border)" onmouseover="this.style.borderColor='rgba(34,211,238,.3)'" onmouseout="this.style.borderColor='var(--border)'">
+        <div class="p-5 rounded-xl mb-3 transition-all" style="background:var(--bg2);border:1px solid var(--border)" onmouseover="this.style.borderColor='rgba(78,216,185,.3)'" onmouseout="this.style.borderColor='var(--border)'">
           <div class="flex items-start gap-4">
-            <div class="w-14 h-14 rounded-xl flex items-center justify-center text-2xl flex-shrink-0" style="background:rgba(34,211,238,.1)">🏥</div>
+            <div class="w-14 h-14 rounded-xl flex items-center justify-center text-2xl flex-shrink-0" style="background:rgba(78,216,185,.1)">🏥</div>
             <div class="flex-1 min-w-0">
               <div class="flex items-center gap-2 flex-wrap">
                 <h3 class="font-bold text-[15px]">${h.name}</h3>
@@ -229,12 +230,12 @@
               </div>
               ${h.specializations ? `
                 <div class="flex flex-wrap gap-1.5 mt-3">
-                  ${(typeof h.specializations === 'string' ? JSON.parse(h.specializations) : h.specializations).slice(0, 4).map(s => `<span class="px-2 py-0.5 text-[11px] rounded-full" style="background:rgba(34,211,238,.08);color:var(--cyan)">${s}</span>`).join('')}
+                  ${(typeof h.specializations === 'string' ? JSON.parse(h.specializations) : h.specializations).slice(0, 4).map(s => `<span class="px-2 py-0.5 text-[11px] rounded-full" style="background:rgba(78,216,185,.08);color:var(--cyan)">${s}</span>`).join('')}
                 </div>
               ` : ''}
             </div>
             <div class="flex flex-col gap-2">
-              <a href="/pages/patient/test-results.html?hospital=${h.hospital_id || h.id}" class="text-xs font-semibold px-3 py-1.5 rounded-lg transition-all" style="background:rgba(34,211,238,.1);color:var(--cyan)">🧪 Results</a>
+              <a href="/pages/patient/test-results.html?hospital=${h.hospital_id || h.id}" class="text-xs font-semibold px-3 py-1.5 rounded-lg transition-all" style="background:rgba(78,216,185,.1);color:var(--cyan)">🧪 Results</a>
             </div>
           </div>
         </div>
@@ -360,9 +361,9 @@
       }
 
       el.innerHTML = hospitals.map(h => `
-        <div class="p-5 rounded-xl mb-3 transition-all" style="background:var(--bg2);border:1px solid var(--border)" onmouseover="this.style.borderColor='rgba(34,211,238,.3)'" onmouseout="this.style.borderColor='var(--border)'">
+        <div class="p-5 rounded-xl mb-3 transition-all" style="background:var(--bg2);border:1px solid var(--border)" onmouseover="this.style.borderColor='rgba(78,216,185,.3)'" onmouseout="this.style.borderColor='var(--border)'">
           <div class="flex items-start gap-4">
-            <div class="w-14 h-14 rounded-xl flex items-center justify-center text-2xl flex-shrink-0" style="background:rgba(16,185,129,.1)">🏥</div>
+            <div class="w-14 h-14 rounded-xl flex items-center justify-center text-2xl flex-shrink-0" style="background:rgba(110,216,170,.1)">🏥</div>
             <div class="flex-1 min-w-0">
               <h3 class="font-bold text-[15px]">${h.name}</h3>
               <p class="text-xs mt-1" style="color:var(--text3)">${h.type ? h.type.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase()) : 'Hospital'}</p>
@@ -373,7 +374,7 @@
               </div>
               ${h.specializations ? `
                 <div class="flex flex-wrap gap-1.5 mt-3">
-                  ${(typeof h.specializations === 'string' ? JSON.parse(h.specializations) : h.specializations).slice(0, 4).map(s => `<span class="px-2 py-0.5 text-[11px] rounded-full" style="background:rgba(16,185,129,.08);color:var(--green)">${s}</span>`).join('')}
+                  ${(typeof h.specializations === 'string' ? JSON.parse(h.specializations) : h.specializations).slice(0, 4).map(s => `<span class="px-2 py-0.5 text-[11px] rounded-full" style="background:rgba(110,216,170,.08);color:var(--green)">${s}</span>`).join('')}
                 </div>
               ` : ''}
             </div>

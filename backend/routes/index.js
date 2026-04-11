@@ -24,5 +24,6 @@ router.use('/health-records',    require('./healthRecords.routes'));
 router.use('/waitlist',          require('./waitlist.routes'));
 router.use('/payments',          require('./payment.routes'));
 router.use('/hospitals',         require('./hospital.routes'));
+router.use('/support',           require('./support.routes'));
 
 module.exports = router;

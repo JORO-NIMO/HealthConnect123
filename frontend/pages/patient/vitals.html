@@ -4,14 +4,14 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
   <meta name="description" content="Track and monitor your vital signs with HealthConnect">
-  <meta name="theme-color" content="#070E1C">
+  <meta name="theme-color" content="#2B555F">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <title>Vital Signs — HealthConnect</title>
   <link rel="manifest" href="/manifest.json">
   <link rel="stylesheet" href="/css/main.css">
   <script src="https://cdn.tailwindcss.com"></script>
-  <script>tailwind.config={theme:{extend:{colors:{primary:{DEFAULT:'#22D3EE',dark:'#0891B2'},secondary:{DEFAULT:'#10B981'}},fontFamily:{sans:['Plus Jakarta Sans','Inter','system-ui','sans-serif'],serif:['Instrument Serif','Georgia','serif']}}}}</script>
+  <script>tailwind.config={theme:{extend:{colors:{primary:{DEFAULT:'#4ED8B9',dark:'#66BFE0'},secondary:{DEFAULT:'#6ED8AA'}},fontFamily:{sans:['Plus Jakarta Sans','Inter','system-ui','sans-serif'],serif:['Instrument Serif','Georgia','serif']}}}}</script>
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4" defer></script>
   <style>
     #charts-container > div {
@@ -45,10 +45,10 @@
   <div class="flex h-screen overflow-hidden">
 
     <!-- Sidebar -->
-    <aside id="sidebar" class="w-[220px] flex flex-col fixed h-full z-30 -translate-x-full lg:translate-x-0 transition-transform duration-300" style="background:var(--surface2);border-right:1px solid rgba(34,211,238,.1)">
+    <aside id="sidebar" class="w-[220px] flex flex-col fixed h-full z-30 -translate-x-full lg:translate-x-0 transition-transform duration-300" style="background:var(--surface2);border-right:1px solid rgba(78,216,185,.1)">
       <div class="p-5 pb-3" style="border-bottom:1px solid var(--border)">
         <a href="/" class="flex items-center gap-2 font-bold text-lg">
-          <div class="w-8 h-8 rounded-[10px] bg-[#22D3EE] flex items-center justify-center text-white text-sm">🏥</div>
+          <div class="w-8 h-8 rounded-[10px] bg-[#4ED8B9] flex items-center justify-center text-white text-sm">🏥</div>
           <span class="font-serif text-[18px]">HealthConnect</span>
         </a>
       </div>
@@ -80,7 +80,7 @@
     <div id="sidebar-overlay" class="fixed inset-0 bg-black/40 z-20 hidden lg:hidden backdrop-blur-sm" onclick="toggleSidebar()"></div>
 
     <main class="flex-1 lg:ml-[220px] overflow-y-auto overflow-x-hidden">
-      <header class="px-4 sm:px-6 py-4 flex items-center justify-between sticky top-0 z-10" style="background:rgba(7,14,28,.88);backdrop-filter:blur(20px);border-bottom:1px solid rgba(34,211,238,.08)">
+      <header class="px-4 sm:px-6 py-4 flex items-center justify-between sticky top-0 z-10" style="background:rgba(33,74,80,.88);backdrop-filter:blur(20px);border-bottom:1px solid rgba(78,216,185,.08)">
         <div class="flex items-center gap-3">
           <button onclick="toggleSidebar()" class="lg:hidden p-2" style="color:var(--text2)">
             <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/></svg>
@@ -100,37 +100,37 @@
 
         <!-- Vital Sign Cards (Latest) -->
         <div class="animate-fade-up grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-2 sm:gap-3">
-          <div class="rounded-xl sm:rounded-2xl p-3 sm:p-4 text-center" style="background:var(--surface2);border:1px solid rgba(34,211,238,.1)">
+          <div class="rounded-xl sm:rounded-2xl p-3 sm:p-4 text-center" style="background:var(--surface2);border:1px solid rgba(78,216,185,.1)">
             <div class="text-xl sm:text-2xl mb-1">🫀</div>
             <div class="text-lg sm:text-xl font-extrabold" id="v-bp">—/—</div>
             <div class="text-[9px] sm:text-[10px]" style="color:var(--text3)">Blood Pressure</div>
             <div class="text-[9px] sm:text-[10px]" style="color:var(--text3)">mmHg</div>
           </div>
-          <div class="rounded-xl sm:rounded-2xl p-3 sm:p-4 text-center" style="background:var(--surface2);border:1px solid rgba(34,211,238,.1)">
+          <div class="rounded-xl sm:rounded-2xl p-3 sm:p-4 text-center" style="background:var(--surface2);border:1px solid rgba(78,216,185,.1)">
             <div class="text-xl sm:text-2xl mb-1">💓</div>
             <div class="text-lg sm:text-xl font-extrabold" id="v-hr">—</div>
             <div class="text-[9px] sm:text-[10px]" style="color:var(--text3)">Heart Rate</div>
             <div class="text-[9px] sm:text-[10px]" style="color:var(--text3)">bpm</div>
           </div>
-          <div class="rounded-xl sm:rounded-2xl p-3 sm:p-4 text-center" style="background:var(--surface2);border:1px solid rgba(34,211,238,.1)">
+          <div class="rounded-xl sm:rounded-2xl p-3 sm:p-4 text-center" style="background:var(--surface2);border:1px solid rgba(78,216,185,.1)">
             <div class="text-xl sm:text-2xl mb-1">🌡️</div>
             <div class="text-lg sm:text-xl font-extrabold" id="v-temp">—</div>
             <div class="text-[9px] sm:text-[10px]" style="color:var(--text3)">Temperature</div>
             <div class="text-[9px] sm:text-[10px]" style="color:var(--text3)">°C</div>
           </div>
-          <div class="rounded-xl sm:rounded-2xl p-3 sm:p-4 text-center" style="background:var(--surface2);border:1px solid rgba(34,211,238,.1)">
+          <div class="rounded-xl sm:rounded-2xl p-3 sm:p-4 text-center" style="background:var(--surface2);border:1px solid rgba(78,216,185,.1)">
             <div class="text-xl sm:text-2xl mb-1">🫁</div>
             <div class="text-lg sm:text-xl font-extrabold" id="v-spo2">—</div>
             <div class="text-[9px] sm:text-[10px]" style="color:var(--text3)">SpO₂</div>
             <div class="text-[9px] sm:text-[10px]" style="color:var(--text3)">%</div>
           </div>
-          <div class="rounded-xl sm:rounded-2xl p-3 sm:p-4 text-center" style="background:var(--surface2);border:1px solid rgba(34,211,238,.1)">
+          <div class="rounded-xl sm:rounded-2xl p-3 sm:p-4 text-center" style="background:var(--surface2);border:1px solid rgba(78,216,185,.1)">
             <div class="text-xl sm:text-2xl mb-1">🩸</div>
             <div class="text-lg sm:text-xl font-extrabold" id="v-sugar">—</div>
             <div class="text-[9px] sm:text-[10px]" style="color:var(--text3)">Blood Sugar</div>
             <div class="text-[9px] sm:text-[10px]" style="color:var(--text3)">mg/dL</div>
           </div>
-          <div class="rounded-xl sm:rounded-2xl p-3 sm:p-4 text-center" style="background:var(--surface2);border:1px solid rgba(34,211,238,.1)">
+          <div class="rounded-xl sm:rounded-2xl p-3 sm:p-4 text-center" style="background:var(--surface2);border:1px solid rgba(78,216,185,.1)">
             <div class="text-xl sm:text-2xl mb-1">⚖️</div>
             <div class="text-lg sm:text-xl font-extrabold" id="v-weight">—</div>
             <div class="text-[9px] sm:text-[10px]" style="color:var(--text3)">Weight</div>
@@ -148,7 +148,7 @@
 
         <!-- Charts -->
         <div class="animate-fade-up-1 grid sm:grid-cols-2 gap-3 sm:gap-5" id="charts-container">
-          <div class="rounded-xl sm:rounded-[18px] p-4 sm:p-5" style="background:var(--surface2);border:1px solid rgba(34,211,238,.1)">
+          <div class="rounded-xl sm:rounded-[18px] p-4 sm:p-5" style="background:var(--surface2);border:1px solid rgba(78,216,185,.1)">
             <div class="flex items-center justify-between mb-3 sm:mb-4 gap-2">
               <h3 class="font-bold text-sm line-clamp-1">Blood Pressure Trends</h3>
               <select id="bp-days" onchange="loadTrends()" class="text-xs px-2 sm:px-3 py-1.5 rounded-lg flex-shrink-0" style="background:var(--bg2);border:1px solid var(--border);color:var(--text)">
@@ -161,7 +161,7 @@
               <canvas id="chart-bp" height="150"></canvas>
             </div>
           </div>
-          <div class="rounded-xl sm:rounded-[18px] p-4 sm:p-5" style="background:var(--surface2);border:1px solid rgba(34,211,238,.1)">
+          <div class="rounded-xl sm:rounded-[18px] p-4 sm:p-5" style="background:var(--surface2);border:1px solid rgba(78,216,185,.1)">
             <div class="flex items-center justify-between mb-3 sm:mb-4">
               <h3 class="font-bold text-sm">Heart Rate</h3>
             </div>
@@ -169,7 +169,7 @@
               <canvas id="chart-hr" height="150"></canvas>
             </div>
           </div>
-          <div class="rounded-xl sm:rounded-[18px] p-4 sm:p-5" style="background:var(--surface2);border:1px solid rgba(34,211,238,.1)">
+          <div class="rounded-xl sm:rounded-[18px] p-4 sm:p-5" style="background:var(--surface2);border:1px solid rgba(78,216,185,.1)">
             <div class="flex items-center justify-between mb-3 sm:mb-4">
               <h3 class="font-bold text-sm">Blood Sugar</h3>
             </div>
@@ -177,7 +177,7 @@
               <canvas id="chart-sugar" height="150"></canvas>
             </div>
           </div>
-          <div class="rounded-xl sm:rounded-[18px] p-4 sm:p-5" style="background:var(--surface2);border:1px solid rgba(34,211,238,.1)">
+          <div class="rounded-xl sm:rounded-[18px] p-4 sm:p-5" style="background:var(--surface2);border:1px solid rgba(78,216,185,.1)">
             <div class="flex items-center justify-between mb-3 sm:mb-4">
               <h3 class="font-bold text-sm">Weight</h3>
             </div>
@@ -188,7 +188,7 @@
         </div>
 
         <!-- History Table -->
-        <div class="animate-fade-up-2 rounded-xl sm:rounded-[18px] p-4 sm:p-5" style="background:var(--surface2);border:1px solid rgba(34,211,238,.1)">
+        <div class="animate-fade-up-2 rounded-xl sm:rounded-[18px] p-4 sm:p-5" style="background:var(--surface2);border:1px solid rgba(78,216,185,.1)">
           <h3 class="font-bold mb-3 sm:mb-4 text-sm sm:text-base">Reading History</h3>
           <div class="overflow-x-auto -mx-4 sm:mx-0 px-4 sm:px-0">
             <table class="w-full text-xs sm:text-sm whitespace-nowrap">
@@ -287,6 +287,7 @@
   <script src="/js/config.js"></script>
   <script src="/js/api.js"></script>
   <script src="/js/utils.js"></script>
+  <script src="/js/patient-icons.js"></script>
   <script src="/js/auth.js"></script>
   <script src="/js/vitals.js"></script>
   <script>

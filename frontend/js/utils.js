@@ -88,9 +88,9 @@ const Utils = (() => {
     if (!el) return;
     const styles = {
       error:   { bg:'rgba(239,68,68,.08)', color:'#F87171', border:'rgba(239,68,68,.2)' },
-      success: { bg:'rgba(16,185,129,.08)', color:'#34D399', border:'rgba(16,185,129,.2)' },
-      info:    { bg:'rgba(34,211,238,.08)', color:'#22D3EE', border:'rgba(34,211,238,.2)' },
-      warning: { bg:'rgba(245,158,11,.08)', color:'#FBBF24', border:'rgba(245,158,11,.2)' },
+      success: { bg:'rgba(110,216,170,.08)', color:'#4ECFB2', border:'rgba(110,216,170,.2)' },
+      info:    { bg:'rgba(78,216,185,.08)', color:'#4ED8B9', border:'rgba(78,216,185,.2)' },
+      warning: { bg:'rgba(133,203,238,.08)', color:'#A5E2F6', border:'rgba(133,203,238,.2)' },
     };
     const s = styles[type] || styles.info;
     el.className = 'p-3 rounded-xl text-sm font-medium';
@@ -116,10 +116,10 @@ const Utils = (() => {
       document.body.appendChild(el);
     }
     const colors = {
-      success: { bg:'#10B981', color:'#fff' },
+      success: { bg:'#6ED8AA', color:'#fff' },
       error:   { bg:'#EF4444', color:'#fff' },
-      info:    { bg:'#0F1D32', color:'#E2E8F0', border:'1px solid rgba(34,211,238,.2)' },
-      warning: { bg:'#F59E0B', color:'#fff' },
+      info:    { bg:'#0F1D32', color:'#E2E8F0', border:'1px solid rgba(78,216,185,.2)' },
+      warning: { bg:'#85CBEE', color:'#fff' },
     };
     const c = colors[type] || colors.info;
     el.style.background = c.bg;

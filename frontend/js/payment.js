@@ -32,7 +32,7 @@
         appearance: {
           theme: 'night',
           variables: {
-            colorPrimary: '#22D3EE',
+            colorPrimary: '#4ED8B9',
             colorBackground: '#0B1120',
             colorText: '#E2E8F0',
             borderRadius: '12px',
