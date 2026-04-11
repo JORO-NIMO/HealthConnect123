@@ -869,6 +869,14 @@ aside { transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1); }
     padding-left: 1rem !important;
     padding-right: 1rem !important;
   }
+
+  /* Keep horizontal filter pills readable on small screens */
+  .tab-filter,
+  .doc-type-label {
+    white-space: nowrap !important;
+    word-break: normal !important;
+    overflow-wrap: normal !important;
+  }
 }
 
 /* ---- Phone breakpoint (≤ 480px) ---- */

@@ -1,6 +1,17 @@
 const { v4: uuidv4 } = require('uuid');
 const { query, queryOne } = require('../config/database');
 
+function parseMetadata(value) {
+  if (!value) return null;
+  if (typeof value === 'object') return value;
+  if (typeof value !== 'string') return null;
+  try {
+    return JSON.parse(value);
+  } catch {
+    return null;
+  }
+}
+
 class NotificationModel {
   // ─── Create ───────────────────────────────────────────────────────────
   static async create({ userId, title, message, type, actionUrl, metadata }) {
@@ -27,7 +38,7 @@ class NotificationModel {
   // ─── Find by ID ──────────────────────────────────────────────────────
   static async findById(id) {
     const n = await queryOne('SELECT * FROM notifications WHERE id = ?', [id]);
-    if (n?.metadata) n.metadata = JSON.parse(n.metadata);
+    if (n?.metadata) n.metadata = parseMetadata(n.metadata);
     return n;
   }
 
@@ -43,7 +54,7 @@ class NotificationModel {
 
     const items = await query(sql, params);
     return items.map(n => {
-      if (n.metadata) n.metadata = JSON.parse(n.metadata);
+      if (n.metadata) n.metadata = parseMetadata(n.metadata);
       return n;
     });
   }

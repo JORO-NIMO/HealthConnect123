@@ -66,12 +66,12 @@
 
         <!-- Filter Tabs -->
         <div class="animate-fade-up-1 flex gap-2 overflow-x-auto pb-2">
-          <button class="tab-filter active text-xs px-4 py-2 rounded-full font-semibold transition-all" data-type="" onclick="filterDocs('')" style="background:rgba(78,216,185,.1);border:1px solid rgba(78,216,185,.2);color:var(--cyan)">All</button>
-          <button class="tab-filter text-xs px-4 py-2 rounded-full font-semibold transition-all" data-type="lab_result" onclick="filterDocs('lab_result')" style="background:var(--bg2);border:1px solid var(--border);color:var(--text2)">🧪 Lab Results</button>
-          <button class="tab-filter text-xs px-4 py-2 rounded-full font-semibold transition-all" data-type="imaging" onclick="filterDocs('imaging')" style="background:var(--bg2);border:1px solid var(--border);color:var(--text2)">🩻 Imaging</button>
-          <button class="tab-filter text-xs px-4 py-2 rounded-full font-semibold transition-all" data-type="prescription" onclick="filterDocs('prescription')" style="background:var(--bg2);border:1px solid var(--border);color:var(--text2)">💊 Prescriptions</button>
-          <button class="tab-filter text-xs px-4 py-2 rounded-full font-semibold transition-all" data-type="vaccination" onclick="filterDocs('vaccination')" style="background:var(--bg2);border:1px solid var(--border);color:var(--text2)">💉 Vaccination</button>
-          <button class="tab-filter text-xs px-4 py-2 rounded-full font-semibold transition-all" data-type="other" onclick="filterDocs('other')" style="background:var(--bg2);border:1px solid var(--border);color:var(--text2)">📄 Other</button>
+          <button class="tab-filter flex-none whitespace-nowrap active text-xs px-4 py-2 rounded-full font-semibold transition-all" data-type="" onclick="filterDocs('')" style="background:rgba(78,216,185,.1);border:1px solid rgba(78,216,185,.2);color:var(--cyan)">All</button>
+          <button class="tab-filter flex-none whitespace-nowrap text-xs px-4 py-2 rounded-full font-semibold transition-all" data-type="lab_result" onclick="filterDocs('lab_result')" style="background:var(--bg2);border:1px solid var(--border);color:var(--text2)">🧪 Lab Results</button>
+          <button class="tab-filter flex-none whitespace-nowrap text-xs px-4 py-2 rounded-full font-semibold transition-all" data-type="imaging" onclick="filterDocs('imaging')" style="background:var(--bg2);border:1px solid var(--border);color:var(--text2)">🩻 Imaging</button>
+          <button class="tab-filter flex-none whitespace-nowrap text-xs px-4 py-2 rounded-full font-semibold transition-all" data-type="prescription" onclick="filterDocs('prescription')" style="background:var(--bg2);border:1px solid var(--border);color:var(--text2)">💊 Prescriptions</button>
+          <button class="tab-filter flex-none whitespace-nowrap text-xs px-4 py-2 rounded-full font-semibold transition-all" data-type="vaccination" onclick="filterDocs('vaccination')" style="background:var(--bg2);border:1px solid var(--border);color:var(--text2)">💉 Vaccination</button>
+          <button class="tab-filter flex-none whitespace-nowrap text-xs px-4 py-2 rounded-full font-semibold transition-all" data-type="other" onclick="filterDocs('other')" style="background:var(--bg2);border:1px solid var(--border);color:var(--text2)">📄 Other</button>
         </div>
 
         <!-- Documents Grid -->
@@ -171,7 +171,7 @@
           ${(stats || []).slice(0, 3).map(s => `
             <div class="rounded-2xl p-4 text-center" style="background:var(--surface2);border:1px solid rgba(78,216,185,.1)">
               <div class="text-2xl font-extrabold">${s.count}</div>
-              <div class="text-[10px]" style="color:var(--text3)">${typeIcons[s.doc_type] || '📄'} ${s.doc_type.replace(/_/g, ' ')}</div>
+              <div class="doc-type-label text-[10px]" style="color:var(--text3)">${typeIcons[s.doc_type] || '📄'} ${s.doc_type.replace(/_/g, ' ')}</div>
             </div>
           `).join('')}
         `;
