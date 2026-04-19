@@ -24,8 +24,9 @@ exports.getPublicProfile = async (req, res, next) => {
     if (!doctor) {
       return sendError(res, 404, 'Doctor not found.');
     }
-    // TODO: restore for production
-    // if (doctor.verification_status === 'rejected') return sendError(res, 404, 'Doctor not found.');
+    if (doctor.verification_status !== 'verified') {
+      return sendError(res, 404, 'Doctor not found.');
+    }
     // Remove sensitive fields
     const { license_number, admin_note, ...publicProfile } = doctor;
     return sendSuccess(res, 200, 'Doctor profile retrieved.', { doctor: publicProfile });
@@ -274,6 +275,7 @@ exports.searchDoctors = async (req, res, next) => {
         FROM doctors d
         JOIN users u ON u.id = d.user_id
         WHERE u.is_active = 1
+          AND d.verification_status = 'verified'
           AND d.is_available = 1
           AND d.latitude IS NOT NULL
           AND d.longitude IS NOT NULL
@@ -299,7 +301,10 @@ exports.searchDoctors = async (req, res, next) => {
 
       const doctors = await dbQuery(sql, params);
       const specs = await dbQuery(
-        `SELECT DISTINCT specialization FROM doctors WHERE specialization IS NOT NULL ORDER BY specialization`
+        `SELECT DISTINCT specialization FROM doctors
+         WHERE specialization IS NOT NULL
+           AND verification_status = 'verified'
+         ORDER BY specialization`
       );
       return sendSuccess(res, 200, 'Nearby doctors found.', { doctors, specializations: specs.map(s => s.specialization) });
     }
@@ -313,8 +318,7 @@ exports.searchDoctors = async (req, res, next) => {
       FROM doctors d
       JOIN users u ON u.id = d.user_id
       WHERE u.is_active = 1
-        -- TODO: restore verification filter for production
-        -- AND d.verification_status IN ('verified', 'pending')
+        AND d.verification_status = 'verified'
         AND d.is_available = 1
     `;
     const params = [];
@@ -341,7 +345,7 @@ exports.searchDoctors = async (req, res, next) => {
     const specs = await dbQuery(
       `SELECT DISTINCT specialization FROM doctors
        WHERE specialization IS NOT NULL
-       -- TODO: restore for production: AND verification_status IN ('verified', 'pending')
+         AND verification_status = 'verified'
        ORDER BY specialization`
     );
 

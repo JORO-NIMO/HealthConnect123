@@ -113,6 +113,7 @@ class DoctorModel {
       FROM doctors d
       JOIN users u ON u.id = d.user_id
       WHERE u.is_active = 1
+        AND d.verification_status = 'verified'
         AND d.is_available = 1
         AND d.latitude IS NOT NULL
         AND d.longitude IS NOT NULL
@@ -136,6 +137,7 @@ class DoctorModel {
       WHERE u.is_active = 1
     `;
     const params = [];
+    sql += " AND d.verification_status = 'verified'";
     if (availableOnly) { sql += ' AND d.is_available = 1'; }
     if (specialization) { sql += ' AND d.specialization = ?'; params.push(specialization); }
     sql += ' ORDER BY d.rating DESC, d.total_reviews DESC LIMIT ? OFFSET ?';
