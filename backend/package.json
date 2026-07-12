@@ -8,7 +8,8 @@
     "dev": "nodemon server.js",
     "db:init": "node database/init.js",
     "db:check": "node scripts/check-db.js",
-    "test:endpoints": "node scripts/test-endpoints.js"
+    "test:endpoints": "node scripts/test-endpoints.js",
+    "test": "jest"
   },
   "dependencies": {
     "africastalking": "^0.7.9",
@@ -42,6 +43,7 @@
     "winston": "^3.11.0"
   },
   "devDependencies": {
+    "jest": "^30.4.2",
     "nodemon": "^3.0.3"
   },
   "engines": {
