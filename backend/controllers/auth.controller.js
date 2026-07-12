@@ -370,3 +370,6 @@ exports.getMe = async (req, res, next) => {
     return sendSuccess(res, 200, 'User retrieved.', { user });
   } catch (err) { next(err); }
 };
+
+// Exported for testing purposes
+exports.resolveFrontendBaseUrl = resolveFrontendBaseUrl;
