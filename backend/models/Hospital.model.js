@@ -155,6 +155,39 @@ class HospitalModel {
     );
   }
 
+  // Batch query to resolve N+1 overhead of fetching hospital mappings for multiple doctors
+  static async getDoctorsHospitals(doctorIds) {
+    if (!doctorIds || !doctorIds.length) return {};
+
+    // Remove duplicates and nulls/undefined values
+    const uniqueIds = [...new Set(doctorIds.filter(Boolean))];
+    if (!uniqueIds.length) return {};
+
+    const placeholders = uniqueIds.map(() => '?').join(', ');
+    const rows = await query(
+      `SELECT hd.doctor_id, h.*, hd.department, hd.position, hd.employment_type, hd.status AS link_status
+       FROM hospital_doctors hd
+       JOIN hospitals h ON h.id = hd.hospital_id
+       WHERE hd.doctor_id IN (${placeholders}) AND hd.status = 'active'
+       ORDER BY h.name`,
+      uniqueIds
+    );
+
+    // Group rows by doctor_id
+    const mapping = {};
+    for (const id of uniqueIds) {
+      mapping[id] = [];
+    }
+    for (const row of rows) {
+      const { doctor_id, ...hospital } = row;
+      if (!mapping[doctor_id]) {
+        mapping[doctor_id] = [];
+      }
+      mapping[doctor_id].push(hospital);
+    }
+    return mapping;
+  }
+
   // ─── Patient Management ────────────────────────────────────────────────
   static async addPatient(hospitalId, patientId, hospitalNumber = null) {
     const id = uuidv4();
