@@ -119,13 +119,14 @@ exports.analyzeSymptoms = async (req, res, next) => {
         recommendedDoctors = availableDoctors.slice(0, 5);
       }
 
-      // Attach hospital info to recommended doctors
-      await Promise.all(
-        recommendedDoctors.slice(0, 5).map(async (doc) => {
-          const hospitals = await HospitalModel.getDoctorHospitals(doc.id);
-          doc.hospitals = hospitals.map(h => ({ id: h.id, name: h.name, city: h.city, type: h.type }));
-        })
-      );
+      // Attach hospital info to recommended doctors using batch query to solve N+1 overhead
+      const recSlice = recommendedDoctors.slice(0, 5);
+      const doctorIds = recSlice.map(d => d.id);
+      const hospitalsMap = await HospitalModel.getDoctorsHospitals(doctorIds);
+      for (const doc of recSlice) {
+        const hospitals = hospitalsMap[doc.id] || [];
+        doc.hospitals = hospitals.map(h => ({ id: h.id, name: h.name, city: h.city, type: h.type }));
+      }
 
       if (patLat && patLng) {
         nearbyHospitals = await HospitalModel.findNearby(

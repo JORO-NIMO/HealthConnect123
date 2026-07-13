@@ -59,9 +59,11 @@ exports.nearbyDoctors = async (req, res, next) => {
       { specialization, limit: parseInt(limit) }
     );
 
-    // Enrich with hospital info
+    // Enrich with hospital info using batch query to solve N+1 overhead
+    const doctorIds = doctors.map(d => d.id);
+    const hospitalsMap = await HospitalModel.getDoctorsHospitals(doctorIds);
     for (const doc of doctors) {
-      const hospitals = await HospitalModel.getDoctorHospitals(doc.id);
+      const hospitals = hospitalsMap[doc.id] || [];
       doc.hospitals = hospitals.map(h => ({ id: h.id, name: h.name, city: h.city }));
     }
 
@@ -218,9 +220,11 @@ exports.recommend = async (req, res, next) => {
       );
     }
 
-    // Enrich with hospital affiliation info
+    // Enrich with hospital affiliation info using batch query to solve N+1 overhead
+    const recommendedIds = recommended.map(d => d.id);
+    const recHospitalsMap = await HospitalModel.getDoctorsHospitals(recommendedIds);
     for (const doc of recommended) {
-      const hospitals = await HospitalModel.getDoctorHospitals(doc.id);
+      const hospitals = recHospitalsMap[doc.id] || [];
       doc.hospitals = hospitals.map(h => ({ id: h.id, name: h.name, city: h.city, type: h.type }));
     }
 
