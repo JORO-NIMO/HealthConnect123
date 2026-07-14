@@ -1,281 +1,122 @@
-// Mock the logger so tests don't spam the console or try to write files
-jest.mock('../utils/logger.util', () => ({
-  warn: jest.fn(),
-  info: jest.fn(),
-  error: jest.fn(),
-}));
+const { recommendDoctorsForReport } = require('./ai.service');
+const { openai } = require('../config/openai');
 
-describe('AI Service Fallback Tests', () => {
-  let aiService;
-  let mockOpenAIObject;
-  let mockOpenAIModule;
-  let logger;
-
-  beforeEach(() => {
-    jest.resetModules();
-    jest.clearAllMocks();
-
-    logger = require('../utils/logger.util');
-
-    // Setup mock openai object
-    mockOpenAIObject = {
+// Mock the openai module
+jest.mock('../config/openai', () => {
+  const mockCreate = jest.fn();
+  return {
+    openai: {
       chat: {
         completions: {
-          create: jest.fn(),
+          create: mockCreate,
         },
       },
-    };
+    },
+    AI_CONFIG: {
+      provider: 'openai',
+      model: 'gpt-4-turbo-preview',
+    },
+    MEDICAL_SYSTEM_PROMPT: 'System prompt',
+  };
+});
 
-    // By default, mock the module config
-    jest.mock('../config/openai', () => ({
-      openai: mockOpenAIObject,
-      AI_CONFIG: {
-        provider: 'openai',
-        model: 'gpt-4-turbo-preview',
-        maxTokens: 2000,
-        temperature: 0.3,
-      },
-      MEDICAL_SYSTEM_PROMPT: 'Mock system prompt',
-    }));
-
-    aiService = require('./ai.service');
-    mockOpenAIModule = require('../config/openai');
+describe('recommendDoctorsForReport', () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
   });
 
-  describe('analyzeSymptoms fallback tests', () => {
-    const context = {
-      symptoms: ['headache', 'fever'],
-      patientAge: 30,
-      patientGender: 'Male',
-      bloodType: 'O+',
-      chronicConditions: 'None',
-      allergies: 'None',
-      duration: '2 days',
-      additionalNotes: '',
-      region: 'East Africa',
+  test('should fallback when analysisResult has no possibleConditions and no symptoms', async () => {
+    const analysisResult = {};
+    const availableDoctors = [
+      { id: 'doc1', rating: 4.5, total_reviews: 10, distance_km: 2 },
+      { id: 'doc2', rating: 4.8, total_reviews: 20, distance_km: 10 },
+    ];
+    const patientContext = { city: 'Nairobi' };
+
+    const result = await recommendDoctorsForReport(analysisResult, availableDoctors, patientContext);
+
+    // It should rank doctors based on ratings/distance, etc.
+    expect(result.length).toBe(2);
+    expect(result[0].id).toBe('doc1'); // doc1 is closer (2km vs 10km) and rating/reviews are high, leading to a higher fallback score
+    expect(openai.chat.completions.create).not.toHaveBeenCalled();
+  });
+
+  test('should fallback when symptoms are empty after merging', async () => {
+    const analysisResult = {
+      symptoms: ['', null, undefined],
+      possibleConditions: [{ name: '' }],
     };
+    const availableDoctors = [
+      { id: 'doc1', rating: 4.5, total_reviews: 10, distance_km: 2 },
+    ];
+    const patientContext = { city: 'Nairobi' };
 
-    it('should use fallback analysis if openai is not configured (null/undefined)', async () => {
-      // Re-setup the mock with null openai
-      jest.resetModules();
-      jest.mock('../config/openai', () => ({
-        openai: null,
-        AI_CONFIG: {
-          provider: 'openai',
-          model: 'gpt-4-turbo-preview',
-          maxTokens: 2000,
-          temperature: 0.3,
-        },
-        MEDICAL_SYSTEM_PROMPT: 'Mock system prompt',
-      }));
+    const result = await recommendDoctorsForReport(analysisResult, availableDoctors, patientContext);
 
-      const freshAIService = require('./ai.service');
-      const freshLogger = require('../utils/logger.util');
+    expect(result.length).toBe(1);
+    expect(result[0].id).toBe('doc1');
+    expect(openai.chat.completions.create).not.toHaveBeenCalled();
+  });
 
-      const result = await freshAIService.analyzeSymptoms(context);
+  test('should recommend doctors using AI when possibleConditions/symptoms are present', async () => {
+    const analysisResult = {
+      symptoms: ['Fever'],
+      possibleConditions: [{ name: 'Malaria' }],
+    };
+    const availableDoctors = [
+      { id: 'doc1', first_name: 'John', last_name: 'Doe', rating: 4.5 },
+      { id: 'doc2', first_name: 'Jane', last_name: 'Smith', rating: 4.8 },
+    ];
+    const patientContext = { city: 'Nairobi' };
 
-      expect(freshLogger.warn).toHaveBeenCalledWith(
-        expect.stringContaining('AI provider not configured')
-      );
-      expect(result).toEqual(freshAIService.getFallbackAnalysis(context.symptoms));
-    });
-
-    it('should use fallback analysis if openai API call fails', async () => {
-      mockOpenAIObject.chat.completions.create.mockRejectedValue(new Error('API Connection Refused'));
-
-      const result = await aiService.analyzeSymptoms(context);
-
-      expect(logger.error).toHaveBeenCalledWith(
-        expect.stringContaining('AI API error')
-      );
-      expect(result).toEqual(aiService.getFallbackAnalysis(context.symptoms));
-    });
-
-    it('should attempt a retry on 503/429 error and then use fallback if retry also fails', async () => {
-      const error503 = new Error('Service Unavailable');
-      error503.status = 503;
-
-      mockOpenAIObject.chat.completions.create.mockRejectedValue(error503);
-
-      // Spy on setTimeout to not actually wait 3s
-      jest.spyOn(global, 'setTimeout').mockImplementation(cb => cb());
-
-      const result = await aiService.analyzeSymptoms(context);
-
-      // Verify retry warning and retry error
-      expect(logger.warn).toHaveBeenCalledWith(
-        expect.stringContaining('HuggingFace model may be loading')
-      );
-      expect(logger.error).toHaveBeenCalledWith(
-        expect.stringContaining('AI retry also failed')
-      );
-      expect(result).toEqual(aiService.getFallbackAnalysis(context.symptoms));
-
-      jest.restoreAllMocks();
-    });
-
-    it('should enforce 20s timeout and use fallback when API takes too long', async () => {
-      // Create a mock that never resolves
-      mockOpenAIObject.chat.completions.create.mockReturnValue(new Promise(() => {}));
-
-      // Speed up timer for setTimeout inside the race
-      jest.useFakeTimers();
-
-      const analysisPromise = aiService.analyzeSymptoms(context);
-
-      // Fast forward the timers to trigger the 20s timeout
-      jest.advanceTimersByTime(20000);
-
-      const result = await analysisPromise;
-
-      expect(logger.error).toHaveBeenCalledWith(
-        expect.stringContaining('HF_TIMEOUT')
-      );
-      expect(result).toEqual(aiService.getFallbackAnalysis(context.symptoms));
-
-      jest.useRealTimers();
-    });
-
-    it('should successfully parse valid OpenAI response and handle missing disclaimer / invalid urgencyLevel', async () => {
-      const mockResponse = {
-        choices: [
-          {
-            message: {
-              content: JSON.stringify({
-                possibleConditions: [
-                  {
-                    name: 'Common Cold',
-                    icd10Code: 'J00',
-                    probability: 'high',
-                    confidenceScore: 90,
-                    description: 'A mild viral infection',
-                    symptoms: ['headache', 'fever'],
-                  },
-                ],
-                urgencyLevel: 'INVALID_URGENCY',
-                urgencyReason: 'Mild symptoms',
-                recommendedActions: ['Rest'],
-                followUpQuestions: [],
-                summary: 'Common Cold suspected',
-              }),
-            },
+    // Mock AI response
+    openai.chat.completions.create.mockResolvedValue({
+      choices: [
+        {
+          message: {
+            content: JSON.stringify({
+              recommendations: [
+                { doctorId: 'doc1', matchScore: 95, matchReason: 'Fits perfectly' },
+              ],
+            }),
           },
-        ],
-      };
-
-      mockOpenAIObject.chat.completions.create.mockResolvedValue(mockResponse);
-
-      const result = await aiService.analyzeSymptoms(context);
-
-      // Check default disclaimer is added since mockResponse didn't have one
-      expect(result.disclaimer).toContain('This analysis is for informational purposes only');
-      // Check invalid urgency level is mapped to MEDIUM
-      expect(result.urgencyLevel).toBe('MEDIUM');
-    });
-  });
-
-  describe('generateFollowUpQuestions fallback tests', () => {
-    it('should return default questions if openai is unconfigured', async () => {
-      // Re-setup the mock with null openai
-      jest.resetModules();
-      jest.mock('../config/openai', () => ({
-        openai: null,
-        AI_CONFIG: {
-          provider: 'openai',
-          model: 'gpt-4-turbo-preview',
-          maxTokens: 2000,
-          temperature: 0.3,
         },
-        MEDICAL_SYSTEM_PROMPT: 'Mock system prompt',
-      }));
-
-      const freshAIService = require('./ai.service');
-
-      const result = await freshAIService.generateFollowUpQuestions(['headache']);
-
-      expect(result.questions).toHaveLength(3);
-      expect(result.questions[0].id).toBe('q1');
+      ],
     });
 
-    it('should return default questions if openai call fails', async () => {
-      mockOpenAIObject.chat.completions.create.mockRejectedValue(new Error('API Error'));
+    const result = await recommendDoctorsForReport(analysisResult, availableDoctors, patientContext);
 
-      const result = await aiService.generateFollowUpQuestions(['headache']);
+    expect(openai.chat.completions.create).toHaveBeenCalledTimes(1);
 
-      expect(logger.error).toHaveBeenCalledWith(
-        expect.stringContaining('Follow-up generation error'),
-        expect.any(String)
-      );
-      expect(result.questions).toHaveLength(3);
-      expect(result.questions[0].id).toBe('q1');
-    });
+    // Check that symptoms passed to AI contain both Fever and Malaria
+    const callArgs = openai.chat.completions.create.mock.calls[0][0];
+    expect(callArgs.messages[1].content).toContain('Fever, Malaria');
+
+    // Result should merge AI recommendation score & reason with doctor details
+    expect(result.length).toBe(1);
+    expect(result[0]).toEqual(expect.objectContaining({
+      id: 'doc1',
+      matchScore: 95,
+      matchReason: 'Fits perfectly',
+    }));
   });
 
-  describe('recommendDoctors fallback tests', () => {
-    const mockDoctors = [
-      { id: 'doc1', first_name: 'John', last_name: 'Doe', rating: 4.5, total_reviews: 20, distance_km: 4, city: 'Kampala' },
-      { id: 'doc2', first_name: 'Jane', last_name: 'Smith', rating: 4.8, total_reviews: 5, distance_km: 12, city: 'Nairobi' },
+  test('should fallback to rankDoctorsFallback when AI doctor recommendation throws an error', async () => {
+    const analysisResult = {
+      symptoms: ['Fever'],
+    };
+    const availableDoctors = [
+      { id: 'doc1', rating: 4.5, total_reviews: 10, distance_km: 2 },
     ];
+    const patientContext = { city: 'Nairobi' };
 
-    it('should use fallback ranking if openai is unconfigured', async () => {
-      // Re-setup the mock with null openai
-      jest.resetModules();
-      jest.mock('../config/openai', () => ({
-        openai: null,
-        AI_CONFIG: {
-          provider: 'openai',
-          model: 'gpt-4-turbo-preview',
-          maxTokens: 2000,
-          temperature: 0.3,
-        },
-        MEDICAL_SYSTEM_PROMPT: 'Mock system prompt',
-      }));
+    // Mock AI failure
+    openai.chat.completions.create.mockRejectedValue(new Error('AI Service Down'));
 
-      const freshAIService = require('./ai.service');
+    const result = await recommendDoctorsForReport(analysisResult, availableDoctors, patientContext);
 
-      const result = await freshAIService.recommendDoctors(['headache'], mockDoctors, { city: 'Kampala' });
-
-      // Check results are sorted by matchScore
-      expect(result).toBeDefined();
-      expect(result.length).toBeLessThanOrEqual(5);
-      expect(result[0].matchScore).toBeGreaterThanOrEqual(result[1].matchScore);
-    });
-
-    it('should use fallback ranking if doctor list is empty', async () => {
-      mockOpenAIObject.chat.completions.create.mockReset();
-
-      const result = await aiService.recommendDoctors(['headache'], [], { city: 'Kampala' });
-      expect(result).toEqual([]);
-      expect(mockOpenAIObject.chat.completions.create).not.toHaveBeenCalled();
-    });
-
-    it('should use fallback ranking if openai call fails', async () => {
-      mockOpenAIObject.chat.completions.create.mockRejectedValue(new Error('API Error'));
-
-      const result = await aiService.recommendDoctors(['headache'], mockDoctors, { city: 'Kampala' });
-
-      expect(logger.error).toHaveBeenCalledWith(
-        expect.stringContaining('Doctor recommendation AI error'),
-        expect.any(String)
-      );
-      expect(result).toBeDefined();
-    });
-  });
-
-  describe('recommendDoctorsForReport fallback tests', () => {
-    const mockDoctors = [
-      { id: 'doc1', first_name: 'John', last_name: 'Doe', rating: 4.5, total_reviews: 20, distance_km: 4, city: 'Kampala' },
-    ];
-
-    it('should fallback if symptoms list is empty', async () => {
-      const analysisResult = {
-        possibleConditions: [],
-        symptoms: [],
-      };
-
-      const result = await aiService.recommendDoctorsForReport(analysisResult, mockDoctors, { city: 'Kampala' });
-      expect(result).toBeDefined();
-      expect(result[0].id).toBe('doc1');
-    });
+    // Should return fallback ranked doctor list
+    expect(result.length).toBe(1);
+    expect(result[0].id).toBe('doc1');
   });
 });

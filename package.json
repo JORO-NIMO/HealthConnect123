@@ -4,7 +4,8 @@
   "description": "HealthConnect AI Telemedicine Platform",
   "scripts": {
     "start": "node backend/server.js",
-    "dev": "cd backend && npm run dev"
+    "dev": "cd backend && npm run dev",
+    "test": "cd backend && npm run test"
   },
   "engines": {
     "node": ">=18.0.0"

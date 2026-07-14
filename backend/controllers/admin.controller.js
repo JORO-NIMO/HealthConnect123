@@ -66,10 +66,12 @@ exports.getPendingDoctors = async (req, res, next) => {
       ORDER BY d.created_at ASC
     `);
 
-    await Promise.all(doctors.map(async (doc) => {
-      const documents = await DoctorVerificationDocumentModel.listByDoctor(doc.id);
-      doc.verification_documents = documents;
-    }));
+    // Enrich with verification documents using batch query to solve N+1 overhead
+    const doctorIds = doctors.map(doc => doc.id);
+    const documentsMap = await DoctorVerificationDocumentModel.getDoctorsVerificationDocuments(doctorIds);
+    for (const doc of doctors) {
+      doc.verification_documents = documentsMap[doc.id] || [];
+    }
 
     return sendSuccess(res, 200, 'Pending doctors retrieved.', { doctors });
   } catch (err) { next(err); }
