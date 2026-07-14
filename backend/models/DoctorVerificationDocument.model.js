@@ -52,6 +52,39 @@ class DoctorVerificationDocumentModel {
     return row?.total || 0;
   }
 
+  // Batch query to resolve N+1 overhead of fetching verification documents for multiple doctors
+  static async getDoctorsVerificationDocuments(doctorIds) {
+    if (!doctorIds || !doctorIds.length) return {};
+
+    // Remove duplicates and nulls/undefined values
+    const uniqueIds = [...new Set(doctorIds.filter(Boolean))];
+    if (!uniqueIds.length) return {};
+
+    const placeholders = uniqueIds.map(() => '?').join(', ');
+    const rows = await query(
+      `SELECT dvd.*, u.first_name AS uploaded_by_first_name, u.last_name AS uploaded_by_last_name
+       FROM doctor_verification_documents dvd
+       JOIN users u ON u.id = dvd.uploaded_by
+       WHERE dvd.doctor_id IN (${placeholders})
+       ORDER BY dvd.created_at DESC`,
+      uniqueIds
+    );
+
+    // Group rows by doctor_id
+    const mapping = {};
+    for (const id of uniqueIds) {
+      mapping[id] = [];
+    }
+    for (const row of rows) {
+      const { doctor_id } = row;
+      if (!mapping[doctor_id]) {
+        mapping[doctor_id] = [];
+      }
+      mapping[doctor_id].push(row);
+    }
+    return mapping;
+  }
+
   static async deleteByIdForDoctor(id, doctorId) {
     const result = await query(
       'DELETE FROM doctor_verification_documents WHERE id = ? AND doctor_id = ?',
