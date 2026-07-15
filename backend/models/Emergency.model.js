@@ -150,6 +150,36 @@ class EmergencyModel {
     });
   }
 
+  // Batched query to solve the N+1 problem when fetching active SOS logs for multiple hospitals
+  static async listActiveSOSForHospitals(hospitalIds, { limit = 50 } = {}) {
+    if (!hospitalIds || !hospitalIds.length) return [];
+
+    const uniqueIds = [...new Set(hospitalIds.filter(Boolean))];
+    if (!uniqueIds.length) return [];
+
+    const placeholders = uniqueIds.map(() => '?').join(', ');
+    const items = await query(
+      `SELECT s.*, t.status AS dispatch_status, t.claimed_by, t.claimed_at,
+              u.first_name, u.last_name, u.phone, u.email
+       FROM emergency_sos_dispatch_targets t
+       JOIN emergency_sos_logs s ON s.id = t.sos_id
+       JOIN patients p ON p.id = s.patient_id
+       JOIN users u ON u.id = p.user_id
+       WHERE t.hospital_id IN (${placeholders})
+         AND s.status IN ('triggered', 'acknowledged')
+         AND t.status IN ('pending', 'claimed')
+       ORDER BY s.created_at DESC
+       LIMIT ?`,
+      [...uniqueIds, limit]
+    );
+
+    return items.map(s => {
+      if (s.symptoms) s.symptoms = this.parseJSON(s.symptoms);
+      if (s.vitals_snapshot) s.vitals_snapshot = this.parseJSON(s.vitals_snapshot);
+      return s;
+    });
+  }
+
   // ─── Admin/Doctor: list active SOS ────────────────────────────────────
   static async listActiveSOS({ limit = 50 } = {}) {
     const items = await query(
