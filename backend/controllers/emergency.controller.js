@@ -349,10 +349,9 @@ exports.getActiveEmergencies = async (req, res, next) => {
       return sendSuccess(res, 200, 'Active emergencies.', { emergencies: [] });
     }
 
-    const byHospital = await Promise.all(
-      hospitalIds.map(hospitalId => EmergencyModel.listActiveSOSForHospital(hospitalId))
-    );
-    const emergencies = uniqueById(byHospital.flat());
+    // Use the batched query helper to load all active emergencies in a single query (resolves N+1 overhead)
+    const items = await EmergencyModel.listActiveSOSForHospitals(hospitalIds);
+    const emergencies = uniqueById(items);
 
     return sendSuccess(res, 200, 'Active emergencies.', { emergencies });
   } catch (err) { next(err); }
@@ -371,10 +370,9 @@ exports.getHospitalSOSQueue = async (req, res, next) => {
       return sendSuccess(res, 200, 'Hospital SOS queue retrieved.', { queue: [] });
     }
 
-    const byHospital = await Promise.all(
-      hospitalIds.map(hospitalId => EmergencyModel.listActiveSOSForHospital(hospitalId))
-    );
-    const queue = uniqueById(byHospital.flat());
+    // Use the batched query helper to load the active hospital queue in a single query (resolves N+1 overhead)
+    const items = await EmergencyModel.listActiveSOSForHospitals(hospitalIds);
+    const queue = uniqueById(items);
 
     return sendSuccess(res, 200, 'Hospital SOS queue retrieved.', { queue });
   } catch (err) { next(err); }
