@@ -11,3 +11,7 @@
 ## 2026-07-15 - [Batching Emergency SOS Dispatches]
 **Learning:** Found N+1 parallel database queries in active emergency/hospital SOS queue dashboards (`getActiveEmergencies` and `getHospitalSOSQueue` endpoints). The controller mapped active hospital IDs with separate asynchronous database lookups to load active SOS dispatches for each hospital individually, multiplying database round-trips for responders with multiple affiliations.
 **Action:** Created `EmergencyModel.listActiveSOSForHospitals(hospitalIds)` to retrieve all active emergency dispatches for a batch of hospital IDs in a single query, reducing DB overhead and accelerating response UI load.
+
+## 2026-07-16 - [Parallelizing Independent Database Queries]
+**Learning:** Found sequential `await` bottlenecks on heavily-frequented API endpoints like `getNotifications` (fetched on every page load to fetch the list and unread count) and search/recommendation endpoints. Querying multiple independent resources sequentially blocked the event loop and increased latency needlessly.
+**Action:** Used `Promise.all` to query notifications list and unread count in parallel, and to query nearby hospitals and doctor affiliations in parallel in `recommend` and `analyzeSymptoms` endpoints, cutting latency significantly.

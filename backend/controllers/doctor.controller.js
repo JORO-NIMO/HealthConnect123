@@ -210,19 +210,14 @@ exports.recommend = async (req, res, next) => {
 
     const recommended = await AIService.recommendDoctors(symptoms, doctors, patientContext);
 
-    let nearbyHospitals = [];
-    if (patLat && patLng) {
-      nearbyHospitals = await HospitalModel.findNearby(
-        parseFloat(patLat),
-        parseFloat(patLng),
-        radius,
-        10
-      );
-    }
-
-    // Enrich with hospital affiliation info using batch query to solve N+1 overhead
+    // Optimize: Fetch nearby hospitals and doctor hospital affiliations in parallel using Promise.all to reduce API latency
     const recommendedIds = recommended.map(d => d.id);
-    const recHospitalsMap = await HospitalModel.getDoctorsHospitals(recommendedIds);
+    const [nearbyHospitals, recHospitalsMap] = await Promise.all([
+      (patLat && patLng)
+        ? HospitalModel.findNearby(parseFloat(patLat), parseFloat(patLng), radius, 10)
+        : Promise.resolve([]),
+      HospitalModel.getDoctorsHospitals(recommendedIds)
+    ]);
     for (const doc of recommended) {
       const hospitals = recHospitalsMap[doc.id] || [];
       doc.hospitals = hospitals.map(h => ({ id: h.id, name: h.name, city: h.city, type: h.type }));

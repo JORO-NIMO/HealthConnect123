@@ -119,22 +119,20 @@ exports.analyzeSymptoms = async (req, res, next) => {
         recommendedDoctors = availableDoctors.slice(0, 5);
       }
 
-      // Attach hospital info to recommended doctors using batch query to solve N+1 overhead
+      // Optimize: Fetch doctor hospital affiliations and nearby hospitals in parallel using Promise.all to reduce API latency
       const recSlice = recommendedDoctors.slice(0, 5);
       const doctorIds = recSlice.map(d => d.id);
-      const hospitalsMap = await HospitalModel.getDoctorsHospitals(doctorIds);
+      const [hospitalsMap, nearbyHospitalsResult] = await Promise.all([
+        HospitalModel.getDoctorsHospitals(doctorIds),
+        (patLat && patLng)
+          ? HospitalModel.findNearby(parseFloat(patLat), parseFloat(patLng), radius, 10)
+          : Promise.resolve([])
+      ]);
+      nearbyHospitals = nearbyHospitalsResult;
+
       for (const doc of recSlice) {
         const hospitals = hospitalsMap[doc.id] || [];
         doc.hospitals = hospitals.map(h => ({ id: h.id, name: h.name, city: h.city, type: h.type }));
-      }
-
-      if (patLat && patLng) {
-        nearbyHospitals = await HospitalModel.findNearby(
-          parseFloat(patLat),
-          parseFloat(patLng),
-          radius,
-          10
-        );
       }
 
       logger.info(`Auto-recommended ${recommendedDoctors.length} doctors for patient ${req.user.id}`);

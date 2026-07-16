@@ -5,11 +5,14 @@ const { sendSuccess, sendError } = require('../utils/response.util');
 exports.getNotifications = async (req, res, next) => {
   try {
     const { limit = 30, offset = 0, unreadOnly } = req.query;
-    const notifications = await NotificationModel.listByUser(req.user.id, {
-      limit: parseInt(limit), offset: parseInt(offset),
-      unreadOnly: unreadOnly === 'true',
-    });
-    const unreadCount = await NotificationModel.unreadCount(req.user.id);
+    // Optimize: Fetch notifications and unread count in parallel using Promise.all to reduce API latency
+    const [notifications, unreadCount] = await Promise.all([
+      NotificationModel.listByUser(req.user.id, {
+        limit: parseInt(limit), offset: parseInt(offset),
+        unreadOnly: unreadOnly === 'true',
+      }),
+      NotificationModel.unreadCount(req.user.id)
+    ]);
 
     return sendSuccess(res, 200, 'Notifications retrieved.', { notifications, unreadCount });
   } catch (err) { next(err); }
