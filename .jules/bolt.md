@@ -11,3 +11,7 @@
 ## 2026-07-15 - [Batching Emergency SOS Dispatches]
 **Learning:** Found N+1 parallel database queries in active emergency/hospital SOS queue dashboards (`getActiveEmergencies` and `getHospitalSOSQueue` endpoints). The controller mapped active hospital IDs with separate asynchronous database lookups to load active SOS dispatches for each hospital individually, multiplying database round-trips for responders with multiple affiliations.
 **Action:** Created `EmergencyModel.listActiveSOSForHospitals(hospitalIds)` to retrieve all active emergency dispatches for a batch of hospital IDs in a single query, reducing DB overhead and accelerating response UI load.
+
+## 2026-07-17 - [Batching Symptom Report Conditions]
+**Learning:** Found a sequential querying pattern in the AI symptom checker report creation (`SymptomReportModel.create`). When parsing AI possible conditions, the model performed sequential insert statements in a sequential loop, multiplying the database roundtrip overhead for each identified medical condition.
+**Action:** Optimized `SymptomReportModel.create` to construct and execute a single, batched SQL `INSERT` statement for all identified possible conditions, reducing $O(N)$ database roundtrips to $O(1)$ and significantly reducing response latency on the critical path of symptom checker completion.
