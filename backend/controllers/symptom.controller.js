@@ -95,12 +95,23 @@ exports.analyzeSymptoms = async (req, res, next) => {
       const patLng = longitude || patient?.longitude;
       const radius  = parseInt(radiusKm) || 50;
 
-      let availableDoctors;
+      // Optimize auto-recommendation: Fetch available doctors and nearby hospitals in parallel
+      let availableDoctorsPromise;
       if (patLat && patLng) {
-        availableDoctors = await DoctorModel.findNearby(parseFloat(patLat), parseFloat(patLng), radius, { limit: 30 });
+        availableDoctorsPromise = DoctorModel.findNearby(parseFloat(patLat), parseFloat(patLng), radius, { limit: 30 });
       } else {
-        availableDoctors = await DoctorModel.listWithLocation({ limit: 30, availableOnly: true });
+        availableDoctorsPromise = DoctorModel.listWithLocation({ limit: 30, availableOnly: true });
       }
+
+      let nearbyHospitalsPromise = (patLat && patLng)
+        ? HospitalModel.findNearby(parseFloat(patLat), parseFloat(patLng), radius, 10)
+        : Promise.resolve([]);
+
+      const [availableDoctors, nearbyHospitalsResult] = await Promise.all([
+        availableDoctorsPromise,
+        nearbyHospitalsPromise
+      ]);
+      nearbyHospitals = nearbyHospitalsResult;
 
       const patientContext = {
         age: patient?.date_of_birth ? Math.floor((Date.now() - new Date(patient.date_of_birth)) / 31557600000) : null,
@@ -126,15 +137,6 @@ exports.analyzeSymptoms = async (req, res, next) => {
       for (const doc of recSlice) {
         const hospitals = hospitalsMap[doc.id] || [];
         doc.hospitals = hospitals.map(h => ({ id: h.id, name: h.name, city: h.city, type: h.type }));
-      }
-
-      if (patLat && patLng) {
-        nearbyHospitals = await HospitalModel.findNearby(
-          parseFloat(patLat),
-          parseFloat(patLng),
-          radius,
-          10
-        );
       }
 
       logger.info(`Auto-recommended ${recommendedDoctors.length} doctors for patient ${req.user.id}`);
