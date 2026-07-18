@@ -200,25 +200,24 @@ exports.recommend = async (req, res, next) => {
 
     const radius = parseInt(radiusKm) || 50;
 
-    // Fetch doctors: prefer nearby if location available
-    let doctors;
+    // Fetch doctors and nearby hospitals in parallel to reduce sequential query latency
+    let doctorsPromise;
     if (patLat && patLng) {
-      doctors = await DoctorModel.findNearby(parseFloat(patLat), parseFloat(patLng), radius, { limit: 30 });
+      doctorsPromise = DoctorModel.findNearby(parseFloat(patLat), parseFloat(patLng), radius, { limit: 30 });
     } else {
-      doctors = await DoctorModel.listWithLocation({ limit: 30, availableOnly: true });
+      doctorsPromise = DoctorModel.listWithLocation({ limit: 30, availableOnly: true });
     }
+
+    let nearbyHospitalsPromise = (patLat && patLng)
+      ? HospitalModel.findNearby(parseFloat(patLat), parseFloat(patLng), radius, 10)
+      : Promise.resolve([]);
+
+    const [doctors, nearbyHospitals] = await Promise.all([
+      doctorsPromise,
+      nearbyHospitalsPromise
+    ]);
 
     const recommended = await AIService.recommendDoctors(symptoms, doctors, patientContext);
-
-    let nearbyHospitals = [];
-    if (patLat && patLng) {
-      nearbyHospitals = await HospitalModel.findNearby(
-        parseFloat(patLat),
-        parseFloat(patLng),
-        radius,
-        10
-      );
-    }
 
     // Enrich with hospital affiliation info using batch query to solve N+1 overhead
     const recommendedIds = recommended.map(d => d.id);
@@ -303,13 +302,16 @@ exports.searchDoctors = async (req, res, next) => {
       sql += ' HAVING distance_km <= ? ORDER BY distance_km ASC LIMIT ? OFFSET ?';
       params.push(radius, parseInt(limit), parseInt(offset));
 
-      const doctors = await dbQuery(sql, params);
-      const specs = await dbQuery(
-        `SELECT DISTINCT specialization FROM doctors
-         WHERE specialization IS NOT NULL
-           AND verification_status = 'verified'
-         ORDER BY specialization`
-      );
+      // Optimize search: Parallelize doctors lookup and unique specializations query
+      const [doctors, specs] = await Promise.all([
+        dbQuery(sql, params),
+        dbQuery(
+          `SELECT DISTINCT specialization FROM doctors
+           WHERE specialization IS NOT NULL
+             AND verification_status = 'verified'
+           ORDER BY specialization`
+        )
+      ]);
       return sendSuccess(res, 200, 'Nearby doctors found.', { doctors, specializations: specs.map(s => s.specialization) });
     }
 
@@ -343,15 +345,16 @@ exports.searchDoctors = async (req, res, next) => {
     sql += ' ORDER BY d.rating DESC, d.total_reviews DESC LIMIT ? OFFSET ?';
     params.push(parseInt(limit), parseInt(offset));
 
-    const doctors = await dbQuery(sql, params);
-
-    // Get unique specializations for filter dropdown
-    const specs = await dbQuery(
-      `SELECT DISTINCT specialization FROM doctors
-       WHERE specialization IS NOT NULL
-         AND verification_status = 'verified'
-       ORDER BY specialization`
-    );
+    // Optimize search: Parallelize doctors lookup and unique specializations query
+    const [doctors, specs] = await Promise.all([
+      dbQuery(sql, params),
+      dbQuery(
+        `SELECT DISTINCT specialization FROM doctors
+         WHERE specialization IS NOT NULL
+           AND verification_status = 'verified'
+         ORDER BY specialization`
+      )
+    ]);
 
     return sendSuccess(res, 200, 'Doctors found.', {
       doctors,
