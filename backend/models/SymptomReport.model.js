@@ -11,21 +11,32 @@ class SymptomReportModel {
       [id, patientId, JSON.stringify(symptoms), JSON.stringify(aiAnalysis), urgencyLevel, sessionId || null]
     );
 
-    // Store individual conditions
+    // Store individual conditions in a single batched query to avoid N+1 sequential database roundtrips
     const VALID_PROB = ['high', 'medium', 'low'];
     if (aiAnalysis?.possibleConditions?.length) {
+      const values = [];
+      const placeholders = [];
       for (const condition of aiAnalysis.possibleConditions) {
         const prob = VALID_PROB.includes(String(condition.probability).toLowerCase())
           ? condition.probability.toLowerCase()
           : 'medium';
-        await query(
-          `INSERT INTO symptom_report_details
-             (id, report_id, condition_name, icd10_code, probability, confidence_score, description)
-           VALUES (?, ?, ?, ?, ?, ?, ?)`,
-          [uuidv4(), id, condition.name, condition.icd10Code || null,
-           prob, condition.confidenceScore || 0, condition.description || null]
+        placeholders.push('(?, ?, ?, ?, ?, ?, ?)');
+        values.push(
+          uuidv4(),
+          id,
+          condition.name,
+          condition.icd10Code || null,
+          prob,
+          condition.confidenceScore || 0,
+          condition.description || null
         );
       }
+      await query(
+        `INSERT INTO symptom_report_details
+           (id, report_id, condition_name, icd10_code, probability, confidence_score, description)
+         VALUES ${placeholders.join(', ')}`,
+        values
+      );
     }
     return this.findById(id);
   }
