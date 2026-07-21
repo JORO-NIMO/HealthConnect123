@@ -11,12 +11,26 @@ class PrescriptionModel {
       [id, patientId, doctorId, consultationId || null, diagnosis, notes || null, validUntil || null]
     );
 
-    // Insert medication line items
-    for (const med of medications || []) {
+    // Insert medication line items in a single, batched database query to avoid sequential N+1 roundtrips
+    const items = medications || [];
+    if (items.length > 0) {
+      const placeholders = items.map(() => '(?, ?, ?, ?, ?, ?, ?)').join(', ');
+      const params = [];
+      for (const med of items) {
+        params.push(
+          uuidv4(),
+          id,
+          med.name,
+          med.dosage,
+          med.frequency,
+          med.duration,
+          med.instructions || null
+        );
+      }
       await query(
         `INSERT INTO prescription_items (id, prescription_id, medication_name, dosage, frequency, duration, instructions)
-         VALUES (?, ?, ?, ?, ?, ?, ?)`,
-        [uuidv4(), id, med.name, med.dosage, med.frequency, med.duration, med.instructions || null]
+         VALUES ${placeholders}`,
+        params
       );
     }
     return this.findById(id);

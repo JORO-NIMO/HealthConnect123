@@ -15,3 +15,7 @@
 ## 2026-07-17 - [Batching Symptom Report Conditions]
 **Learning:** Found a sequential querying pattern in the AI symptom checker report creation (`SymptomReportModel.create`). When parsing AI possible conditions, the model performed sequential insert statements in a sequential loop, multiplying the database roundtrip overhead for each identified medical condition.
 **Action:** Optimized `SymptomReportModel.create` to construct and execute a single, batched SQL `INSERT` statement for all identified possible conditions, reducing $O(N)$ database roundtrips to $O(1)$ and significantly reducing response latency on the critical path of symptom checker completion.
+
+## 2026-07-21 - [Batching Prescription Medication Line Items]
+**Learning:** Found N+1 sequential database insert queries in `PrescriptionModel.create`. When creating a prescription with multiple medications, each line item was inserted into `prescription_items` individually inside a sequential `for...of` loop, degrading consultation and prescription creation performance.
+**Action:** Optimized `PrescriptionModel.create` to generate all placeholders and insert all medication line items in a single bulk SQL statement, reducing the database overhead on the prescription creation critical path from $O(N)$ sequential queries to $O(1)$.
