@@ -12,6 +12,10 @@
 **Learning:** Found N+1 parallel database queries in active emergency/hospital SOS queue dashboards (`getActiveEmergencies` and `getHospitalSOSQueue` endpoints). The controller mapped active hospital IDs with separate asynchronous database lookups to load active SOS dispatches for each hospital individually, multiplying database round-trips for responders with multiple affiliations.
 **Action:** Created `EmergencyModel.listActiveSOSForHospitals(hospitalIds)` to retrieve all active emergency dispatches for a batch of hospital IDs in a single query, reducing DB overhead and accelerating response UI load.
 
-## 2026-07-16 - [Parallelizing Independent Database Queries]
-**Learning:** Found sequential `await` bottlenecks on heavily-frequented API endpoints like `getNotifications` (fetched on every page load to fetch the list and unread count) and search/recommendation endpoints. Querying multiple independent resources sequentially blocked the event loop and increased latency needlessly.
-**Action:** Used `Promise.all` to query notifications list and unread count in parallel, and to query nearby hospitals and doctor affiliations in parallel in `recommend` and `analyzeSymptoms` endpoints, cutting latency significantly.
+## 2026-07-17 - [Batching Symptom Report Conditions]
+**Learning:** Found a sequential querying pattern in the AI symptom checker report creation (`SymptomReportModel.create`). When parsing AI possible conditions, the model performed sequential insert statements in a sequential loop, multiplying the database roundtrip overhead for each identified medical condition.
+**Action:** Optimized `SymptomReportModel.create` to construct and execute a single, batched SQL `INSERT` statement for all identified possible conditions, reducing $O(N)$ database roundtrips to $O(1)$ and significantly reducing response latency on the critical path of symptom checker completion.
+
+## 2026-07-21 - [Batching Prescription Medication Line Items]
+**Learning:** Found N+1 sequential database insert queries in `PrescriptionModel.create`. When creating a prescription with multiple medications, each line item was inserted into `prescription_items` individually inside a sequential `for...of` loop, degrading consultation and prescription creation performance.
+**Action:** Optimized `PrescriptionModel.create` to generate all placeholders and insert all medication line items in a single bulk SQL statement, reducing the database overhead on the prescription creation critical path from $O(N)$ sequential queries to $O(1)$.
