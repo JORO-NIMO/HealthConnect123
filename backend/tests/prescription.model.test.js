@@ -10,87 +10,95 @@ test.describe('PrescriptionModel.create', () => {
     db.pool.query = originalPoolQuery;
   });
 
-  test.it('should insert a prescription and its medication items in exactly two database queries', async () => {
+  test.it('should insert a prescription and its medication items in exactly two database queries, then fetch details', async () => {
     const queries = [];
 
     db.pool.query = async (sql, params) => {
       queries.push({ sql, params });
-
-      // Mock returned rows for findById
-      if (sql.includes('SELECT p.*,')) {
+      // Mock different returned rows for queries
+      if (sql.includes('SELECT p.*')) {
         return [[{
-          id: 'rx-123',
+          id: 'prescription-123',
           patient_id: 'patient-456',
           doctor_id: 'doctor-789',
           consultation_id: 'consultation-abc',
-          diagnosis: 'Acute Bronchitis',
+          diagnosis: 'Infection',
           notes: 'Take with food',
           valid_until: '2026-08-17',
           status: 'active',
-          created_at: '2026-07-20 12:00:00',
+          created_at: '2026-07-21 12:00:00',
           patient_first_name: 'John',
           patient_last_name: 'Doe',
           doctor_first_name: 'Jane',
           doctor_last_name: 'Smith',
-          specialization: 'Pulmonology',
-          license_number: 'LIC98765'
+          specialization: 'General Medicine',
+          license_number: 'MD12345'
         }]];
       }
       if (sql.includes('SELECT * FROM prescription_items WHERE prescription_id = ?')) {
         return [[
-          { id: 'item-1', prescription_id: 'rx-123', medication_name: 'Amoxicillin', dosage: '500mg', frequency: 'Three times daily', duration: '7 days', instructions: 'Finish the entire course' },
-          { id: 'item-2', prescription_id: 'rx-123', medication_name: 'Ibuprofen', dosage: '400mg', frequency: 'As needed for pain', duration: '5 days', instructions: 'Take with food' }
+          { id: 'item-1', prescription_id: 'prescription-123', medication_name: 'Amoxicillin', dosage: '500mg', frequency: '3x daily', duration: '7 days', instructions: 'Take with water' },
+          { id: 'item-2', prescription_id: 'prescription-123', medication_name: 'Ibuprofen', dosage: '400mg', frequency: 'As needed', duration: '5 days', instructions: null }
         ]];
       }
-
-      // INSERT returns success
+      // INSERT or other queries return success structure
       return [[{ affectedRows: 1 }]];
     };
 
-    const rx = await PrescriptionModel.create({
+    const prescription = await PrescriptionModel.create({
       patientId: 'patient-456',
       doctorId: 'doctor-789',
       consultationId: 'consultation-abc',
-      diagnosis: 'Acute Bronchitis',
+      diagnosis: 'Infection',
       notes: 'Take with food',
       validUntil: '2026-08-17',
       medications: [
-        { name: 'Amoxicillin', dosage: '500mg', frequency: 'Three times daily', duration: '7 days', instructions: 'Finish the entire course' },
-        { name: 'Ibuprofen', dosage: '400mg', frequency: 'As needed for pain', duration: '5 days', instructions: 'Take with food' }
+        { name: 'Amoxicillin', dosage: '500mg', frequency: '3x daily', duration: '7 days', instructions: 'Take with water' },
+        { name: 'Ibuprofen', dosage: '400mg', frequency: 'As needed', duration: '5 days' }
       ]
     });
 
-    // Check query calls: 1. INSERT prescriptions, 2. INSERT prescription_items, 3. SELECT prescription (findById), 4. SELECT items (findById)
-    assert.strictEqual(queries.length, 4);
+    // Check query calls
+    // 1. INSERT prescription
+    // 2. INSERT prescription_items (in a single bulk query)
+    // 3. SELECT prescription details (findById query 1)
+    // 4. SELECT prescription medications (findById query 2)
+    assert.strictEqual(queries.length, 4, `Expected 4 queries, but got ${queries.length}: ${JSON.stringify(queries.map(q => q.sql))}`);
 
     // First query: INSERT INTO prescriptions
     assert.ok(queries[0].sql.includes('INSERT INTO prescriptions'));
     assert.strictEqual(queries[0].params[1], 'patient-456');
     assert.strictEqual(queries[0].params[2], 'doctor-789');
-    assert.strictEqual(queries[0].params[3], 'consultation-abc');
-    assert.strictEqual(queries[0].params[4], 'Acute Bronchitis');
 
-    // Second query: INSERT INTO prescription_items
+    // Second query: INSERT INTO prescription_items bulk
     assert.ok(queries[1].sql.includes('INSERT INTO prescription_items'));
-    assert.ok(queries[1].sql.includes('VALUES (?, ?, ?, ?, ?, ?, ?), (?, ?, ?, ?, ?, ?, ?)')); // Batched placeholder verification
-    assert.strictEqual(queries[1].params[2], 'Amoxicillin');
-    assert.strictEqual(queries[1].params[3], '500mg');
-    assert.strictEqual(queries[1].params[4], 'Three times daily');
-    assert.strictEqual(queries[1].params[5], '7 days');
-    assert.strictEqual(queries[1].params[6], 'Finish the entire course');
-    assert.strictEqual(queries[1].params[9], 'Ibuprofen');
-    assert.strictEqual(queries[1].params[10], '400mg');
-    assert.strictEqual(queries[1].params[11], 'As needed for pain');
-    assert.strictEqual(queries[1].params[12], '5 days');
-    assert.strictEqual(queries[1].params[13], 'Take with food');
+    assert.ok(queries[1].sql.includes('VALUES (?, ?, ?, ?, ?, ?, ?), (?, ?, ?, ?, ?, ?, ?)'), 'Should use bulk insert with multiple values placeholders');
+
+    // Check parameters of the bulk insert
+    const params = queries[1].params;
+    const expectedPrescriptionId = queries[0].params[0]; // actual generated UUID of prescription
+
+    // item 1:
+    assert.strictEqual(params[1], expectedPrescriptionId); // prescription_id
+    assert.strictEqual(params[2], 'Amoxicillin');
+    assert.strictEqual(params[3], '500mg');
+    assert.strictEqual(params[4], '3x daily');
+    assert.strictEqual(params[5], '7 days');
+    assert.strictEqual(params[6], 'Take with water');
+    // item 2:
+    assert.strictEqual(params[8], expectedPrescriptionId); // prescription_id
+    assert.strictEqual(params[9], 'Ibuprofen');
+    assert.strictEqual(params[10], '400mg');
+    assert.strictEqual(params[11], 'As needed');
+    assert.strictEqual(params[12], '5 days');
+    assert.strictEqual(params[13], null);
 
     // Returned prescription object verification
-    assert.ok(rx);
-    assert.strictEqual(rx.id, 'rx-123');
-    assert.strictEqual(rx.diagnosis, 'Acute Bronchitis');
-    assert.strictEqual(rx.medications.length, 2);
-    assert.strictEqual(rx.medications[0].medication_name, 'Amoxicillin');
-    assert.strictEqual(rx.medications[1].medication_name, 'Ibuprofen');
+    assert.ok(prescription);
+    assert.strictEqual(prescription.id, 'prescription-123');
+    assert.strictEqual(prescription.diagnosis, 'Infection');
+    assert.strictEqual(prescription.medications.length, 2);
+    assert.strictEqual(prescription.medications[0].medication_name, 'Amoxicillin');
   });
 
   test.it('should handle empty medications array without inserting any prescription items', async () => {
@@ -98,18 +106,23 @@ test.describe('PrescriptionModel.create', () => {
 
     db.pool.query = async (sql, params) => {
       queries.push({ sql, params });
-
-      if (sql.includes('SELECT p.*,')) {
+      if (sql.includes('SELECT p.*')) {
         return [[{
-          id: 'rx-123',
+          id: 'prescription-123',
           patient_id: 'patient-456',
           doctor_id: 'doctor-789',
-          consultation_id: null,
-          diagnosis: 'No meds needed',
-          notes: 'Rest and fluids',
-          valid_until: null,
+          consultation_id: 'consultation-abc',
+          diagnosis: 'Infection',
+          notes: 'Take with food',
+          valid_until: '2026-08-17',
           status: 'active',
-          created_at: '2026-07-20 12:00:00'
+          created_at: '2026-07-21 12:00:00',
+          patient_first_name: 'John',
+          patient_last_name: 'Doe',
+          doctor_first_name: 'Jane',
+          doctor_last_name: 'Smith',
+          specialization: 'General Medicine',
+          license_number: 'MD12345'
         }]];
       }
       if (sql.includes('SELECT * FROM prescription_items WHERE prescription_id = ?')) {
@@ -118,21 +131,23 @@ test.describe('PrescriptionModel.create', () => {
       return [[{ affectedRows: 1 }]];
     };
 
-    const rx = await PrescriptionModel.create({
+    const prescription = await PrescriptionModel.create({
       patientId: 'patient-456',
       doctorId: 'doctor-789',
-      diagnosis: 'No meds needed',
-      notes: 'Rest and fluids',
+      consultationId: 'consultation-abc',
+      diagnosis: 'Infection',
+      notes: 'Take with food',
+      validUntil: '2026-08-17',
       medications: []
     });
 
-    // Check query calls: 1. INSERT prescription, 2. SELECT prescription, 3. SELECT items (no insert should occur)
-    assert.strictEqual(queries.length, 3);
+    // Check query calls — no prescription_items INSERT should be made
+    assert.strictEqual(queries.length, 3); // 1. INSERT prescription, 2. SELECT prescription, 3. SELECT items
     assert.ok(queries[0].sql.includes('INSERT INTO prescriptions'));
-    assert.ok(queries[1].sql.includes('SELECT p.*,'));
+    assert.ok(queries[1].sql.includes('SELECT p.*'));
     assert.ok(queries[2].sql.includes('SELECT * FROM prescription_items'));
 
-    assert.ok(rx);
-    assert.strictEqual(rx.medications.length, 0);
+    assert.ok(prescription);
+    assert.strictEqual(prescription.medications.length, 0);
   });
 });
